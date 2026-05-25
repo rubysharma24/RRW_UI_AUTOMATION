@@ -1,0 +1,11 @@
+<extentreports>
+    <configuration>
+        <theme>dark</theme>
+        <encoding>utf-8</encoding>
+        <protocol>https</protocol>
+        <timelineEnabled>true</timelineEnabled>
+        <offlineMode>true</offlineMode>
+        <documentTitle>RoadReadyWheels UI Automation Report</documentTitle>
+        <reportName>UI Test Execution</reportName>
+    </configuration>
+</extentreports>
