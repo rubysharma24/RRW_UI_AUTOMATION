@@ -159,7 +159,7 @@ public class Credit_Card_Checkout {
 		}
 	    Java_methods.sendKeys(addresspagelocator.Company , PropertyReader.getDataProperty("Company"));
 	    try {
-			Thread.sleep(3000);
+			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
