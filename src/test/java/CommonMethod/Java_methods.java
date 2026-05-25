@@ -1,10 +1,7 @@
 package CommonMethod;
-
 import com.rrw.driver.BrowserManager;
 import com.rrw.utils.PropertyReader;
-
 import io.cucumber.shaded.messages.types.JavaMethod;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
