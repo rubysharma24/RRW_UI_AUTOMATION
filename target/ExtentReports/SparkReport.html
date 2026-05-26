@@ -35,7 +35,7 @@
 <a href="#"><span class="badge badge-primary">UI Test Execution</span></a>
 </li>
 <li class="m-r-10">
-<a href="#"><span class="badge badge-primary">May 22, 2026 06:43:27 pm</span></a>
+<a href="#"><span class="badge badge-primary">May 26, 2026 01:01:33 pm</span></a>
 </li>
 </ul>
 </div>
@@ -45,11 +45,6 @@
 <li class="nav-item dropdown" onclick="toggleView('test-view')">
 <a id="nav-test" class="dropdown-toggle" href="#">
 <span class="ico"><i class="fa fa-list"></i></span>
-</a>
-</li>
-<li class="nav-item dropdown" onclick="toggleView('exception-view')">
-<a id="nav-exception" class="dropdown-toggle" href="#">
-<span class="ico"><i class="fa fa-bug"></i></span>
 </a>
 </li>
 <li class="nav-item dropdown" onclick="toggleView('category-view')">
@@ -76,7 +71,7 @@
 <li class="dropdown">
 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-exclamation-circle"></i></a>
 <ul id="status-toggle" class="dropdown-menu dropdown-md p-v-0">
-<a class="dropdown-item" status="fail" href="#"><span>Fail</span><span class="status danger"></span></a>
+<a class="dropdown-item" status="pass" href="#"><span>Pass</span><span class="status success"></span></a>
 <div class="dropdown-divider"></div>
 <a status="clear" class="dropdown-item" href="#"><span>Clear</span><span class="pull-right"><i class="fa fa-close"></i></span></a>
 </ul>
@@ -90,25 +85,25 @@
 </ul>
 </div>    <div class="test-list-wrapper scrollable">
       <ul class="test-list-item">
-        <li class="test-item"  status="fail" test-id="1"
+        <li class="test-item"  status="pass" test-id="1"
           author=""
           tag=""
           device="">
           <div class="test-detail">
             <p class="name">Login</p>
             <p class="text-sm">
-              <span>6:43:28 pm</span> / <span>00:00:38:166</span>
-              <span class="badge fail-bg log float-right">Fail</span>
+              <span>1:01:34 pm</span> / <span>00:00:19:062</span>
+              <span class="badge pass-bg log float-right">Pass</span>
             </p>
           </div>
           <div class="test-contents d-none">
 <div class="detail-head">
 <div class="p-v-10">
 <div class="info">
-<h5 class="test-status text-fail">Login</h5>
-<span class='badge badge-success'>05.22.2026 6:43:28 pm</span>
-<span class='badge badge-danger'>05.22.2026 6:44:06 pm</span>
-<span class='badge badge-default'>00:00:38:166</span>
+<h5 class="test-status text-pass">Login</h5>
+<span class='badge badge-success'>05.26.2026 1:01:34 pm</span>
+<span class='badge badge-danger'>05.26.2026 1:01:53 pm</span>
+<span class='badge badge-default'>00:00:19:062</span>
 &middot; <span class='uri-anchor badge badge-default'>#test-id=1</span>
 <span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
 <span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
@@ -183,51 +178,22 @@
                   </div>
               </div>
             </div>
-            <div class="card-body l1">
-              <div class="card-header">
-                <div class="card-title outline-child">
-                  <div class="node" id="13"><span class="badge log pass-bg mr-2">Pass</span>User login with invalid  credentials</div>
-                </div>
-              </div>
-              <div class="card-body mt-3 collapse">
-                  <div class="step pass-bg">
-                    <span>Given User is on the login page</span>
-      <div>
-      </div>
-                  </div>
-                  <div class="step pass-bg">
-                    <span>When User enters "rg@w3villa.com" and "123456"</span>
-      <div>
-      </div>
-                  </div>
-                  <div class="step pass-bg">
-                    <span>And User clicks on login button</span>
-      <div>
-      </div>
-                  </div>
-                  <div class="step pass-bg">
-                    <span>Then User should see "Invalid email or password"</span>
-      <div>
-      </div>
-                  </div>
-              </div>
-            </div>
         </div>
   </div>
   <div class="card">
     <div class="card-header" role="tab">
       <div class="card-title">
-        <div class="node" id="18"><span class="badge log fail-bg mr-2">Fail</span>User login with valid  credentials</div>
+        <div class="node" id="13"><span class="badge log pass-bg mr-2">Pass</span>User login with valid  credentials</div>
       </div>
     </div>
-        <div class="scenario_outline ">
+        <div class="scenario_outline collapse">
             <div class="card-body l1">
               <div class="card-header">
                 <div class="card-title outline-child">
-                  <div class="node" id="19"><span class="badge log fail-bg mr-2">Fail</span>User login with valid  credentials</div>
+                  <div class="node" id="14"><span class="badge log pass-bg mr-2">Pass</span>User login with valid  credentials</div>
                 </div>
               </div>
-              <div class="card-body mt-3 ">
+              <div class="card-body mt-3 collapse">
                   <div class="step pass-bg">
                     <span>Given User is on the login page</span>
       <div>
@@ -243,16 +209,9 @@
       <div>
       </div>
                   </div>
-                  <div class="step fail-bg">
+                  <div class="step pass-bg">
                     <span>Then User should see "Shop Road Ready Products"</span>
       <div>
-        <textarea disabled class="code-block">org.junit.ComparisonFailure: expected:<[Shop Road Ready Products]> but was:<[]>
-	at org.junit.Assert.assertEquals(Assert.java:117)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.stepDefinations.login.user_should_see(login.java:60)
-	at ✽.User should see "Shop Road Ready Products"(classpath:features/01_login.feature:24)
-</textarea>
-      
       </div>
                   </div>
               </div>
@@ -271,59 +230,7 @@
 </div>
 <div class="test-content-detail"><div class="detail-body"></div></div>
 </div></div>
-<div class="test-wrapper row view exception-view attributes-view">
-<div class="test-list">
-<div class="test-list-tools">
-<ul class="tools pull-left"><li><a href=""><span class="font-size-14">Exception</span></a></li></ul>
-<ul class="tools text-right"><li><a href="#"><span class="badge badge-primary">1</span></a></li></ul>
-</div>
-<div class="test-list-wrapper scrollable">
-<ul class="test-list-item">
-<li class="test-item">
-<div class="test-detail">
-<span class="meta">
-<span class='badge log badge-danger'>1</span>
-</span>
-<p class="name">org.junit.ComparisonFailure</p>
-<p class="duration text-sm">1 tests</p>
-</div>
-<div class="test-contents d-none">
-<div class="info">
-<h4>org.junit.ComparisonFailure</h4>
-<span status="fail" class='badge log badge-danger'>1 failed</span>
-</div>
-<table class='table table-sm mt-4'>
-<thead>
-<tr>
-<th class="status-col">Status</th>
-<th class="timestamp-col">Timestamp</th>
-<th>TestName</th>
-</tr>
-</thead>
-<tbody>
-<tr class="tag-test-status" status="fail">
-<td><span class="badge log fail-bg">Fail</span></td>
-<td>18:43:56 pm</td>
-<td>
-<a href="#" class="linked" test-id='1' id='23'>Then User should see "Shop Road Ready Products"</a>
-<div class="">
-<span class="badge badge-default">Login.User login with valid credentials.Then User should see "Shop Road Ready Products"</span>
-</div>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</li>
-</ul>
-</div>
-</div>
-<div class="test-content scrollable">
-<div class="test-content-detail">
-<div class="detail-body"></div>
-</div>
-</div>
-</div><div class="test-wrapper row view category-view attributes-view">
+<div class="test-wrapper row view category-view attributes-view">
 <div class="test-list">
 <div class="test-list-tools">
 <ul class="tools pull-left"><li><a href=""><span class="font-size-14">Category</span></a></li></ul>
@@ -335,16 +242,14 @@
 <div class="test-detail">
 <span class="meta">
 <span class='badge log pass-bg'>3</span>
-<span class='badge log badge-danger'>1</span>
 </span>
 <p class="name">@login_test</p>
-<p class="duration text-sm">4 tests</p>
+<p class="duration text-sm">3 tests</p>
 </div>
 <div class="test-contents d-none">
 <div class="info">
 <h4>@login_test</h4>
 <span status="pass" class='badge log pass-bg'>3 passed</span>
-<span status="fail" class='badge log badge-danger'>1 failed</span>
 </div>
 <table class='table table-sm mt-4'>
 <thead>
@@ -357,7 +262,7 @@
 <tbody>
 <tr class="tag-test-status" status="pass">
 <td><span class="badge log pass-bg">Pass</span></td>
-<td>18:43:28 pm</td>
+<td>13:01:34 pm</td>
 <td>
 <a href="#" class="linked" test-id='1' id='3'>User login with invalid credentials</a>
 <div class="">
@@ -367,7 +272,7 @@
 </tr>
 <tr class="tag-test-status" status="pass">
 <td><span class="badge log pass-bg">Pass</span></td>
-<td>18:43:45 pm</td>
+<td>13:01:43 pm</td>
 <td>
 <a href="#" class="linked" test-id='1' id='8'>User login with invalid credentials</a>
 <div class="">
@@ -377,19 +282,9 @@
 </tr>
 <tr class="tag-test-status" status="pass">
 <td><span class="badge log pass-bg">Pass</span></td>
-<td>18:43:50 pm</td>
+<td>13:01:46 pm</td>
 <td>
-<a href="#" class="linked" test-id='1' id='13'>User login with invalid credentials</a>
-<div class="">
-<span class="badge badge-default">Login.User login with invalid credentials</span>
-</div>
-</td>
-</tr>
-<tr class="tag-test-status" status="fail">
-<td><span class="badge log fail-bg">Fail</span></td>
-<td>18:43:53 pm</td>
-<td>
-<a href="#" class="linked" test-id='1' id='19'>User login with valid credentials</a>
+<a href="#" class="linked" test-id='1' id='14'>User login with valid credentials</a>
 <div class="">
 <span class="badge badge-default">Login.User login with valid credentials</span>
 </div>
@@ -412,25 +307,25 @@
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0">Started</p>
-<h3>May 22, 2026 06:43:27 pm</h3>
+<h3>May 26, 2026 01:01:33 pm</h3>
 </div></div>
 </div>
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0">Ended</p>
-<h3>May 22, 2026 06:44:06 pm</h3>
+<h3>May 26, 2026 01:01:53 pm</h3>
 </div></div>
 </div>
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0 text-pass">Features Passed</p>
-<h3>0</h3>
+<h3>1</h3>
 </div></div>
 </div>
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0 text-fail">Features Failed</p>
-<h3>1</h3>
+<h3>0</h3>
 </div></div>
 </div>
 </div>
@@ -446,12 +341,12 @@
 </div>
 </div>
 <div class="card-footer">
-<div><small data-tooltip='0%'>
-<b>0</b> features passed
+<div><small data-tooltip='100%'>
+<b>1</b> features passed
 </small>
 </div>
 <div>
-<small data-tooltip='100%'><b>1</b> features failed,
+<small data-tooltip='0%'><b>0</b> features failed,
 <b>0</b> skipped, <b data-tooltip='0%'>0</b> others
 </small>
 </div>
@@ -469,9 +364,9 @@
 </div>
 </div>
 <div class="card-footer">
-<div><small data-tooltip='75%'><b>3</b> scenarios passed</small></div>
+<div><small data-tooltip='100%'><b>3</b> scenarios passed</small></div>
 <div>
-<small data-tooltip='25%'><b>1</b> scenarios failed,
+<small data-tooltip='0%'><b>0</b> scenarios failed,
 <b>0</b> skipped, <b data-tooltip='%'>0</b> others
 </small>
 </div>
@@ -489,9 +384,9 @@
 </div>
 </div>
 <div class="card-footer">
-<div><small data-tooltip='93%'><b>15</b> steps passed</small></div>
+<div><small data-tooltip='100%'><b>12</b> steps passed</small></div>
 <div>
-<small data-tooltip='6%'><b>1</b> steps failed,
+<small data-tooltip='0%'><b>0</b> steps failed,
 <b>0</b> skipped, <b data-tooltip='%'>0</b> others
 </small>
 </div>
@@ -508,7 +403,7 @@
 </div></div>
 <script>
 var timeline = {
-"Login":38.166
+"Login":19.062
 };
 </script>
 <div class="row">
@@ -520,10 +415,10 @@ var timeline = {
 <tr>
 <td>@login_test</td>
 <td>3</td>
-<td>1</td>
 <td>0</td>
 <td>0</td>
-<td>75%</td>
+<td>0</td>
+<td>100%</td>
 </tr>
 </tbody>
 </table></div>
@@ -560,19 +455,19 @@ var timeline = {
 <script>
 var statusGroup = {
 parentCount: 5,
-passParent: 0,
-failParent: 1,
+passParent: 1,
+failParent: 0,
 warningParent: 0,
 skipParent: 0,
 childCount: 5,
 passChild: 3,
-failChild: 1,
+failChild: 0,
 warningChild: 0,
 skipChild: 0,
 infoChild: 0,
 grandChildCount: 5,
-passGrandChild: 15,
-failGrandChild: 1,
+passGrandChild: 12,
+failGrandChild: 0,
 warningGrandChild: 0,
 skipGrandChild: 0,
 infoGrandChild: 0,
