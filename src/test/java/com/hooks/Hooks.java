@@ -7,7 +7,7 @@ import io.cucumber.java.AfterAll;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 
-public class hooks {
+public class Hooks {
 
     @Before
     public void setUp() {
