@@ -1,341 +1,419 @@
 package CommonMethod;
-
 import com.rrw.driver.BrowserManager;
 import com.rrw.utils.PropertyReader;
+import io.cucumber.shaded.messages.types.JavaMethod;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import java.time.Duration;
 
 public class Java_methods {
 
     public static WebDriver driver;
-
-    // Default timeouts (seconds)
-    private static final int DEFAULT_TIMEOUT      = 10;
-    private static final int SHORT_TIMEOUT        = 5;
-    private static final int LONG_TIMEOUT         = 30;
+    private static final int timeout = 10;
 
     // ════════════════════════════════════════════
-    //  BROWSER LIFECYCLE
+    //  BROWSER KHOLO
     // ════════════════════════════════════════════
-
     public static void openBrowserAndNavigate() {
         String url = PropertyReader.getConfigProperty("url");
         driver = BrowserManager.openBrowser();
-        
-        try {
-            driver.get(url);
-            System.out.println("✅ Browser opened, navigated to: " + url);
-        } catch (org.openqa.selenium.TimeoutException e) {
-            // ⚡ Page didn't fully load — stop loading, continue
-            System.out.println("⚠️ Page load timed out — calling window.stop() and proceeding");
-            try {
-                ((JavascriptExecutor) driver).executeScript("window.stop();");
-            } catch (Exception ignored) {}
-            System.out.println("✅ Continuing with partial page load: " + url);
-        }
-    }
-    public static void closeBrowser() {
-        BrowserManager.closeBrowser();
-        driver = null;
-        System.out.println("🔒 Browser closed");
-    }
-
-    /** Safe driver getter — initializes if null. Used internally to prevent NullPointerException. */
-    private static WebDriver getDriver() {
-        if (driver == null) {
-            driver = BrowserManager.openBrowser();
-        }
-        return driver;
+        driver.get(url);
+        System.out.println("" + url);
     }
 
     // ════════════════════════════════════════════
-    //  LOCATOR PARSER (single source of truth)
+    //  BROWSER BAND KARO
+    // ════════════════════════════════════════════
+    public static void closeBrowser() {
+        BrowserManager.closeBrowser();
+        System.out.println("");
+    }
+
+ // Java_methods.java mein add karo
+    public static String getToastMessage(String locator) {
+        try {
+            WebDriverWait wait = new WebDriverWait(BrowserManager.openBrowser(), Duration.ofSeconds(5));
+            
+            WebElement toast = wait.until(
+                ExpectedConditions.presenceOfElementLocated(By.xpath(locator))
+            );
+            
+            // textContent use karo — getText() fast disappearing elements pe fail hota hai
+            return toast.getAttribute("textContent").trim();
+            
+        } catch (Exception e) {
+            return "";
+        }
+    }
+    
+    public static void selectDropDownByIndex(String locator, int index) {
+//		Assert.assertTrue(isElementPresent(locator), "Element Locator :"
+//				+ locator + " Not found");
+		WebElement waitForElementPresent = Java_methods.WaitForElementPresent(locator, 60);
+		new Select(waitForElementPresent)
+		.selectByIndex(index);
+
+	}
+		public static WebElement WaitForElementPresent(By locator, int timeout) {
+		    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+		    return wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+		}
+    
+    
+		// ── Format helper: "9,2027" → ["09", "2027"] ─────────────────────
+		public static String[] formatExpiryDate(String rawExpiry) {
+		    try {
+		        String[] parts = rawExpiry.split(",");
+		        String month = parts[0].trim();
+		        String year  = parts[1].trim();
+
+		        if (month.length() == 1) {
+		            month = "0" + month;   // "9" → "09"
+		        }
+
+		        return new String[]{month, year};
+		    } catch (Exception e) {
+		        System.out.println("Expiry format error: " + e.getMessage());
+		        return new String[]{"", ""};
+		    }
+		}
+
+		// ── Set type="month" input via JS ─────────────────────────────────
+		public static void setMonthYearInput(String xpath, String month, String year) {
+		    try {
+		        String value = year + "-" + month;  // "2027-09"
+
+		        WebElement el = driver.findElement(By.xpath(xpath));
+
+		        JavascriptExecutor js = (JavascriptExecutor) driver;
+		        js.executeScript("arguments[0].value = arguments[1];", el, value);
+
+		        // React change event trigger
+		        js.executeScript(
+		            "arguments[0].dispatchEvent(new Event('input',  {bubbles:true}));" +
+		            "arguments[0].dispatchEvent(new Event('change', {bubbles:true}));",
+		            el
+		        );
+
+		        System.out.println("Expiry set: " + value);
+
+		    } catch (Exception e) {
+		        System.out.println("setMonthYearInput error: " + e.getMessage());
+		    }
+		}
+		
+
+		
+		public static String GetFieldValue(String locator) {
+		    int timeout = 0;
+		    WaitForElementPresent(locator, timeout);
+		    WebElement el = driver.findElement(ByLocator(locator));
+		    return el.getText().trim();
+		}
+
+		// Overloaded method for By locators
+		public static String GetFieldValue(By locator) {
+		    WebElement el = driver.findElement(locator);
+		    return el.getText().trim();
+		}
+		
+    // ═══════════════════════════════════════════
+    //  STRING → By CONVERT KARO
     // ════════════════════════════════════════════
 
     /**
-     * String locator ko By object mein convert karta hai.
-     * Supports: xpath (//), css=, id=, name=, class=, linkText=, link=
-     * Default fallback: xpath
+     * "id=email"      → By.id("email")
+     * "xpath=//btn"   → By.xpath("//btn")
+     * "name=username" → By.name("username")
+     *
+     * MANAGER KE LIYE:
+     *   Address book mein likha hai "id=email" —
+     *   yeh method us address ko samajhta hai
+     *   aur sahi jagah dhundhta hai.
      */
     public static By byLocator(String locator) {
-        if (locator == null || locator.isBlank()) {
-            throw new IllegalArgumentException("Locator cannot be null/blank");
-        }
 
-        if (locator.startsWith("//") || locator.startsWith(".//") || locator.startsWith("(//")) {
-            return By.xpath(locator);
+        if (locator.startsWith("id=")) {
+            return By.id(locator.replace("id=", ""));
+
         } else if (locator.startsWith("xpath=")) {
-            return By.xpath(locator.substring(6));
-        } else if (locator.startsWith("css=")) {
-            return By.cssSelector(locator.substring(4));
-        } else if (locator.startsWith("id=")) {
-            return By.id(locator.substring(3));
+            return By.xpath(locator.replace("xpath=", ""));
+
         } else if (locator.startsWith("name=")) {
-            return By.name(locator.substring(5));
+            return By.name(locator.replace("name=", ""));
+
+        } else if (locator.startsWith("css=")) {
+            return By.cssSelector(locator.replace("css=", ""));
+
+        } else if (locator.startsWith("linkText=")) {
+            return By.linkText(locator.replace("linkText=", ""));
+
         } else if (locator.startsWith("class=")) {
-            return By.className(locator.substring(6));
-        } else if (locator.startsWith("linkText=") || locator.startsWith("link=")) {
-            return By.linkText(locator.replaceFirst("(linkText=|link=)", ""));
+            return By.className(locator.replace("class=", ""));
+
         } else {
-            // Default: treat as xpath
+            // Kuch match nahi hua → xpath try karo by default
+            System.out.println("" + locator);
             return By.xpath(locator);
         }
     }
 
-    /** Backward-compat alias — old code uses ByLocator (PascalCase) */
-    public static By ByLocator(String locator) {
-        return byLocator(locator);
+    // ════════════════════════════════════════════
+    //  WAIT — Element dikhne tak ruko
+    // ════════════════════════════════════════════
+    public static void waitForElementPresent(String locator, int seconds) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(seconds));
+        wait.until(ExpectedConditions.presenceOfElementLocated(byLocator(locator)));
     }
 
     // ════════════════════════════════════════════
-    //  WAIT METHODS
+    //  WAIT — Element clickable hone tak ruko
     // ════════════════════════════════════════════
-
-    public static WebElement waitForElementPresent(String locator, int timeoutSec) {
-        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(timeoutSec));
-        return wait.until(ExpectedConditions.presenceOfElementLocated(byLocator(locator)));
-    }
-
-    public static WebElement waitForElementVisible(String locator, int timeoutSec) {
-        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(timeoutSec));
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(byLocator(locator)));
-    }
-
-    public static WebElement waitForElementClickable(String locator, int timeoutSec) {
-        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(timeoutSec));
-        return wait.until(ExpectedConditions.elementToBeClickable(byLocator(locator)));
-    }
-
-    /** Backward-compat — old PascalCase name. FIXED: now actually uses timeout parameter. */
-    public static WebElement WaitForElementPresent(String locator, int timeout) {
-        return waitForElementPresent(locator, timeout);  // ✅ FIXED: parameter ab actually use ho raha
-    }
-
-    /** Backward-compat — By overload */
-    public static WebElement WaitForElementPresent(By locator, int timeout) {
-        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(timeout));
-        return wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-    }
-
-    /** Backward-compat — WebElement overload */
     public static void waitForElementToBeClickable(WebElement element) {
-        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(DEFAULT_TIMEOUT));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
         wait.until(ExpectedConditions.elementToBeClickable(element));
     }
 
     // ════════════════════════════════════════════
-    //  CORE ACTIONS — Click, Type, GetText
+    //  CLICK ON — String locator wala
     // ════════════════════════════════════════════
 
+    /**
+     * Kisi bhi element pe click karo.
+     *
+     * USE KAISE KARO:
+     *   CommonMethods.clickOn(LoginPageLocators.LOGIN_PAGE_LOGIN_BUTTON);
+     */
     public static void clickOn(String locator) {
         try {
-            WebElement el = waitForElementClickable(locator, DEFAULT_TIMEOUT);
+            waitForElementPresent(locator, timeout);
+            WebElement el = driver.findElement(byLocator(locator));
+            waitForElementToBeClickable(el);
             el.click();
-            System.out.println("🖱️ Clicked: " + locator);
+            System.out.println("🖱️ Click kiya: " + locator);
         } catch (Exception e) {
-            System.err.println("❌ Click failed: " + locator + " | " + e.getMessage());
-            throw new RuntimeException("Click failed on: " + locator, e);  // ✅ Fail fast
+            System.out.println("❌ Click nahi hua: " + locator);
+            e.printStackTrace();
         }
     }
 
+    // ════════════════════════════════════════════
+    //  TYPE TEXT — Input field mein likhna
+    // ════════════════════════════════════════════
+
+    /**
+     * USE KAISE KARO:
+     *   CommonMethods.typeText(LoginPageLocators.EMAIL_FIELD, "abc@gmail.com");
+     */
     public static void typeText(String locator, String text) {
         try {
-            WebElement el = waitForElementVisible(locator, DEFAULT_TIMEOUT);
+            waitForElementPresent(locator, timeout);
+            WebElement el = driver.findElement(byLocator(locator));
             el.clear();
             el.sendKeys(text);
-            System.out.println("⌨️ Typed '" + text + "' in: " + locator);
+            System.out.println("⌨️ Type kiya '" + text + "' in: " + locator);
         } catch (Exception e) {
-            System.err.println("❌ Type failed: " + locator + " | " + e.getMessage());
-            throw new RuntimeException("Type failed on: " + locator, e);
+            System.out.println("❌ Type nahi hua: " + locator);
+            e.printStackTrace();
         }
     }
-
-    public static void sendKeys(String locator, String text) {
-        try {
-            WebElement el = waitForElementVisible(locator, DEFAULT_TIMEOUT);
-            el.sendKeys(text);  // no clear() — for appending or non-input fields
-        } catch (Exception e) {
-            System.err.println("❌ sendKeys failed: " + locator + " | " + e.getMessage());
-            throw new RuntimeException("sendKeys failed on: " + locator, e);
+    
+    public static By ByLocator(String locator)
+    {
+        By result = null;
+        if (locator.startsWith(".//")) {
+            result = By.xpath(locator);
         }
+        else if (locator.startsWith("//")) {
+            result = By.xpath(locator);
+        } else if (locator.startsWith("css=")) {
+            result = By.cssSelector(locator.replace("css=", ""));
+        } else if (locator.startsWith("name=")) {
+            result = By.name(locator.replace("name=", ""));
+        } else if (locator.startsWith("link=")) {
+            result = By.linkText(locator.replace("link=", ""));
+        } else if (locator.startsWith("id="))  {
+            result = By.id(locator.replace("id=", ""));
+        }
+        else {
+            result = By.id(locator);
+        }
+        return result;
     }
 
+    
+    public static WebElement WaitForElementPresent(String locator, int timeout) {
+
+		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(50));
+		WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(ByLocator(locator)));
+		return element;
+	}
+
+    
+    public static void sendKeys(String locator, String text) 
+	{
+		try
+		{
+		WaitForElementPresent(locator, timeout);
+		WebElement el = driver.findElement(ByLocator(locator));
+		el.sendKeys(text);
+		}
+		catch (Exception e) {
+		e.printStackTrace();
+		}
+		}
+	 
+
+    // ════════════════════════════════════════════
+    //  GET TEXT — Element ka text padho
+    // ════════════════════════════════════════════
+
+    /**
+     * USE KAISE KARO:
+     *   String msg = CommonMethods.getText(LoginPageLocators.LOGIN_ERROR_MESSAGE);
+     */
     public static String getText(String locator) {
         try {
-            WebElement el = waitForElementVisible(locator, DEFAULT_TIMEOUT);
-            String text = el.getText();
-            System.out.println("📖 Text: " + text);
+            waitForElementPresent(locator, timeout);
+            String text = driver.findElement(byLocator(locator)).getText();
+            System.out.println("📖 Text mila: " + text);
             return text;
         } catch (Exception e) {
-            System.err.println("❌ getText failed: " + locator);
+            System.out.println("❌ Text nahi mila: " + locator);
+            e.printStackTrace();
             return "";
         }
     }
 
-    public static String GetFieldValue(String locator) {
-        WebElement el = waitForElementVisible(locator, DEFAULT_TIMEOUT);  // ✅ FIXED: was timeout=0
-        return el.getText().trim();
-    }
+    
+    
+    public static void scrollToElementAndClick(String locator) {
+        try {
+            // Element dhundho
+            WebElement el = driver.findElement(ByLocator(locator));
 
-    public static String GetFieldValue(By locator) {
-        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(DEFAULT_TIMEOUT));
-        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-        return el.getText().trim();
-    }
+            // Element tak scroll karo — screen ke center mein lao
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block:'center', inline:'nearest'});", el);
+            Thread.sleep(500);
 
+            // Clickable hone tak wait karo
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(el));
+
+            // JS se click karo — koi bhi overlay block nahi kar payega
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", el);
+
+            System.out.println("Scroll karke click kiya: " + locator);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Interrupted: " + locator);
+            e.printStackTrace();
+
+        } catch (Exception e) {
+            System.out.println("Click nahi hua: " + locator);
+            e.printStackTrace();
+        }
+    }
+    
+    
+    public static void scrollToElementAndSendKeys(String locator, String text) {
+        try {
+            // Element dhundho
+            WebElement el = driver.findElement(ByLocator(locator));
+
+            // Element tak scroll karo — screen ke center mein lao
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block:'center', inline:'nearest'});", el);
+            Thread.sleep(500);
+
+            // Visible hone tak wait karo
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.visibilityOf(el));
+
+            // Pehle clear karo — phir type karo
+            el.clear();
+            el.sendKeys(text);
+
+            System.out.println("Scroll karke type kiya: " + text + " in: " + locator);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Interrupted: " + locator);
+            e.printStackTrace();
+
+        } catch (Exception e) {
+            System.out.println("Type nahi hua: " + locator);
+            e.printStackTrace();
+        }
+    }
+    
+    public static void scrollByXPath(String xpath)
+		{
+		JavascriptExecutor je = (JavascriptExecutor)driver;
+		//Identify the WebElement which will appear after scrolling down
+		WebElement element = driver.findElement(By.xpath(xpath));
+		// now execute query which actually will scroll until that element is not appeared on page.
+		je.executeScript("arguments[0].scrollIntoView(true);",element);
+		// Extract the text and verify
+		System.out.println(element.getText());
+		}
+ 
+    public static void clickByJS(String locator)
+		{
+
+			WebElement el = driver.findElement(ByLocator(locator));
+		JavascriptExecutor executor = (JavascriptExecutor)driver;
+		executor.executeScript("arguments[0].click();", el);
+
+		}
+		public static void ScrollWithclickByJS(String locator) {
+		    // Scroll to the top of the page
+		    JavascriptExecutor executor = (JavascriptExecutor) driver;
+		    executor.executeScript("window.scrollTo(0, 0);");
+
+		    // Locate the element
+		    WebElement el = driver.findElement(ByLocator(locator));
+
+		    // Perform the click using JavaScript
+		    executor.executeScript("arguments[0].click();", el);
+		}
+    
+    
+    // ════════════════════════════════════════════
+    //  IS VISIBLE — Element dikh raha hai?
+    // ════════════════════════════════════════════
+
+    /**
+     * USE KAISE KARO:
+     *   boolean visible = CommonMethods.isVisible(LoginPageLocators.ERROR_MESSAGE);
+     */
     public static boolean isVisible(String locator) {
         try {
-            return waitForElementVisible(locator, SHORT_TIMEOUT).isDisplayed();
+            waitForElementPresent(locator, timeout);
+            return driver.findElement(byLocator(locator)).isDisplayed();
         } catch (Exception e) {
-            System.out.println("⚠️ Not visible: " + locator);
+            System.out.println("⚠️ Element nahi dikh raha: " + locator);
             return false;
         }
     }
-
+    
     // ════════════════════════════════════════════
-    //  TOAST / SHORT-LIVED MESSAGES
-    // ════════════════════════════════════════════
-
-    public static String getToastMessage(String locator) {
-        try {
-            WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(SHORT_TIMEOUT));
-            WebElement toast = wait.until(
-                    ExpectedConditions.presenceOfElementLocated(byLocator(locator)));
-            // textContent → fast-disappearing elements ke liye reliable
-            return toast.getAttribute("textContent").trim();
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    // ════════════════════════════════════════════
-    //  DROPDOWN
-    // ════════════════════════════════════════════
-
-    public static void selectDropDownByIndex(String locator, int index) {
-        WebElement el = waitForElementClickable(locator, DEFAULT_TIMEOUT);
-        new Select(el).selectByIndex(index);
-        System.out.println("📋 Selected dropdown index " + index + " in: " + locator);
-    }
-
-    public static void selectDropDownByVisibleText(String locator, String text) {
-        WebElement el = waitForElementClickable(locator, DEFAULT_TIMEOUT);
-        new Select(el).selectByVisibleText(text);
-    }
-
-    public static void selectDropDownByValue(String locator, String value) {
-        WebElement el = waitForElementClickable(locator, DEFAULT_TIMEOUT);
-        new Select(el).selectByValue(value);
-    }
-
-    // ════════════════════════════════════════════
-    //  EXPIRY DATE HELPERS
-    // ════════════════════════════════════════════
-
-    /** "9,2027" → ["09", "2027"] */
-    public static String[] formatExpiryDate(String rawExpiry) {
-        try {
-            String[] parts = rawExpiry.split(",");
-            String month = parts[0].trim();
-            String year = parts[1].trim();
-            if (month.length() == 1) month = "0" + month;
-            return new String[]{month, year};
-        } catch (Exception e) {
-            System.err.println("Expiry format error: " + e.getMessage());
-            return new String[]{"", ""};
-        }
-    }
-
-    /** Sets HTML5 input type="month" via JS + dispatches React events */
-    public static void setMonthYearInput(String xpath, String month, String year) {
-        try {
-            String value = year + "-" + month;
-            WebElement el = waitForElementPresent(xpath, DEFAULT_TIMEOUT);
-            JavascriptExecutor js = (JavascriptExecutor) getDriver();
-            js.executeScript("arguments[0].value = arguments[1];", el, value);
-            js.executeScript(
-                    "arguments[0].dispatchEvent(new Event('input',  {bubbles:true}));" +
-                    "arguments[0].dispatchEvent(new Event('change', {bubbles:true}));",
-                    el);
-            System.out.println("📅 Expiry set: " + value);
-        } catch (Exception e) {
-            System.err.println("setMonthYearInput error: " + e.getMessage());
-        }
-    }
-
-    // ════════════════════════════════════════════
-    //  SCROLL ACTIONS
-    // ════════════════════════════════════════════
-
-    public static void scrollToElementAndClick(String locator) {
-        try {
-            WebElement el = waitForElementPresent(locator, DEFAULT_TIMEOUT);
-            ((JavascriptExecutor) getDriver()).executeScript(
-                    "arguments[0].scrollIntoView({block:'center', inline:'nearest'});", el);
-            // No Thread.sleep — wait for clickability is enough
-            new WebDriverWait(getDriver(), Duration.ofSeconds(DEFAULT_TIMEOUT))
-                    .until(ExpectedConditions.elementToBeClickable(el));
-            ((JavascriptExecutor) getDriver()).executeScript("arguments[0].click();", el);
-            System.out.println("📜 Scrolled & clicked: " + locator);
-        } catch (Exception e) {
-            System.err.println("❌ Scroll+click failed: " + locator + " | " + e.getMessage());
-            throw new RuntimeException("Scroll+click failed on: " + locator, e);
-        }
-    }
-
-    public static void scrollToElementAndSendKeys(String locator, String text) {
-        try {
-            WebElement el = waitForElementPresent(locator, DEFAULT_TIMEOUT);
-            ((JavascriptExecutor) getDriver()).executeScript(
-                    "arguments[0].scrollIntoView({block:'center', inline:'nearest'});", el);
-            new WebDriverWait(getDriver(), Duration.ofSeconds(DEFAULT_TIMEOUT))
-                    .until(ExpectedConditions.visibilityOf(el));
-            el.clear();
-            el.sendKeys(text);
-            System.out.println("📜 Scrolled & typed '" + text + "' in: " + locator);
-        } catch (Exception e) {
-            System.err.println("❌ Scroll+type failed: " + locator + " | " + e.getMessage());
-            throw new RuntimeException("Scroll+type failed on: " + locator, e);
-        }
-    }
-
-    public static void scrollByXPath(String xpath) {
-        WebElement element = waitForElementPresent(xpath, DEFAULT_TIMEOUT);
-        ((JavascriptExecutor) getDriver()).executeScript(
-                "arguments[0].scrollIntoView(true);", element);
-        System.out.println("📜 Scrolled to: " + element.getText());
-    }
-
-    public static void clickByJS(String locator) {
-        WebElement el = waitForElementPresent(locator, DEFAULT_TIMEOUT);
-        ((JavascriptExecutor) getDriver()).executeScript("arguments[0].click();", el);
-        System.out.println("🖱️ JS click: " + locator);
-    }
-
-    public static void scrollWithClickByJS(String locator) {
-        JavascriptExecutor js = (JavascriptExecutor) getDriver();
-        js.executeScript("window.scrollTo(0, 0);");
-        WebElement el = waitForElementPresent(locator, DEFAULT_TIMEOUT);
-        js.executeScript("arguments[0].click();", el);
-    }
-
-    /** Backward-compat alias */
-    public static void ScrollWithclickByJS(String locator) {
-        scrollWithClickByJS(locator);
-    }
-
-    // ════════════════════════════════════════════
-    //  LOGIN STATE CHECK
+    //  LoginSuccessful -
     // ════════════════════════════════════════════
 
     public static boolean isLoginSuccessful() {
-        return getDriver().getCurrentUrl().contains("just_sign_in=true");
+        return BrowserManager.openBrowser().getCurrentUrl().contains("just_sign_in=true");
+        
     }
+
+   
 }

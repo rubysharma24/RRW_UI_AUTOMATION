@@ -8,7 +8,7 @@ Feature: Login
     Given User is on the login page
     When User enters "<username>" and "<password>"
     And User clicks on login button
-    Then User should see a mesage "<message>"
+    Then User should see "<message>"
 
     Examples:
       | username                        | password                    | message                    |
