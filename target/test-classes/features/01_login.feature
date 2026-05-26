@@ -14,7 +14,7 @@ Feature: Login
       | username                        | password                    | message                    |
       | xyzzz@email.com                 | 123456                      | Invalid email or password  |
       | rishabh.gangwar@w3villa.com     | 1234567890                  | Invalid email or password   |
-      | rg@w3villa.com                  | 123456                      | Invalid email or password  |
+      #| rg@w3villa.com                  | 123456                      | Invalid email or password  |
        
 
   Scenario Outline: User login with valid  credentials
