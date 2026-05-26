@@ -24,8 +24,18 @@ public class Java_methods {
     public static void openBrowserAndNavigate() {
         String url = PropertyReader.getConfigProperty("url");
         driver = BrowserManager.openBrowser();
-        driver.get(url);
-        System.out.println("" + url);
+        
+        try {
+            driver.get(url);
+            System.out.println("✅ Browser opened, navigated to: " + url);
+        } catch (org.openqa.selenium.TimeoutException e) {
+            // ⚡ Page didn't fully load — stop loading, continue
+            System.out.println("⚠️ Page load timed out — calling window.stop() and proceeding");
+            try {
+                ((JavascriptExecutor) driver).executeScript("window.stop();");
+            } catch (Exception ignored) {}
+            System.out.println("✅ Continuing with partial page load: " + url);
+        }
     }
 
     // ════════════════════════════════════════════
@@ -36,7 +46,7 @@ public class Java_methods {
         System.out.println("");
     }
 
- // Java_methods.java mein add karo
+ 
     public static String getToastMessage(String locator) {
         try {
             WebDriverWait wait = new WebDriverWait(BrowserManager.openBrowser(), Duration.ofSeconds(5));
@@ -45,7 +55,7 @@ public class Java_methods {
                 ExpectedConditions.presenceOfElementLocated(By.xpath(locator))
             );
             
-            // textContent use karo — getText() fast disappearing elements pe fail hota hai
+          
             return toast.getAttribute("textContent").trim();
             
         } catch (Exception e) {
@@ -67,7 +77,7 @@ public class Java_methods {
 		}
     
     
-		// ── Format helper: "9,2027" → ["09", "2027"] ─────────────────────
+	
 		public static String[] formatExpiryDate(String rawExpiry) {
 		    try {
 		        String[] parts = rawExpiry.split(",");
@@ -85,7 +95,7 @@ public class Java_methods {
 		    }
 		}
 
-		// ── Set type="month" input via JS ─────────────────────────────────
+	
 		public static void setMonthYearInput(String xpath, String month, String year) {
 		    try {
 		        String value = year + "-" + month;  // "2027-09"
@@ -95,7 +105,7 @@ public class Java_methods {
 		        JavascriptExecutor js = (JavascriptExecutor) driver;
 		        js.executeScript("arguments[0].value = arguments[1];", el, value);
 
-		        // React change event trigger
+		     
 		        js.executeScript(
 		            "arguments[0].dispatchEvent(new Event('input',  {bubbles:true}));" +
 		            "arguments[0].dispatchEvent(new Event('change', {bubbles:true}));",
@@ -123,21 +133,7 @@ public class Java_methods {
 		    WebElement el = driver.findElement(locator);
 		    return el.getText().trim();
 		}
-		
-    // ═══════════════════════════════════════════
-    //  STRING → By CONVERT KARO
-    // ════════════════════════════════════════════
-
-    /**
-     * "id=email"      → By.id("email")
-     * "xpath=//btn"   → By.xpath("//btn")
-     * "name=username" → By.name("username")
-     *
-     * MANAGER KE LIYE:
-     *   Address book mein likha hai "id=email" —
-     *   yeh method us address ko samajhta hai
-     *   aur sahi jagah dhundhta hai.
-     */
+	
     public static By byLocator(String locator) {
 
         if (locator.startsWith("id=")) {
@@ -159,38 +155,25 @@ public class Java_methods {
             return By.className(locator.replace("class=", ""));
 
         } else {
-            // Kuch match nahi hua → xpath try karo by default
+           
             System.out.println("" + locator);
             return By.xpath(locator);
         }
     }
 
-    // ════════════════════════════════════════════
-    //  WAIT — Element dikhne tak ruko
-    // ════════════════════════════════════════════
+  
     public static void waitForElementPresent(String locator, int seconds) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(seconds));
         wait.until(ExpectedConditions.presenceOfElementLocated(byLocator(locator)));
     }
 
-    // ════════════════════════════════════════════
-    //  WAIT — Element clickable hone tak ruko
-    // ════════════════════════════════════════════
+   
     public static void waitForElementToBeClickable(WebElement element) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
         wait.until(ExpectedConditions.elementToBeClickable(element));
     }
 
-    // ════════════════════════════════════════════
-    //  CLICK ON — String locator wala
-    // ════════════════════════════════════════════
-
-    /**
-     * Kisi bhi element pe click karo.
-     *
-     * USE KAISE KARO:
-     *   CommonMethods.clickOn(LoginPageLocators.LOGIN_PAGE_LOGIN_BUTTON);
-     */
+    
     public static void clickOn(String locator) {
         try {
             waitForElementPresent(locator, timeout);
@@ -204,14 +187,8 @@ public class Java_methods {
         }
     }
 
-    // ════════════════════════════════════════════
-    //  TYPE TEXT — Input field mein likhna
-    // ════════════════════════════════════════════
-
-    /**
-     * USE KAISE KARO:
-     *   CommonMethods.typeText(LoginPageLocators.EMAIL_FIELD, "abc@gmail.com");
-     */
+   
+ 
     public static void typeText(String locator, String text) {
         try {
             waitForElementPresent(locator, timeout);
@@ -271,14 +248,8 @@ public class Java_methods {
 		}
 	 
 
-    // ════════════════════════════════════════════
-    //  GET TEXT — Element ka text padho
-    // ════════════════════════════════════════════
+    
 
-    /**
-     * USE KAISE KARO:
-     *   String msg = CommonMethods.getText(LoginPageLocators.LOGIN_ERROR_MESSAGE);
-     */
     public static String getText(String locator) {
         try {
             waitForElementPresent(locator, timeout);
@@ -296,19 +267,19 @@ public class Java_methods {
     
     public static void scrollToElementAndClick(String locator) {
         try {
-            // Element dhundho
+          
             WebElement el = driver.findElement(ByLocator(locator));
 
-            // Element tak scroll karo — screen ke center mein lao
+         
             ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block:'center', inline:'nearest'});", el);
             Thread.sleep(500);
 
-            // Clickable hone tak wait karo
+          
             new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.elementToBeClickable(el));
 
-            // JS se click karo — koi bhi overlay block nahi kar payega
+          
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", el);
 
             System.out.println("Scroll karke click kiya: " + locator);
@@ -327,15 +298,15 @@ public class Java_methods {
     
     public static void scrollToElementAndSendKeys(String locator, String text) {
         try {
-            // Element dhundho
+          
             WebElement el = driver.findElement(ByLocator(locator));
 
-            // Element tak scroll karo — screen ke center mein lao
+          
             ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block:'center', inline:'nearest'});", el);
             Thread.sleep(500);
 
-            // Visible hone tak wait karo
+           
             new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.visibilityOf(el));
 
@@ -388,14 +359,7 @@ public class Java_methods {
 		}
     
     
-    // ════════════════════════════════════════════
-    //  IS VISIBLE — Element dikh raha hai?
-    // ════════════════════════════════════════════
-
-    /**
-     * USE KAISE KARO:
-     *   boolean visible = CommonMethods.isVisible(LoginPageLocators.ERROR_MESSAGE);
-     */
+  
     public static boolean isVisible(String locator) {
         try {
             waitForElementPresent(locator, timeout);
@@ -406,10 +370,7 @@ public class Java_methods {
         }
     }
     
-    // ════════════════════════════════════════════
-    //  LoginSuccessful -
-    // ════════════════════════════════════════════
-
+    
     public static boolean isLoginSuccessful() {
         return BrowserManager.openBrowser().getCurrentUrl().contains("just_sign_in=true");
         

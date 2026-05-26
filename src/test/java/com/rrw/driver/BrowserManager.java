@@ -1,5 +1,6 @@
 package com.rrw.driver;
 
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -7,76 +8,108 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.JavascriptExecutor;
+
 import com.rrw.utils.*;
 
-/**
- * BrowserManager
- * --------------
- * Config se browser ka naam padho, kholo, aur band karo.
- * Ek waqt mein sirf ek browser khula rahega.
- */
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
 public final class BrowserManager {
 
-    private static WebDriver driver = null;
+    private static WebDriver openBrowser = null;
 
-    // Bahar se object banana allowed nahi
     private BrowserManager() {}
 
-
-    // ─── Browser Kholo ───────────────────────────────────────
-
-    /**
-     * Agar browser pehle se khula hai → wahi wapas karo.
-     * Nahi hai → config padho aur naya kholo.
-     */
     public static WebDriver openBrowser() {
-        if (driver != null) return driver;
-
+        if (openBrowser != null) {
+            return openBrowser;
+        }
         String browserName = PropertyReader.getConfigProperty("browserName");
-
         try {
-            driver = startBrowser(browserName);
+            openBrowser = startBrowser(browserName);
+            
+            // ⚡ Page load timeout — 30 sec se zyada nahi
+            openBrowser.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+            openBrowser.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
+            
         } catch (Exception e) {
-            throw new RuntimeException("Browser open nahi hua: " + e.getMessage(), e);
+            throw new RuntimeException(
+                "Browser open nahi ho saka! Reason: " + e.getMessage(), e
+            );
         }
-
-        return driver;
+        return openBrowser;
     }
 
-
-    // ─── Browser Band Karo ───────────────────────────────────
-
-    /**
-     * Test khatam? Yeh call karo — browser quit ho jayega.
-     */
-    public static void closeBrowser() 
-    {
-        if (driver != null) {
-            driver.quit();
-            driver = null;
+    public static void closeBrowser() {
+        if (openBrowser != null) {
+            WebDriver toClose = openBrowser;
+            openBrowser = null;
+            
+            // Suppress unload dialogs
+            try {
+                ((JavascriptExecutor) toClose).executeScript("window.onbeforeunload = null;");
+            } catch (Exception ignored) {}
+            
+            // Quit with timeout protection
+            Thread quitter = new Thread(() -> {
+                try {
+                    toClose.quit();
+                } catch (Exception e) {
+                    System.err.println("quit() error: " + e.getMessage());
+                }
+            });
+            quitter.setDaemon(true);
+            quitter.start();
+            try {
+                quitter.join(8000);
+                if (quitter.isAlive()) {
+                    System.err.println("⚠️ driver.quit() hung — proceeding anyway");
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
-
-
-    // ─── Private: Browser Start Logic ────────────────────────
 
     private static WebDriver startBrowser(String browserName) {
         switch (browserName.toLowerCase()) {
-
             case "firefox":
                 FirefoxOptions firefox = new FirefoxOptions();
-                firefox.addArguments("--headless");
+                firefox.setPageLoadStrategy(PageLoadStrategy.EAGER);
                 return new FirefoxDriver(firefox);
 
             case "edge":
                 EdgeOptions edge = new EdgeOptions();
-                edge.addArguments("--headless", "--window-size=1920,1080");
+                edge.setPageLoadStrategy(PageLoadStrategy.EAGER);
+                edge.addArguments("--window-size=1920,1080");
                 return new EdgeDriver(edge);
 
             case "chrome":
             default:
                 ChromeOptions chrome = new ChromeOptions();
+                
+                // ⚡⚡⚡ KEY FIX — EAGER strategy
+                chrome.setPageLoadStrategy(PageLoadStrategy.EAGER);
+                
+                // Speed optimizations
+                chrome.addArguments("--disable-extensions");
+                chrome.addArguments("--disable-notifications");
+                chrome.addArguments("--disable-popup-blocking");
+                chrome.addArguments("--disable-gpu");
+                chrome.addArguments("--no-sandbox");
+                chrome.addArguments("--disable-dev-shm-usage");
+                chrome.addArguments("--disable-blink-features=AutomationControlled");
                 chrome.addArguments("--start-maximized");
+                
+                // Block notifications + tracking-heavy stuff via prefs
+                Map<String, Object> prefs = new HashMap<>();
+                prefs.put("profile.default_content_setting_values.notifications", 2);
+                prefs.put("credentials_enable_service", false);
+                prefs.put("profile.password_manager_enabled", false);
+                chrome.setExperimentalOption("prefs", prefs);
+                
                 return new ChromeDriver(chrome);
         }
     }
