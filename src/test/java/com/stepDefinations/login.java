@@ -4,7 +4,10 @@ import com.locator.loginlocator;
 import CommonMethod.Java_methods;
 import io.cucumber.java.en.*;
 import org.junit.Assert;
-
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.TimeoutException;
+import java.time.Duration;
 public class login {
 
     @Given("User is on the login page")
@@ -31,6 +34,12 @@ public class login {
      */
     @Then("User should see {string}")
     public void user_should_see_message(String expectedMessage) {
+    	try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         String actualMessage = "";
 
         if (Java_methods.isVisible(loginlocator.unsuccess_message)) {

@@ -28,7 +28,7 @@
 
         <!-- Library versions -->
         <cucumber.version>7.15.0</cucumber.version>
-        <selenium.version>4.25.0</selenium.version>
+        <selenium.version>4.27.0</selenium.version>
         <junit.version>4.13.2</junit.version>
         <restassured.version>5.4.0</restassured.version>
         <extentreports.version>5.1.1</extentreports.version>
