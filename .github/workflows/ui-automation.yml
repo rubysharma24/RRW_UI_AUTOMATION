@@ -22,20 +22,14 @@ jobs:
             -p 4444:4444 \
             --shm-size="2g" \
             selenium/standalone-chrome:4.27.0
+          echo "✅ Grid container started"
 
-      # ✅ Grid ready hone ka wait karo properly
-      - name: Wait for Grid to be Ready
+      # ✅ Simple sleep — Grid ready hone do
+      - name: Wait for Grid
         run: |
-          echo "Waiting for Selenium Grid..."
-          for i in {1..30}; do
-            STATUS=$(curl -s http://localhost:4444/status | grep -o '"ready":true')
-            if [ "$STATUS" = '"ready":true' ]; then
-              echo "✅ Grid is ready!"
-              break
-            fi
-            echo "⏳ Attempt $i — Grid not ready yet, waiting..."
-            sleep 3
-          done
+          sleep 20
+          curl -f http://localhost:4444/status
+          echo "✅ Grid is ready!"
 
       # ✅ Tests run karo
       - name: Run Maven Tests
