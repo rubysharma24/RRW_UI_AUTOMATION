@@ -9,70 +9,95 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.remote.RemoteWebDriver;  // ✅ ADD THIS
 
 import com.rrw.utils.*;
 
+import java.net.URL;  // ✅ ADD THIS
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class BrowserManager {
 
-    private static WebDriver openBrowser = null;
+    // ✅ ThreadLocal for parallel execution
+    private static ThreadLocal<WebDriver> openBrowser = new ThreadLocal<>();
 
     private BrowserManager() {}
 
     public static WebDriver openBrowser() {
-        if (openBrowser != null) {
-            return openBrowser;
+        if (openBrowser.get() != null) {
+            return openBrowser.get();
         }
+
         String browserName = PropertyReader.getConfigProperty("browserName");
+        String gridEnabled = PropertyReader.getConfigProperty("gridEnabled"); // ✅ NEW
+        String gridUrl = PropertyReader.getConfigProperty("gridUrl");         // ✅ NEW
+
         try {
-            openBrowser = startBrowser(browserName);
-            
-            // ⚡ Page load timeout — 30 sec se zyada nahi
-            openBrowser.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-            openBrowser.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
-            
+            WebDriver driver;
+
+            if ("true".equalsIgnoreCase(gridEnabled)) {
+                driver = startRemoteBrowser(browserName, gridUrl); // ✅ Grid
+            } else {
+                driver = startBrowser(browserName);                // ✅ Local
+            }
+
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+            driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
+            openBrowser.set(driver);
+
         } catch (Exception e) {
-            throw new RuntimeException(
-                "Browser open nahi ho saka! Reason: " + e.getMessage(), e
-            );
+            throw new RuntimeException("Browser open nahi ho saka! Reason: " + e.getMessage(), e);
         }
-        return openBrowser;
+        return openBrowser.get();
     }
 
     public static void closeBrowser() {
-        if (openBrowser != null) {
-            WebDriver toClose = openBrowser;
-            openBrowser = null;
-            
-            // Suppress unload dialogs
+        WebDriver driver = openBrowser.get();
+        if (driver != null) {
             try {
-                ((JavascriptExecutor) toClose).executeScript("window.onbeforeunload = null;");
+                ((JavascriptExecutor) driver).executeScript("window.onbeforeunload = null;");
             } catch (Exception ignored) {}
-            
-            // Quit with timeout protection
+
             Thread quitter = new Thread(() -> {
-                try {
-                    toClose.quit();
-                } catch (Exception e) {
-                    System.err.println("quit() error: " + e.getMessage());
-                }
+                try { driver.quit(); }
+                catch (Exception e) { System.err.println("quit() error: " + e.getMessage()); }
             });
             quitter.setDaemon(true);
             quitter.start();
             try {
                 quitter.join(8000);
-                if (quitter.isAlive()) {
-                    System.err.println("⚠️ driver.quit() hung — proceeding anyway");
-                }
+                if (quitter.isAlive()) System.err.println("⚠️ driver.quit() hung");
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+            openBrowser.remove(); // ✅ ThreadLocal cleanup
         }
     }
 
+    // ✅ NEW — Remote/Grid browser
+    private static WebDriver startRemoteBrowser(String browserName, String gridUrl) throws Exception {
+        switch (browserName.toLowerCase()) {
+            case "firefox":
+                FirefoxOptions firefoxOptions = new FirefoxOptions();
+                firefoxOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+                return new RemoteWebDriver(new URL(gridUrl), firefoxOptions);
+
+            case "edge":
+                EdgeOptions edgeOptions = new EdgeOptions();
+                edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+                edgeOptions.addArguments("--window-size=1920,1080");
+                return new RemoteWebDriver(new URL(gridUrl), edgeOptions);
+
+            case "chrome":
+            default:
+                ChromeOptions chromeOptions = buildChromeOptions();
+                return new RemoteWebDriver(new URL(gridUrl), chromeOptions);
+        }
+    }
+
+    // ✅ Local browser (unchanged logic)
     private static WebDriver startBrowser(String browserName) {
         switch (browserName.toLowerCase()) {
             case "firefox":
@@ -88,29 +113,28 @@ public final class BrowserManager {
 
             case "chrome":
             default:
-                ChromeOptions chrome = new ChromeOptions();
-                
-                // ⚡⚡⚡ KEY FIX — EAGER strategy
-                chrome.setPageLoadStrategy(PageLoadStrategy.EAGER);
-                
-                // Speed optimizations
-                chrome.addArguments("--disable-extensions");
-                chrome.addArguments("--disable-notifications");
-                chrome.addArguments("--disable-popup-blocking");
-                chrome.addArguments("--disable-gpu");
-                chrome.addArguments("--no-sandbox");
-                chrome.addArguments("--disable-dev-shm-usage");
-                chrome.addArguments("--disable-blink-features=AutomationControlled");
-                chrome.addArguments("--start-maximized");
-                
-                // Block notifications + tracking-heavy stuff via prefs
-                Map<String, Object> prefs = new HashMap<>();
-                prefs.put("profile.default_content_setting_values.notifications", 2);
-                prefs.put("credentials_enable_service", false);
-                prefs.put("profile.password_manager_enabled", false);
-                chrome.setExperimentalOption("prefs", prefs);
-                
-                return new ChromeDriver(chrome);
+                return new ChromeDriver(buildChromeOptions());
         }
+    }
+
+    // ✅ Common Chrome options extracted
+    private static ChromeOptions buildChromeOptions() {
+        ChromeOptions chrome = new ChromeOptions();
+        chrome.setPageLoadStrategy(PageLoadStrategy.EAGER);
+        chrome.addArguments("--disable-extensions");
+        chrome.addArguments("--disable-notifications");
+        chrome.addArguments("--disable-popup-blocking");
+        chrome.addArguments("--disable-gpu");
+        chrome.addArguments("--no-sandbox");
+        chrome.addArguments("--disable-dev-shm-usage");
+        chrome.addArguments("--disable-blink-features=AutomationControlled");
+        chrome.addArguments("--start-maximized");
+
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("profile.default_content_setting_values.notifications", 2);
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        chrome.setExperimentalOption("prefs", prefs);
+        return chrome;
     }
 }
