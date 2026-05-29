@@ -14,7 +14,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      # ✅ NEW - Selenium Grid start karo
+      # ✅ Grid start karo
       - name: Start Selenium Grid
         run: |
           docker run -d \
@@ -22,9 +22,21 @@ jobs:
             -p 4444:4444 \
             --shm-size="2g" \
             selenium/standalone-chrome:4.27.0
-          sleep 10
-          curl http://localhost:4444/status
 
-      # ✅ NEW - Headless + Grid URL pass karo
+      # ✅ Grid ready hone ka wait karo properly
+      - name: Wait for Grid to be Ready
+        run: |
+          echo "Waiting for Selenium Grid..."
+          for i in {1..30}; do
+            STATUS=$(curl -s http://localhost:4444/status | grep -o '"ready":true')
+            if [ "$STATUS" = '"ready":true' ]; then
+              echo "✅ Grid is ready!"
+              break
+            fi
+            echo "⏳ Attempt $i — Grid not ready yet, waiting..."
+            sleep 3
+          done
+
+      # ✅ Tests run karo
       - name: Run Maven Tests
         run: mvn clean test -DgridEnabled=true -DgridUrl=http://localhost:4444 -Dheadless=true
