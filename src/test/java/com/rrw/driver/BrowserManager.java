@@ -120,7 +120,13 @@ public final class BrowserManager {
     // ✅ Common Chrome options extracted
     private static ChromeOptions buildChromeOptions() {
         ChromeOptions chrome = new ChromeOptions();
+
         chrome.setPageLoadStrategy(PageLoadStrategy.EAGER);
+
+        // Headless Mode
+        chrome.addArguments("--headless=new");
+        chrome.addArguments("--window-size=1920,1080");
+
         chrome.addArguments("--disable-extensions");
         chrome.addArguments("--disable-notifications");
         chrome.addArguments("--disable-popup-blocking");
@@ -128,13 +134,14 @@ public final class BrowserManager {
         chrome.addArguments("--no-sandbox");
         chrome.addArguments("--disable-dev-shm-usage");
         chrome.addArguments("--disable-blink-features=AutomationControlled");
-        chrome.addArguments("--start-maximized");
 
         Map<String, Object> prefs = new HashMap<>();
         prefs.put("profile.default_content_setting_values.notifications", 2);
         prefs.put("credentials_enable_service", false);
         prefs.put("profile.password_manager_enabled", false);
+
         chrome.setExperimentalOption("prefs", prefs);
+
         return chrome;
     }
 }
