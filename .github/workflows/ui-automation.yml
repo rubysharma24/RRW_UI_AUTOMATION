@@ -1,16 +1,10 @@
 name: UI Automation
-
 on:
   workflow_dispatch:
-
 jobs:
-
   run-ui-tests:
-
     runs-on: ubuntu-latest
-
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -20,5 +14,17 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      # ✅ NEW - Selenium Grid start karo
+      - name: Start Selenium Grid
+        run: |
+          docker run -d \
+            --name selenium-chrome \
+            -p 4444:4444 \
+            --shm-size="2g" \
+            selenium/standalone-chrome:4.27.0
+          sleep 10
+          curl http://localhost:4444/status
+
+      # ✅ NEW - Headless + Grid URL pass karo
       - name: Run Maven Tests
-        run: mvn clean test
+        run: mvn clean test -DgridEnabled=true -DgridUrl=http://localhost:4444 -Dheadless=true
