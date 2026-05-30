@@ -9,18 +9,17 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.remote.RemoteWebDriver;  // ✅ ADD THIS
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.rrw.utils.*;
 
-import java.net.URL;  // ✅ ADD THIS
+import java.net.URL;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class BrowserManager {
 
-    // ✅ ThreadLocal for parallel execution
     private static ThreadLocal<WebDriver> openBrowser = new ThreadLocal<>();
 
     private BrowserManager() {}
@@ -31,16 +30,29 @@ public final class BrowserManager {
         }
 
         String browserName = PropertyReader.getConfigProperty("browserName");
-        String gridEnabled = PropertyReader.getConfigProperty("gridEnabled"); // ✅ NEW
-        String gridUrl = PropertyReader.getConfigProperty("gridUrl");         // ✅ NEW
+
+        // ✅ System Property pehle, phir config.properties
+        String gridEnabled = System.getProperty("gridEnabled") != null
+            ? System.getProperty("gridEnabled")
+            : PropertyReader.getConfigProperty("gridEnabled");
+
+        String gridUrl = System.getProperty("gridUrl") != null
+            ? System.getProperty("gridUrl")
+            : PropertyReader.getConfigProperty("gridUrl");
+
+        System.out.println("🔧 browserName : " + browserName);
+        System.out.println("🔧 gridEnabled : " + gridEnabled);
+        System.out.println("🔧 gridUrl     : " + gridUrl);
 
         try {
             WebDriver driver;
 
             if ("true".equalsIgnoreCase(gridEnabled)) {
-                driver = startRemoteBrowser(browserName, gridUrl); // ✅ Grid
+                System.out.println("🌐 Grid mode — connecting to: " + gridUrl);
+                driver = startRemoteBrowser(browserName, gridUrl);
             } else {
-                driver = startBrowser(browserName);                // ✅ Local
+                System.out.println("💻 Local mode");
+                driver = startBrowser(browserName);
             }
 
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
@@ -61,22 +73,27 @@ public final class BrowserManager {
             } catch (Exception ignored) {}
 
             Thread quitter = new Thread(() -> {
-                try { driver.quit(); }
-                catch (Exception e) { System.err.println("quit() error: " + e.getMessage()); }
+                try {
+                    driver.quit();
+                } catch (Exception e) {
+                    System.err.println("quit() error: " + e.getMessage());
+                }
             });
             quitter.setDaemon(true);
             quitter.start();
             try {
                 quitter.join(8000);
-                if (quitter.isAlive()) System.err.println("⚠️ driver.quit() hung");
+                if (quitter.isAlive()) {
+                    System.err.println("⚠️ driver.quit() hung — proceeding anyway");
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            openBrowser.remove(); // ✅ ThreadLocal cleanup
+            openBrowser.remove();
         }
     }
 
-    // ✅ NEW — Remote/Grid browser
+    // ✅ Remote/Grid browser
     private static WebDriver startRemoteBrowser(String browserName, String gridUrl) throws Exception {
         switch (browserName.toLowerCase()) {
             case "firefox":
@@ -97,7 +114,7 @@ public final class BrowserManager {
         }
     }
 
-    // ✅ Local browser (unchanged logic)
+    // ✅ Local browser
     private static WebDriver startBrowser(String browserName) {
         switch (browserName.toLowerCase()) {
             case "firefox":
@@ -117,15 +134,23 @@ public final class BrowserManager {
         }
     }
 
-    // ✅ Common Chrome options extracted
+    // ✅ Chrome options — headless for Linux/CI, normal for local
     private static ChromeOptions buildChromeOptions() {
         ChromeOptions chrome = new ChromeOptions();
-
         chrome.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
-        // Headless Mode
-        chrome.addArguments("--headless=new");
-        chrome.addArguments("--window-size=1920,1080");
+        // ✅ Headless — Linux/CI pe automatically on
+        String os = System.getProperty("os.name", "").toLowerCase();
+        String headless = System.getProperty("headless", "false");
+
+        if ("true".equalsIgnoreCase(headless) || os.contains("linux")) {
+            System.out.println("🖥️ Headless mode ON");
+            chrome.addArguments("--headless=new");
+            chrome.addArguments("--window-size=1920,1080");
+        } else {
+            System.out.println("🖥️ Headless mode OFF");
+            chrome.addArguments("--start-maximized");
+        }
 
         chrome.addArguments("--disable-extensions");
         chrome.addArguments("--disable-notifications");
@@ -139,9 +164,13 @@ public final class BrowserManager {
         prefs.put("profile.default_content_setting_values.notifications", 2);
         prefs.put("credentials_enable_service", false);
         prefs.put("profile.password_manager_enabled", false);
-
         chrome.setExperimentalOption("prefs", prefs);
 
         return chrome;
+    }
+
+    // ✅ Driver getter — step definitions ke liye
+    public static WebDriver getDriver() {
+        return openBrowser.get();
     }
 }
