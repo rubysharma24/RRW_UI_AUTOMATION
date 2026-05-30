@@ -62,7 +62,7 @@ public class login {
         );
     }
 
-    /** Backward-compat — agar feature file mein "a mesage" wording use ho rahi ho */
+ 
     @Then("User should see a mesage {string}")
     public void user_should_see_message_alt(String expectedMessage) {
         user_should_see_message(expectedMessage);   // delegate to main impl
