@@ -6,5 +6,6 @@ public interface loginlocator {
     String login_button = "//button[normalize-space()='Login']";
     String unsuccess_message = "//*[contains(text(),'Invalid email or password')]";
     String Dashboardmessage = "//span[text()='Shop Road Ready Products']";
+    
 }
 

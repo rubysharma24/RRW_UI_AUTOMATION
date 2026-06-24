@@ -14,7 +14,7 @@ Feature: Login
       | username                        | password                    | message                    |
       | xyzzz@email.com                 | 123456                      | Invalid email or password  |
       | rishabh.gangwar@w3villa.com     | 1234567890                  | Invalid email or password   |
-      #| rg@w3villa.com                  | 123456                      | Invalid email or password  |
+      | rg@w3villa.com                  | 123456                      | Invalid email or password  |
        
 
   Scenario Outline: User login with valid  credentials
@@ -22,6 +22,8 @@ Feature: Login
     When User enters "<username>" and "<password>"
     And User clicks on login button
     Then User should see "<message>"
+    And User clicks on roadready button
+
 
     Examples:
       | username                        | password                    | message     |

@@ -58,7 +58,7 @@ import static io.cucumber.junit.platform.engine.Constants.*;
 // "not @Skip"          → skip wale chhod do baaki sab
 @ConfigurationParameter(
     key = FILTER_TAGS_PROPERTY_NAME,
-    value = "@login_test" 
+    value = "@login_test or @dashboard"
 )
 
 public class CucumberRunnerTest {

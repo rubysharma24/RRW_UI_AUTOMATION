@@ -19,6 +19,19 @@ public class ApiHelper {
                 .extract()
                 .response();
     }
+    
+    public static Response getSearchAutoComplete(String searchTerm) {
+
+        return given()
+                .relaxedHTTPSValidation()
+                .accept(ContentType.JSON)
+                .queryParam("search[term]", searchTerm)
+        .when()
+                .get("https://stagingapi.roadreadywheels.com/api/v2/storefront/search/autocomplete")
+        .then()
+                .extract()
+                .response();
+    }
 
     // Overload: path relative to baseUri (if you set RestAssured.baseURI in Hooks)
     public static Response sendGetRequestPath(String path, Map<String, ?> queryParams, Map<String, String> headers) {
