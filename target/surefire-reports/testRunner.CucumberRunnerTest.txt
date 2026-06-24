@@ -1,56 +1,9 @@
 -------------------------------------------------------------------------------
 Test set: testRunner.CucumberRunnerTest
 -------------------------------------------------------------------------------
-Tests run: 8, Failures: 0, Errors: 1, Skipped: 5, Time elapsed: 26.31 s <<< FAILURE! -- in testRunner.CucumberRunnerTest
-Examples.Example #1.1 -- Time elapsed: 5.633 s <<< ERROR!
-java.lang.RuntimeException: Type failed on: //input[@type='email']
-	at CommonMethod.Java_methods.typeText(Java_methods.java:147)
-	at com.stepDefinations.login.user_enters_credentials(login.java:21)
-	at ✽.User enters "xyzzz@email.com" and "123456"(classpath:features/01_login.feature:9)
-Caused by: org.openqa.selenium.StaleElementReferenceException: stale element reference: stale element not found in the current frame
-  (Session info: chrome=148.0.7778.181)
-For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#stale-element-reference-exception
-Build info: version: '4.27.0', revision: 'd6e718d134'
-System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '23.0.1'
-Driver info: org.openqa.selenium.remote.RemoteWebDriver
-Command: [ae34a6da8668c88f9987b49b2c1a9321, sendKeysToElement {id=f.A3AAB742888A72AABFF5DEDB318CEF15.d.7332686F0A3BD06451AE2517A0433ED7.e.25, value=[Ljava.lang.CharSequence;@a2341c6}]
-Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 148.0.7778.181, chrome: {chromedriverVersion: 148.0.7778.178 (d096af1c9e9..., userDataDir: C:\Users\Lenovo\AppData\Loc...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:61689}, goog:processID: 14188, networkConnectionEnabled: false, pageLoadStrategy: eager, platformName: Windows 11, proxy: Proxy(), se:bidiEnabled: false, se:cdp: ws://192.168.29.99:4444/ses..., se:cdpVersion: 148.0.7778.181, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
-Element: [[RemoteWebDriver: chrome on Windows 11 (ae34a6da8668c88f9987b49b2c1a9321)] -> xpath: //input[@type='email']]
-Session ID: ae34a6da8668c88f9987b49b2c1a9321
-	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:501)
-	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:485)
-	at org.openqa.selenium.remote.ErrorCodec.decode(ErrorCodec.java:167)
-	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:138)
-	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:50)
-	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:190)
-	at org.openqa.selenium.remote.TracedCommandExecutor.execute(TracedCommandExecutor.java:53)
-	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:545)
-	at org.openqa.selenium.remote.RemoteWebElement.execute(RemoteWebElement.java:223)
-	at org.openqa.selenium.remote.RemoteWebElement.sendKeys(RemoteWebElement.java:110)
-	at CommonMethod.Java_methods.typeText(Java_methods.java:143)
-	at com.stepDefinations.login.user_enters_credentials(login.java:21)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at io.cucumber.java.Invoker.doInvoke(Invoker.java:66)
-	at io.cucumber.java.Invoker.invoke(Invoker.java:24)
-	at io.cucumber.java.AbstractGlueDefinition.invokeMethod(AbstractGlueDefinition.java:47)
-	at io.cucumber.java.JavaStepDefinition.execute(JavaStepDefinition.java:29)
-	at io.cucumber.core.runner.CoreStepDefinition.execute(CoreStepDefinition.java:66)
-	at io.cucumber.core.runner.PickleStepDefinitionMatch.runStep(PickleStepDefinitionMatch.java:63)
-	at io.cucumber.core.runner.ExecutionMode$1.execute(ExecutionMode.java:10)
-	at io.cucumber.core.runner.TestStep.executeStep(TestStep.java:84)
-	at io.cucumber.core.runner.TestStep.run(TestStep.java:56)
-	at io.cucumber.core.runner.PickleStepTestStep.run(PickleStepTestStep.java:51)
-	at io.cucumber.core.runner.TestCase.run(TestCase.java:84)
-	at io.cucumber.core.runner.Runner.runPickle(Runner.java:75)
-	at io.cucumber.junit.platform.engine.CucumberEngineExecutionContext.lambda$runTestCase$4(CucumberEngineExecutionContext.java:112)
-	at io.cucumber.core.runtime.CucumberExecutionContext.lambda$runTestCase$5(CucumberExecutionContext.java:137)
-	at io.cucumber.core.runtime.RethrowingThrowableCollector.executeAndThrow(RethrowingThrowableCollector.java:23)
-	at io.cucumber.core.runtime.CucumberExecutionContext.runTestCase(CucumberExecutionContext.java:137)
-	at io.cucumber.junit.platform.engine.CucumberEngineExecutionContext.runTestCase(CucumberEngineExecutionContext.java:109)
-	at io.cucumber.junit.platform.engine.NodeDescriptor$PickleDescriptor.execute(NodeDescriptor.java:168)
-	at io.cucumber.junit.platform.engine.NodeDescriptor$PickleDescriptor.execute(NodeDescriptor.java:90)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+Tests run: 10, Failures: 1, Errors: 0, Skipped: 9, Time elapsed: 9.835 s <<< FAILURE! -- in testRunner.CucumberRunnerTest
+Product Description Page Validation.Validate first product details ( price , name )  on UI against API -- Time elapsed: 6.614 s <<< FAILURE!
+org.junit.ComparisonFailure: expected:<...roadreadywheels.com/[]> but was:<...roadreadywheels.com/[t/categories]>
+	at com.stepDefinations.Dashboard_validation.the_user_should_be_redirected_to_the_product_listing_page(Dashboard_validation.java:45)
+	at ✽.the user should be redirected to the Product Listing Page(classpath:features/05_dashboard.feature:10)
 

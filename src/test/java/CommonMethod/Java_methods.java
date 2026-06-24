@@ -329,4 +329,24 @@ public class Java_methods {
     public static boolean isLoginSuccessful() {
         return getDriver().getCurrentUrl().contains("just_sign_in=true");
     }
-}
+    
+ // ════════════════════════════════════════════
+    //  VALIDATE CURRENT URL OF THE PAGE 
+    // 
+    
+    public static String getCurrentUrl() {
+        return driver.getCurrentUrl();
+    }
+    
+ // ════════════════════════════════════════════ 
+//  URL WAIT 
+ // ════════════════════════════════════════════
+    
+    public static void waitForUrlContains(String expectedUrlPart) {
+
+        WebDriverWait wait =
+                new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        wait.until(
+                ExpectedConditions.urlContains(expectedUrlPart));
+}}

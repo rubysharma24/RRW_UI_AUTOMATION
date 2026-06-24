@@ -1,5 +1,6 @@
 package com.stepDefinations;
 
+import com.locator.homepagelocator;
 import com.locator.loginlocator;
 import CommonMethod.Java_methods;
 import io.cucumber.java.en.*;
@@ -66,5 +67,13 @@ public class login {
     @Then("User should see a mesage {string}")
     public void user_should_see_message_alt(String expectedMessage) {
         user_should_see_message(expectedMessage);   // delegate to main impl
+        
+        
     }
+    
+    @And("User clicks on roadready  button")
+    public void user_clicks_on_roadready_button() {
+    	Java_methods.clickOn(homepagelocator.ROADREADY_LOGO);    }
+    
+    
 }
