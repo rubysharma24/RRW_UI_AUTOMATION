@@ -1,0 +1,7 @@
+PDP Price: $147.15
+Current quantity: 3
+Current quantity: 3
+Clicking decrease quantity
+Quantity: 3 -> 2
+Selecting random address: 1 of 1
+Selected address: TCS, raja sharma, w3vvvvvvvvvvvvvv, Mountain View, California 90012 , 9368047877

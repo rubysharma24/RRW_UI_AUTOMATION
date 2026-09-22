@@ -1,0 +1,1 @@
+[{"values":["Chromium"],"name":"Browser"},{"values":["Staging"],"name":"Environment"},{"values":["https://staging.roadreadywheels.com"],"name":"Base.URL"},{"values":["Playwright + TypeScript"],"name":"Framework"},{"values":["QA Team"],"name":"Tester"}]

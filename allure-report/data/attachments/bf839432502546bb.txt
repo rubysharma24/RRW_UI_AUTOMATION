@@ -1,0 +1,5 @@
+PDP Price: $198.55
+Current quantity: 6
+Current quantity: 6
+Clicking decrease quantity
+Quantity after toggle: NaN

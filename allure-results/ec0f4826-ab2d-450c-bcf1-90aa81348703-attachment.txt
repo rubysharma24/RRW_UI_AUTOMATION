@@ -1,0 +1,9 @@
+Resale price: 233.58
+Wholesale button count: 1
+Wholesale button class BEFORE click: relative z-10 w-full px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 text-center whitespace-nowrap text-gray-600 hover:text-gray-900
+Wholesale button class AFTER click: relative z-10 w-full px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 text-center whitespace-nowrap text-white
+Wholesale price: 173
+--------------------------------
+Resale price: 233.58
+Wholesale price: 173
+--------------------------------

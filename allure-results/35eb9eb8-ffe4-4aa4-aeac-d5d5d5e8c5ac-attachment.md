@@ -1,0 +1,993 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: search.spec.ts >> Search Functionality - RoadReady Wheels >> should navigate to listing page and show only matching Hollander products
+- Location: tests\search.spec.ts:23:7
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: expect(page).toHaveURL(expected) failed
+
+Expected pattern: /.*560-64127.*/i
+Received string:  "https://staging.roadreadywheels.com/t/categories?just_sign_in=true"
+
+Call log:
+  - Expect "toHaveURL" with timeout 5000ms
+  - Protocol error (Runtime.callFunctionOn): Internal server error, session closed.
+
+```
+
+```yaml
+- region "Notifications Alt+T"
+- alert: Categories - Road Ready Wheels
+- iframe
+- iframe
+- banner:
+  - link "ROADREADY":
+    - /url: /
+  - combobox "Search category":
+    - option "Search All" [selected]
+    - option "Hollander"
+    - option "OE#"
+  - textbox "Search for wheels":
+    - /placeholder: Search globally for make, model, part number... . . .
+    - text: 560-64127
+  - button "Clear search":
+    - img
+  - button "Search"
+  - button "Resale"
+  - button "Wholesale"
+  - button "Select State":
+    - img
+    - text: Select State
+  - text: "|"
+  - button:
+    - img
+    - img
+  - text: "|"
+  - button "Cart is empty" [disabled]:
+    - img
+- heading "Your Cart (0 items)" [level=2]
+- button "Close cart":
+  - img
+- paragraph: Your cart is empty
+- text: Parts Finder
+- combobox
+- text: Select Make
+- combobox
+- text: Select Model
+- combobox
+- text: Select Year type
+- button "Aftermarket Wheel"
+- button "Genuine OEM Reconditioned Rim"
+- button "OEM Reconditioned Wheel"
+- button "OEM Replacement Hubcap"
+- button "OEM Replacement Wheel"
+- button "OEM Surplus Wheel"
+- button "OEM Take Off Wheel"
+- button "OEM Wheel Rim"
+- button "Simulator"
+- button "Trailer"
+- text: material
+- button "Alloy"
+- button "Steel"
+- button "ABS Plastic"
+- text: diameter
+- button "14\""
+- button "15\""
+- button "16\""
+- button "17\""
+- button "17.5\""
+- button "18\""
+- button "19\""
+- button "19.5\""
+- button "20\""
+- button "21\""
+- button "22\""
+- button "22.5\""
+- button "23\""
+- button "24\""
+- button "24.5\""
+- text: bolt pattern
+- button "3x112.5mm or 3x4.4\""
+- button "4x98mm or 4x3.9\""
+- button "4x100mm or 4x3.9\""
+- button "4x108mm or 4x4.3\""
+- button "4x114.3mm or 4x4.5\""
+- button "5x92.3mm or 5x3.6\""
+- button "5x98mm or 5x3.9\""
+- button "5x100mm or 5x3.9\""
+- button "5x105mm or 5x4.1\""
+- button "5x108mm or 5x4.3\""
+- button "5x108mm or 5x4.25\""
+- button "5x110mm or 5x4.3\""
+- button "5x112mm or 5x4.4\""
+- button "5x114.3mm or 5x4.5\""
+- button "5x114.3mm or 5x5\""
+- button "5x115mm or 5x4.5\""
+- button "5x116.4mm or 4.6\""
+- button "5x118.4mm or 4.7\""
+- button "5x120mm or 5x4.7\""
+- button "5x120mm or 5x4.75\""
+- button "5x127mm or 5x5\""
+- button "5x127mm or 5x4.7\""
+- button "5x130mm or 5x5.1\""
+- button "5x135mm or 5x5.3\""
+- button "5x139.7mm or 5x5.5\""
+- button "5x150mm or 5x5.9\""
+- button "5x160mm or 5x6.3\""
+- button "6x114.3mm or 6x4.5\""
+- button "6x115mm or 6x4.5\""
+- button "6x120mm or 6x4.7\""
+- button "6x127mm or 6x5\""
+- button "6x130mm or 6x5.1\""
+- button "6x132mm or 6x5.2\""
+- button "6x135mm or 6x5.3\""
+- button "6x139.7mm or 6x5.5\""
+- button "6x180mm or 6x7.1\""
+- button "6x205mm or 6x8.1\""
+- button "6x222.25mm or 6x8.75\""
+- button "7x150mm or 7x5.9\""
+- button "8x165.1mm or 8x6.5\""
+- button "8x170mm or 8x6.7\""
+- button "8x180mm or 8x7.1\""
+- button "8x200mm or 8x7.9\""
+- button "8x210mm or 8x8.3\""
+- button "8x225mm or 8x8.9\""
+- button "8x275mm or 8x10.8\""
+- button "10x184.1mm or 10x7.25\""
+- button "10-222.25mm or 10-8.75\""
+- button "10x225mm or 10x8.9\""
+- button "10x285.7mm or 10x11.2\""
+- text: lug count
+- button "3"
+- button "4"
+- button "5"
+- button "6"
+- button "7"
+- button "8"
+- button "10"
+- text: center bore
+- button "46mm"
+- button "54mm"
+- button "54.06mm"
+- button "54.1mm"
+- button "56mm"
+- button "56.1mm"
+- button "56.5mm"
+- button "56.6mm"
+- button "56.8mm"
+- button "57mm"
+- button "57.1mm"
+- button "57.2mm"
+- button "58mm"
+- button "58.1mm"
+- button "59.1mm"
+- button "60mm"
+- button "60.1mm"
+- button "60.7mm"
+- button "63mm"
+- button "63.1mm"
+- button "63.3mm"
+- button "63.4mm"
+- button "63.5mm"
+- button "63.6mm"
+- button "64mm"
+- button "64.1mm"
+- button "64.2mm"
+- button "65mm"
+- button "65.1mm"
+- button "66mm"
+- button "66.1mm"
+- button "66.45mm"
+- button "66.5mm"
+- button "66.6mm"
+- button "66.87mm"
+- button "66.9mm"
+- button "67mm"
+- button "67.1mm"
+- button "68mm"
+- button "70,3mm"
+- button "70.1mm"
+- button "70.2mm"
+- button "70.3mm"
+- button "70.5mm"
+- button "70.6mm"
+- button "70.8mm"
+- button "71.5mm"
+- button "71.6mm"
+- button "71.8mm"
+- button "72.5mm"
+- button "72.6mm"
+- button "73.1mm"
+- button "74mm"
+- button "74.1mm"
+- button "74.5mm"
+- button "77.8mm"
+- button "78mm"
+- button "78.1mm"
+- button "78.3mm"
+- button "81mm"
+- button "83.7mm"
+- button "84mm"
+- button "84.1mm"
+- button "84.5mm"
+- button "87mm"
+- button "87,1mm"
+- button "87.1mm"
+- button "92.5mm"
+- button "93.1mm"
+- button "95.1mm"
+- button "95.2mm"
+- button "100mm"
+- button "100.3mm"
+- button "106mm"
+- button "106.1mm"
+- button "106.2mm"
+- button "108mm"
+- button "108.1mm"
+- button "110.1mm"
+- button "110.2mm"
+- button "110.5mm"
+- button "110.6mm"
+- button "116mm"
+- button "116.6mm"
+- button "116.7mm"
+- button "116.8mm"
+- button "117mm"
+- button "120.9mm"
+- button "121mm"
+- button "121.0mm"
+- button "121.15mm"
+- button "121.2mm"
+- button "121.3mm"
+- button "122mm"
+- button "123.9mm"
+- button "124mm"
+- button "124.1mm"
+- button "124.2mm"
+- button "124.46mm"
+- button "124.9mm"
+- button "125mm"
+- button "125.1mm"
+- button "125.2mm"
+- button "133.4mm"
+- button "138.8mm"
+- button "139mm"
+- button "140mm"
+- button "142mm"
+- button "142.1mm"
+- button "154mm"
+- button "154.2mm"
+- button "161mm"
+- button "164mm"
+- button "165.1mm"
+- button "167.5mm"
+- button "170.1mm"
+- button "170.2mm"
+- button "220mm"
+- button "220.1mm"
+- button "220.9mm"
+- button "221mm"
+- button "222mm"
+- text: Availability
+- checkbox "Include Out of Stock" [checked]
+- text: Include Out of Stock Shop Road Ready Products
+- link "By Category":
+  - /url: /t/categories
+  - button "By Category"
+- link "Top Brands":
+  - /url: /t/brand
+  - button "Top Brands"
+- link "Featured Items":
+  - /url: /t/section
+  - button "Featured Items"
+- heading "Steel Wheels" [level=5]
+- button "View All"
+- text: Top Steel Wheel
+- button "Add to wishlist":
+  - img
+- link "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim":
+  - /url: /products/2005-2026-ford-f-550-19-5x6-steel-wheel-rim
+  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim"
+- link "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim":
+  - /url: /products/2005-2026-ford-f-550-19-5x6-steel-wheel-rim
+  - heading "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "16,540 All-Time Units Sold":
+  - /url: /products/2005-2026-ford-f-550-19-5x6-steel-wheel-rim
+- text: "$194.33 Hollander: 99042 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Steel Wheel
+- button "Add to wishlist":
+  - img
+- link "2011-2025 Chevrolet Silverado 3500 17x6.5 Steel Wheel / Rim":
+  - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+  - img "2011-2025 Chevrolet Silverado 3500 17x6.5 Steel Wheel / Rim"
+- link "2011-2025 Chevrolet Silverado 3500 17x6.5 Steel Wheel / Rim":
+  - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+  - heading "2011-2025 Chevrolet Silverado 3500 17x6.5 Steel Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "13,372 All-Time Units Sold":
+  - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+- text: "$147.15 Hollander: 560-08094 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Steel Wheel
+- button "Add to wishlist":
+  - img
+- link "2015-2025 16x6 Ford Transit 350 Dually Steel Wheel / Rim":
+  - /url: /products/2015-2025-16x6-ford-transit-350-dually-steel-wheel-rim2
+  - img "2015-2025 16x6 Ford Transit 350 Dually Steel Wheel / Rim"
+- link "2015-2025 16x6 Ford Transit 350 Dually Steel Wheel / Rim":
+  - /url: /products/2015-2025-16x6-ford-transit-350-dually-steel-wheel-rim2
+  - heading "2015-2025 16x6 Ford Transit 350 Dually Steel Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "4,176 All-Time Units Sold":
+  - /url: /products/2015-2025-16x6-ford-transit-350-dually-steel-wheel-rim2
+- text: "$142.66 Hollander: 560-10050S 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Steel Wheel
+- button "Add to wishlist":
+  - img
+- link "2020-2025 Toyota Corolla 16x7 Steel Wheel / Rim":
+  - /url: /products/2020-2025-16x7-toyota-corolla-steel-wheel-rim
+  - img "2020-2025 Toyota Corolla 16x7 Steel Wheel / Rim"
+- link "2020-2025 Toyota Corolla 16x7 Steel Wheel / Rim":
+  - /url: /products/2020-2025-16x7-toyota-corolla-steel-wheel-rim
+  - heading "2020-2025 Toyota Corolla 16x7 Steel Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "2,984 All-Time Units Sold":
+  - /url: /products/2020-2025-16x7-toyota-corolla-steel-wheel-rim
+- text: "$104.30 Hollander: 560-75253 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- heading "Alloy Wheels" [level=5]
+- button "View All"
+- text: Top Alloy Wheel
+- button "Add to wishlist":
+  - img
+- link "1999-2004 16x6 Ford F350SD Alloy Wheel / Rim":
+  - /url: /products/1999-2004-16x6-ford-f350sd-alloy-wheel-rim3
+  - img "1999-2004 16x6 Ford F350SD Alloy Wheel / Rim"
+- link "1999-2004 16x6 Ford F350SD Alloy Wheel / Rim":
+  - /url: /products/1999-2004-16x6-ford-f350sd-alloy-wheel-rim3
+  - heading "1999-2004 16x6 Ford F350SD Alloy Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "9,257 All-Time Units Sold":
+  - /url: /products/1999-2004-16x6-ford-f350sd-alloy-wheel-rim3
+- text: "$233.58 Hollander: 560-03335B 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Alloy Wheel
+- button "Add to wishlist":
+  - img
+- link "2018-2022 Honda Accord 19x8.5 Alloy Wheel / Rim":
+  - /url: /products/2018-2022-19x8-5-honda-accord-alloy-wheel-rim
+  - img "2018-2022 Honda Accord 19x8.5 Alloy Wheel / Rim"
+- link "2018-2022 Honda Accord 19x8.5 Alloy Wheel / Rim":
+  - /url: /products/2018-2022-19x8-5-honda-accord-alloy-wheel-rim
+  - heading "2018-2022 Honda Accord 19x8.5 Alloy Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "6,555 All-Time Units Sold":
+  - /url: /products/2018-2022-19x8-5-honda-accord-alloy-wheel-rim
+- text: "$198.55 Hollander: 560-64127 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Alloy Wheel
+- button "Add to wishlist":
+  - img
+- link "2019-2025 Toyota Corolla 18x8 Alloy Wheel / Rim":
+  - /url: /products/2019-2025-toyota-corolla-18x8-alloy-wheel-rim
+  - img "2019-2025 Toyota Corolla 18x8 Alloy Wheel / Rim"
+- link "2019-2025 Toyota Corolla 18x8 Alloy Wheel / Rim":
+  - /url: /products/2019-2025-toyota-corolla-18x8-alloy-wheel-rim
+  - heading "2019-2025 Toyota Corolla 18x8 Alloy Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "705 All-Time Units Sold":
+  - /url: /products/2019-2025-toyota-corolla-18x8-alloy-wheel-rim
+- text: "$228.87 Hollander: 560-75236C 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Alloy Wheel
+- button "Add to wishlist":
+  - img
+- link "2018-2022 Honda Accord 19x8.5 Alloy Wheel / Rim":
+  - /url: /products/2018-2022-honda-accord-19x8-5-alloy-wheel-rim
+  - img "2018-2022 Honda Accord 19x8.5 Alloy Wheel / Rim"
+- link "2018-2022 Honda Accord 19x8.5 Alloy Wheel / Rim":
+  - /url: /products/2018-2022-honda-accord-19x8-5-alloy-wheel-rim
+  - heading "2018-2022 Honda Accord 19x8.5 Alloy Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "6,555 All-Time Units Sold":
+  - /url: /products/2018-2022-honda-accord-19x8-5-alloy-wheel-rim
+- text: "$198.55 Hollander: 560-60337A 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- heading "Chrome Wheels" [level=5]
+- button "View All"
+- text: Top Trending Chrome Wheels
+- button "Add to wishlist":
+  - img
+- link "2014-2023 22x9 Cadillac Escalade GMC Sierra Yukon 1500 Chrome Wheel / Rim":
+  - /url: /products/2014-2023-22x9-cadillac-escalade-gmc-sierra-yukon-1500-chrome-wheel-rim
+  - img "2014-2023 22x9 Cadillac Escalade GMC Sierra Yukon 1500 Chrome Wheel / Rim"
+- link "2014-2023 22x9 Cadillac Escalade GMC Sierra Yukon 1500 Chrome Wheel / Rim":
+  - /url: /products/2014-2023-22x9-cadillac-escalade-gmc-sierra-yukon-1500-chrome-wheel-rim
+  - heading "2014-2023 22x9 Cadillac Escalade GMC Sierra Yukon 1500 Chrome Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "333 All-Time Units Sold":
+  - /url: /products/2014-2023-22x9-cadillac-escalade-gmc-sierra-yukon-1500-chrome-wheel-rim
+- text: "$363.40 Hollander: 560-05667 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Trending Chrome Wheels
+- button "Add to wishlist":
+  - img
+- link "2007-2013 22 x 9 Cadillac Escalade EXT Chrome Wheel /Rim":
+  - /url: /products/07-13-22-x-9-cadillac-escalade-ext-chrome-wheel-rim
+  - img "2007-2013 22 x 9 Cadillac Escalade EXT Chrome Wheel /Rim"
+- link "2007-2013 22 x 9 Cadillac Escalade EXT Chrome Wheel /Rim":
+  - /url: /products/07-13-22-x-9-cadillac-escalade-ext-chrome-wheel-rim
+  - heading "2007-2013 22 x 9 Cadillac Escalade EXT Chrome Wheel /Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "668 All-Time Units Sold":
+  - /url: /products/07-13-22-x-9-cadillac-escalade-ext-chrome-wheel-rim
+- text: "$351.07 Hollander: 560-05309A 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Trending Chrome Wheels
+- button "Add to wishlist":
+  - img
+- link "2014-2023 22x9 Chevrolet Silverado Suburban Tahoe 1500 Chrome Wheel / Rim":
+  - /url: /products/2014-2023-22x9-chevrolet-silverado-suburban-tahoe-1500-chrome-wheel-rim
+  - img "2014-2023 22x9 Chevrolet Silverado Suburban Tahoe 1500 Chrome Wheel / Rim"
+- link "2014-2023 22x9 Chevrolet Silverado Suburban Tahoe 1500 Chrome Wheel / Rim":
+  - /url: /products/2014-2023-22x9-chevrolet-silverado-suburban-tahoe-1500-chrome-wheel-rim
+  - heading "2014-2023 22x9 Chevrolet Silverado Suburban Tahoe 1500 Chrome Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "391 All-Time Units Sold":
+  - /url: /products/2014-2023-22x9-chevrolet-silverado-suburban-tahoe-1500-chrome-wheel-rim
+- text: "$363.40 Hollander: 560-05667 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Trending Chrome Wheels
+- button "Add to wishlist":
+  - img
+- link "1999-2018 20x9 GMC Sierra 1500 Chrome Wheel / Rim":
+  - /url: /products/1999-2018-20-x-9-gmc-sierra-1500-chrome-wheel-rim
+  - img "1999-2018 20x9 GMC Sierra 1500 Chrome Wheel / Rim"
+- link "1999-2018 20x9 GMC Sierra 1500 Chrome Wheel / Rim":
+  - /url: /products/1999-2018-20-x-9-gmc-sierra-1500-chrome-wheel-rim
+  - heading "1999-2018 20x9 GMC Sierra 1500 Chrome Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "498 All-Time Units Sold":
+  - /url: /products/1999-2018-20-x-9-gmc-sierra-1500-chrome-wheel-rim
+- text: "$351.07 Hollander: 560-05656 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- heading "Hubcaps" [level=5]
+- button "View All"
+- text: Top Hubcaps
+- button "Add to wishlist":
+  - img
+- link "2013-2015 Honda Civic Four Piece Set Silver Wheel Cover Caps / Hubcaps":
+  - /url: /products/2013-2015-honda-civic-four-piece-set-silver-wheel-cover-caps-hubcaps
+  - img "2013-2015 Honda Civic Four Piece Set Silver Wheel Cover Caps / Hubcaps"
+- link "2013-2015 Honda Civic Four Piece Set Silver Wheel Cover Caps / Hubcaps":
+  - /url: /products/2013-2015-honda-civic-four-piece-set-silver-wheel-cover-caps-hubcaps
+  - heading "2013-2015 Honda Civic Four Piece Set Silver Wheel Cover Caps / Hubcaps" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "475 All-Time Units Sold":
+  - /url: /products/2013-2015-honda-civic-four-piece-set-silver-wheel-cover-caps-hubcaps
+- text: "$71.85 Hollander: 570-0020 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Hubcaps
+- button "Add to wishlist":
+  - img
+- link "2006-2011 Chevrolet Impala Four Piece Set Silver Wheel Cover Caps / Hubcaps":
+  - /url: /products/2006-2011-16-inch-chevrolet-impala-wheel-hubcap-4-pcs
+  - img "2006-2011 Chevrolet Impala Four Piece Set Silver Wheel Cover Caps / Hubcaps"
+- link "2006-2011 Chevrolet Impala Four Piece Set Silver Wheel Cover Caps / Hubcaps":
+  - /url: /products/2006-2011-16-inch-chevrolet-impala-wheel-hubcap-4-pcs
+  - heading "2006-2011 Chevrolet Impala Four Piece Set Silver Wheel Cover Caps / Hubcaps" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "243 All-Time Units Sold":
+  - /url: /products/2006-2011-16-inch-chevrolet-impala-wheel-hubcap-4-pcs
+- text: "$65.01 Hollander: 570-03021 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Hubcaps
+- button "Add to wishlist":
+  - img
+- link "2015-2024 Ford Transit 150 Four Piece Set 16\" Silver Wheel Cover Caps / Hubcaps":
+  - /url: /products/2015-2024-ford-transit-150-four-piece-set-16-silver-wheel-cover-caps-hubcaps
+  - img "2015-2024 Ford Transit 150 Four Piece Set 16\" Silver Wheel Cover Caps / Hubcaps"
+- link "2015-2024 Ford Transit 150 Four Piece Set 16\" Silver Wheel Cover Caps / Hubcaps":
+  - /url: /products/2015-2024-ford-transit-150-four-piece-set-16-silver-wheel-cover-caps-hubcaps
+  - heading "2015-2024 Ford Transit 150 Four Piece Set 16\" Silver Wheel Cover Caps / Hubcaps" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "126 All-Time Units Sold":
+  - /url: /products/2015-2024-ford-transit-150-four-piece-set-16-silver-wheel-cover-caps-hubcaps
+- text: "$72.99 Hollander: 570-07068 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Hubcaps
+- button "Add to wishlist":
+  - img
+- link "2008-2012 Chevrolet Malibu Four Piece Set Chrome Wheel Cover Caps / Hubcaps":
+  - /url: /products/08-12-17-inch-chevrolet-malibu-wheel-hubcap-4-pcs
+  - img "2008-2012 Chevrolet Malibu Four Piece Set Chrome Wheel Cover Caps / Hubcaps"
+- link "2008-2012 Chevrolet Malibu Four Piece Set Chrome Wheel Cover Caps / Hubcaps":
+  - /url: /products/08-12-17-inch-chevrolet-malibu-wheel-hubcap-4-pcs
+  - heading "2008-2012 Chevrolet Malibu Four Piece Set Chrome Wheel Cover Caps / Hubcaps" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "350 All-Time Units Sold":
+  - /url: /products/08-12-17-inch-chevrolet-malibu-wheel-hubcap-4-pcs
+- text: "$79.53 Hollander: 570-0008 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- heading "Simulators" [level=5]
+- button "View All"
+- text: Top Seller Badge Title Top Seller Badge Title Top
+- button "Add to wishlist":
+  - img
+- link "2005-2025 17\" Ford F350SD Wheel Simulator Set of 2 Rear & 2 Front":
+  - /url: /products/2005-2025-17-ford-f350sd-wheel-simulator-set-of-2-rear-2-front
+  - img "2005-2025 17\" Ford F350SD Wheel Simulator Set of 2 Rear & 2 Front"
+- link "2005-2025 17\" Ford F350SD Wheel Simulator Set of 2 Rear & 2 Front":
+  - /url: /products/2005-2025-17-ford-f350sd-wheel-simulator-set-of-2-rear-2-front
+  - heading "2005-2025 17\" Ford F350SD Wheel Simulator Set of 2 Rear & 2 Front" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "342 All-Time Units Sold":
+  - /url: /products/2005-2025-17-ford-f350sd-wheel-simulator-set-of-2-rear-2-front
+- text: "$270.47 Hollander: 400-0001 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Seller Badge Title Top Seller Badge Title Top
+- button "Add to wishlist":
+  - img
+- link "2003-2025 17\" Dodge Ram Wheel Simulator Set of 2 Rear & 2 Front":
+  - /url: /products/2003-2025-17-dodge-ram-wheel-simulator-set-of-2-rear-2-front
+  - img "2003-2025 17\" Dodge Ram Wheel Simulator Set of 2 Rear & 2 Front"
+- link "2003-2025 17\" Dodge Ram Wheel Simulator Set of 2 Rear & 2 Front":
+  - /url: /products/2003-2025-17-dodge-ram-wheel-simulator-set-of-2-rear-2-front
+  - heading "2003-2025 17\" Dodge Ram Wheel Simulator Set of 2 Rear & 2 Front" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "342 All-Time Units Sold":
+  - /url: /products/2003-2025-17-dodge-ram-wheel-simulator-set-of-2-rear-2-front
+- text: "$270.47 Hollander: 400-0001 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Seller Badge Title Top Seller Badge Title Top
+- button "Add to wishlist":
+  - img
+- link "1985-2004 16\" Ford F-350 Wheel Simulator Set of 2 Rear & 2 Front":
+  - /url: /products/1985-2004-16-ford-f-350-wheel-simulator-set-of-2-rear-2-front
+  - img "1985-2004 16\" Ford F-350 Wheel Simulator Set of 2 Rear & 2 Front"
+- link "1985-2004 16\" Ford F-350 Wheel Simulator Set of 2 Rear & 2 Front":
+  - /url: /products/1985-2004-16-ford-f-350-wheel-simulator-set-of-2-rear-2-front
+  - heading "1985-2004 16\" Ford F-350 Wheel Simulator Set of 2 Rear & 2 Front" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "387 All-Time Units Sold":
+  - /url: /products/1985-2004-16-ford-f-350-wheel-simulator-set-of-2-rear-2-front
+- text: "$253.22 Hollander: 400-0002 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top Seller Badge Title Top Seller Badge Title Top
+- button "Add to wishlist":
+  - img
+- link "2007-2025 16\" Ford E-450 Van Wheel Simulator Set of 2 Rear & 2 Front":
+  - /url: /products/2007-2025-16-ford-e-450-van-wheel-simulator-set-of-2-rear-2-front
+  - img "2007-2025 16\" Ford E-450 Van Wheel Simulator Set of 2 Rear & 2 Front"
+- link "2007-2025 16\" Ford E-450 Van Wheel Simulator Set of 2 Rear & 2 Front":
+  - /url: /products/2007-2025-16-ford-e-450-van-wheel-simulator-set-of-2-rear-2-front
+  - heading "2007-2025 16\" Ford E-450 Van Wheel Simulator Set of 2 Rear & 2 Front" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "387 All-Time Units Sold":
+  - /url: /products/2007-2025-16-ford-e-450-van-wheel-simulator-set-of-2-rear-2-front
+- text: "$253.22 Hollander: 400-0002 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- heading "New OEM Take Off Wheels / Rims" [level=5]
+- button "View All"
+- text: Top OEM Take Off Wheel
+- button "Add to wishlist":
+  - img
+- link "2010-2025 17x7.5 Ford F250SD Genuine OEM Take-Off Steel Wheel / Rim":
+  - /url: /products/2010-2025-17x7-5-ford-f250sd-genuine-oem-take-off-steel-wheel-rim
+  - img "2010-2025 17x7.5 Ford F250SD Genuine OEM Take-Off Steel Wheel / Rim"
+- link "2010-2025 17x7.5 Ford F250SD Genuine OEM Take-Off Steel Wheel / Rim":
+  - /url: /products/2010-2025-17x7-5-ford-f250sd-genuine-oem-take-off-steel-wheel-rim
+  - heading "2010-2025 17x7.5 Ford F250SD Genuine OEM Take-Off Steel Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "406 All-Time Units Sold":
+  - /url: /products/2010-2025-17x7-5-ford-f250sd-genuine-oem-take-off-steel-wheel-rim
+- text: "$181.31 Hollander: 560-03828A 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top OEM Take Off Wheel
+- button "Add to wishlist":
+  - img
+- link "2020-2024 16x6.5 Ford Transit 150 Genuine OEM Take-Off Steel Wheel / Rim":
+  - /url: /products/2020-2024-16x6-5-ford-transit-150-genuine-oem-take-off-steel-wheel-rim
+  - img "2020-2024 16x6.5 Ford Transit 150 Genuine OEM Take-Off Steel Wheel / Rim"
+- link "2020-2024 16x6.5 Ford Transit 150 Genuine OEM Take-Off Steel Wheel / Rim":
+  - /url: /products/2020-2024-16x6-5-ford-transit-150-genuine-oem-take-off-steel-wheel-rim
+  - heading "2020-2024 16x6.5 Ford Transit 150 Genuine OEM Take-Off Steel Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "1,437 All-Time Units Sold":
+  - /url: /products/2020-2024-16x6-5-ford-transit-150-genuine-oem-take-off-steel-wheel-rim
+- text: "$138.82 Hollander: 560-10283 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top OEM Take Off Wheel
+- button "Add to wishlist":
+  - img
+- link "2010-2024 Mercedes-Benz Sprinter 3500 DRW 16x5.5 Genuine OEM Take-Off Steel Wheel / Rim":
+  - /url: /products/2010-2024-mercedes-benz-sprinter-3500-drw-16x5-5-genuine-oem-take-off-steel-wheel-rim2
+  - img "2010-2024 Mercedes-Benz Sprinter 3500 DRW 16x5.5 Genuine OEM Take-Off Steel Wheel / Rim"
+- link "2010-2024 Mercedes-Benz Sprinter 3500 DRW 16x5.5 Genuine OEM Take-Off Steel Wheel / Rim":
+  - /url: /products/2010-2024-mercedes-benz-sprinter-3500-drw-16x5-5-genuine-oem-take-off-steel-wheel-rim2
+  - heading "2010-2024 Mercedes-Benz Sprinter 3500 DRW 16x5.5 Genuine OEM Take-Off Steel Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "599 All-Time Units Sold":
+  - /url: /products/2010-2024-mercedes-benz-sprinter-3500-drw-16x5-5-genuine-oem-take-off-steel-wheel-rim2
+- text: "$101.68 Hollander: 560-85412 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- text: Top OEM Take Off Wheel
+- button "Add to wishlist":
+  - img
+- link "2010-2024 16x5.5 Mercedes-Benz Sprinter 3500 Genuine OEM Take-Off Steel Wheel / Rim":
+  - /url: /products/2010-2024-16x5-5-mercedes-benz-sprinter-3500-genuine-oem-take-off-steel-wheel-rim2
+  - img "2010-2024 16x5.5 Mercedes-Benz Sprinter 3500 Genuine OEM Take-Off Steel Wheel / Rim"
+- link "2010-2024 16x5.5 Mercedes-Benz Sprinter 3500 Genuine OEM Take-Off Steel Wheel / Rim":
+  - /url: /products/2010-2024-16x5-5-mercedes-benz-sprinter-3500-genuine-oem-take-off-steel-wheel-rim2
+  - heading "2010-2024 16x5.5 Mercedes-Benz Sprinter 3500 Genuine OEM Take-Off Steel Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "599 All-Time Units Sold":
+  - /url: /products/2010-2024-16x5-5-mercedes-benz-sprinter-3500-genuine-oem-take-off-steel-wheel-rim2
+- text: "$101.68 Hollander: 560-85413 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- heading "Dually Steel Wheels" [level=5]
+- button "View All"
+- text: Top Trending Dually Wheels
+- button "Add to wishlist":
+  - img
+- link "2019-2024 17x6 Dodge Ram 3500 Dually Wheel / Rim":
+  - /url: /products/2019-2024-17x6-dodge-ram-3500-dually-wheel-rim
+  - img "2019-2024 17x6 Dodge Ram 3500 Dually Wheel / Rim"
+- link "2019-2024 17x6 Dodge Ram 3500 Dually Wheel / Rim":
+  - /url: /products/2019-2024-17x6-dodge-ram-3500-dually-wheel-rim
+  - heading "2019-2024 17x6 Dodge Ram 3500 Dually Wheel / Rim" [level=3]
+- img
+- img
+- img
+- img
+- img
+- img
+- link "727 All-Time Units Sold":
+  - /url: /products/2019-2024-17x6-dodge-ram-3500-dually-wheel-rim
+- text: "$183.75 Hollander: 560-02704 🚚"
+- button "Please Select State"
+- button "1":
+  - text: "1"
+  - img
+- button "Add To Cart"
+- contentinfo:
+  - heading "Contact Us" [level=3]
+  - paragraph:
+    - text: "Call:"
+    - link "1-888-790-5899":
+      - /url: tel:+18887905899
+  - paragraph:
+    - text: "Text:"
+    - link "217-635-2033":
+      - /url: tel:+12176352033
+  - link "support@roadreadywheels.com":
+    - /url: mailto:support@roadreadywheels.com
+  - link "Visit our Facebook page":
+    - /url: https://www.facebook.com/roadreadywheels/
+    - img
+  - link "X (Twitter)":
+    - /url: https://twitter.com/RoadReadyWheel1
+    - img "X (Twitter)"
+  - link "Visit our Instagram page":
+    - /url: https://www.instagram.com/roadreadywheels/
+    - img
+  - link "Visit our YouTube channel":
+    - /url: https://www.youtube.com/channel/UCYkBqgu0APKgEfPKJmRrCrg
+    - img
+  - img "BBB Accredited"
+  - img "WTC Member"
+  - heading "Support" [level=3]
+  - link "Returns and Refunds":
+    - /url: /faq/i-want-to-return-my-rim-and-get-a-full-refund?id=7
+  - link "Contact Us":
+    - /url: /contact
+  - link "Warranty":
+    - /url: /faq/what-is-your-product-warranty?id=9
+  - link "FAQs":
+    - /url: /faq
+  - link "Wheel Requests":
+    - /url: /wheel-requests
+  - link "Terms of Service":
+    - /url: /terms-of-service
+  - link "Privacy Policy":
+    - /url: /privacy-policy
+  - link "Shipping Policy":
+    - /url: /faq/how-long-does-it-take-to-ship-to-me?id=1
+  - heading "Why Road Ready" [level=3]
+  - link "About Us":
+    - /url: /about-us
+  - link "Price Comparison":
+    - /url: /price-comparison
+  - heading "Divisions" [level=3]
+  - link "Wholesale":
+    - /url: /wholesale
+  - link "Resale":
+    - /url: /resale
+  - paragraph:
+    - strong: "DISCLAIMER :"
+    - text: Road Ready Wheels is not affiliated with or authorized by, and does not claim to be endorsed by any of the automobile manufacturers named and/or otherwise identified within this page, and its use of any third party’s company, model and/or brand name(s), including but not limited to "Acura", "Audi", "BMW", "Buick", "Cadillac", "Chevrolet", “Chrysler”, "Dodge", "Fiat", "Ford", "GMC", "Honda", "Hyundai", "Infiniti", "Jaguar", "Land Rover", "Lexus", "Lincoln", "Mercedes-Benz", "Mercury", "Mitsubishi", "Nissan", "Oldsmobile", "Opel", "Porsche", "Plymouth", "Pontiac", "Rivian", "Saab", "Saturn", "Scion", "Smart", "Subaru", "Suzuki", "Tesla", "Toyota", "Volkswagen" and "Volvo" is for the nominative purpose of product fitment and description.
+  - paragraph: 2026 Road Ready Wheels All Rights Reserved
+  - paragraph:
+    - text: Made with ❤️ at
+    - link "W3villa Technologies":
+      - /url: https://www.w3villa.com/
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '../fixtures/pageFixtures';
+  2  | import { validUser } from '../test-data/login.data';
+  3  | 
+  4  | test.describe('Search Functionality - RoadReady Wheels', () => {
+  5  |   test.beforeEach(async ({ homePage, loginPage }) => {
+  6  |     await homePage.open();
+  7  |     await homePage.goToLogin();
+  8  |     await loginPage.login(validUser.email, validUser.password);
+  9  |   });
+  10 | 
+  11 |   test('should close Shop As modal', async ({ categoriesPage }) => {
+  12 |     await categoriesPage.closeShopAsModal();
+  13 |   });
+  14 | 
+  15 |   test('should navigate to search results page after clicking search', async ({ categoriesPage }) => {
+  16 |     await categoriesPage.closeShopAsModal();
+  17 |     await categoriesPage.searchFor('560-64127');
+  18 |     await categoriesPage.clickSearch();
+  19 | 
+  20 |     await expect(categoriesPage.page).toHaveURL(/.*560-64127.*/i);
+  21 |   });
+  22 | 
+  23 |   test('should navigate to listing page and show only matching Hollander products', async ({ categoriesPage }) => {
+  24 |     await categoriesPage.closeShopAsModal();
+  25 |     await categoriesPage.searchFor('560-64127');
+  26 |     await categoriesPage.page.waitForTimeout(5000);
+  27 |     await categoriesPage.clickSearch();
+  28 | 
+> 29 |     await expect(categoriesPage.page).toHaveURL(/.*560-64127.*/i);
+     |                                       ^ Error: expect(page).toHaveURL(expected) failed
+  30 | 
+  31 |    
+  32 |     await categoriesPage.hollanderLabels.first().waitFor({ state: 'visible', timeout: 15000 });
+  33 | 
+  34 |     const hollanderTexts = await categoriesPage.getAllHollanderTexts();
+  35 | 
+  36 |     expect(hollanderTexts.length).toBeGreaterThan(0);
+  37 | 
+  38 |     for (const text of hollanderTexts) {
+  39 |       expect(text).toContain('560-64127');
+  40 |     }
+  41 |   });
+  42 | });
+```

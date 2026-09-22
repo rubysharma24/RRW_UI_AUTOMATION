@@ -1,0 +1,21 @@
+[
+  {
+    "name": "Locator Issues",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*strict mode violation.*"
+  },
+  {
+    "name": "Timeout Issues",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*Timeout.*exceeded.*"
+  },
+  {
+    "name": "Assertion Failures",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*expect.*failed.*"
+  },
+  {
+    "name": "Product Bugs",
+    "matchedStatuses": ["failed"]
+  }
+]

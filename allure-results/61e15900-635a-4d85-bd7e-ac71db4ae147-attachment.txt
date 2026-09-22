@@ -1,0 +1,18 @@
+Unit price: 233.58
+Quantity before toggle: 1
+Current quantity: 1
+Clicking increase quantity
+Quantity after toggle: 2
+Selecting random address: 1 of 1
+Selected address: TCS, raja sharma, w3vvvvvvvvvvvvvv, Mountain View, California 90012 , 9368047877
+Selected shipping option: Ground Shipping (FREE)$0.00Expected Delivery: Wednesday, September 23rd - Thursday, September 24th
+Selected shipping option: Ground Shipping (FREE)$0.00Expected Delivery: Wednesday, September 23rd - Thursday, September 24th
+--------------------------------
+Unit price: 233.58
+Quantity: 2
+Subtotal: 467.16
+Tax + Shipping (derived): 45.55
+Total: 512.71
+--------------------------------
+Expected subtotal: 467.16
+Order Number: R712088561

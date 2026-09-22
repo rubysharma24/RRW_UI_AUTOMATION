@@ -1,0 +1,1007 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: cart.spec.ts >> Add to Cart - RoadReady Wheels >> should increase quantity in cart and proceed to checkout without PO
+- Location: tests\cart.spec.ts:25:7
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: locator.waitFor: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: '+' }) to be visible
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - region "Notifications Alt+T"
+  - alert [ref=e2]: 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim - Road Ready Wheels
+  - iframe [ref=e3]
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e8]:
+        - link "ROADREADY" [ref=e9] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e12]:
+          - combobox "Search category" [ref=e14] [cursor=pointer]:
+            - option "Search All" [selected]
+            - option "Hollander"
+            - option "OE#"
+          - textbox "Search for wheels" [ref=e16]:
+            - /placeholder: Search globally for make, model, part number... . . .
+          - button "Search" [disabled] [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Resale" [ref=e22] [cursor=pointer]
+            - button "Wholesale" [ref=e24] [cursor=pointer]
+          - button "Select State" [ref=e27] [cursor=pointer]
+          - generic [ref=e34]: "|"
+          - button [ref=e36] [cursor=pointer]
+          - generic [ref=e42]: "|"
+          - button "Open cart" [ref=e43] [cursor=pointer]:
+            - generic [ref=e48]: "3"
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - heading "Your Cart (3 items)" [level=2] [ref=e53]
+        - button "Close cart" [ref=e54] [cursor=pointer]
+      - generic [ref=e59]:
+        - generic [ref=e60] [cursor=pointer]:
+          - checkbox "E-Mail Shopping Cart To Me" [ref=e61]
+          - text: E-Mail Shopping Cart To Me
+        - generic [ref=e62]:
+          - textbox "Enter your email" [ref=e63]
+          - button "Send Email" [ref=e64] [cursor=pointer]
+      - generic [ref=e65]:
+        - generic [ref=e69]:
+          - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e71]
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - heading "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [level=4] [ref=e74] [cursor=pointer]
+              - button "Remove 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim from cart" [ref=e75] [cursor=pointer]
+            - paragraph [ref=e79]: "SKU: 99042"
+            - generic [ref=e80]:
+              - generic [ref=e81]:
+                - button "Decrease quantity of 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e82] [cursor=pointer]
+                - generic [ref=e84]: "3"
+                - button "Increase quantity of 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e85] [cursor=pointer]
+              - generic [ref=e87]: $194.33
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - generic [ref=e91]: Subtotal (3 items)
+              - generic [ref=e92]: $582.99
+            - button "Shipping Select State" [ref=e94] [cursor=pointer]:
+              - generic [ref=e95]: Shipping
+              - button "Select State" [ref=e100]
+            - generic [ref=e101]:
+              - generic [ref=e102]: Total
+              - generic [ref=e103]: $582.99
+          - generic [ref=e104]:
+            - paragraph [ref=e105]: Express Checkouts
+            - generic [ref=e106]:
+              - generic [ref=e107]:
+                - img "Amazon Pay"
+                - generic:
+                  - generic:
+                    - img "AmazonPay"
+                - button "Pay with Amazon Pay" [ref=e108] [cursor=pointer]
+              - generic [ref=e109]:
+                - img "Google Pay"
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - button "Pay with GPay"
+                - button "Pay with Google Pay" [ref=e110] [cursor=pointer]
+          - button "Complete Checkout" [ref=e112] [cursor=pointer]
+          - generic [ref=e113]:
+            - img "American Express" [ref=e115]
+            - img "Visa" [ref=e117]
+            - img "Mastercard" [ref=e119]
+            - img "PayPal" [ref=e121]
+            - img "Discover" [ref=e123]
+            - img "Apple Pay" [ref=e125]
+            - img "Affirm" [ref=e127]
+          - separator [ref=e128]
+          - generic [ref=e129]:
+            - paragraph [ref=e130]: Questions?
+            - generic [ref=e131]:
+              - link [ref=e132] [cursor=pointer]:
+                - /url: tel:1-888-790-5899
+              - link [ref=e136] [cursor=pointer]:
+                - /url: mailto:support@roadreadywheels.com
+              - button "Open live chat" [ref=e141] [cursor=pointer]
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: Awesomely Secured 🔒
+            - img "Trusted Secure" [ref=e148]
+    - banner [ref=e149]:
+      - generic [ref=e153]:
+        - generic [ref=e154]:
+          - generic [ref=e155]: Browse By Vehicle
+          - generic "Select Make" [ref=e156] [cursor=pointer]:
+            - generic [ref=e158]:
+              - combobox "Select Make" [ref=e160]
+              - generic: Select Make
+          - generic "Select Model" [ref=e161] [cursor=pointer]:
+            - generic [ref=e163]:
+              - combobox "Select Model" [disabled] [ref=e165]
+              - generic: Select Model
+          - generic "Select Year" [ref=e166] [cursor=pointer]:
+            - generic [ref=e168]:
+              - combobox "Select Year" [disabled] [ref=e170]
+              - generic: Select Year
+          - button "Search" [ref=e171] [cursor=pointer]
+        - generic [ref=e172]:
+          - generic [ref=e173]: Browse All Wheels
+          - generic [ref=e174]:
+            - button "By Category" [ref=e175] [cursor=pointer]
+            - button "Top Brands" [ref=e176] [cursor=pointer]
+            - button "Featured Items" [ref=e177] [cursor=pointer]
+    - generic [ref=e180]:
+      - generic [ref=e181]:
+        - heading "Your Cart (3 items)" [level=2] [ref=e182]
+        - button "Close cart" [ref=e183] [cursor=pointer]
+      - generic [ref=e188]:
+        - generic [ref=e189] [cursor=pointer]:
+          - checkbox "E-Mail Shopping Cart To Me" [ref=e190]
+          - text: E-Mail Shopping Cart To Me
+        - generic [ref=e191]:
+          - textbox "Enter your email" [ref=e192]
+          - button "Send Email" [ref=e193] [cursor=pointer]
+      - generic [ref=e194]:
+        - generic [ref=e198]:
+          - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e200]
+          - generic [ref=e201]:
+            - generic [ref=e202]:
+              - heading "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [level=4] [ref=e203] [cursor=pointer]
+              - button "Remove 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim from cart" [ref=e204] [cursor=pointer]
+            - paragraph [ref=e208]: "SKU: 99042"
+            - generic [ref=e209]:
+              - generic [ref=e210]:
+                - button "Decrease quantity of 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e211] [cursor=pointer]
+                - generic [ref=e213]: "3"
+                - button "Increase quantity of 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e214] [cursor=pointer]
+              - generic [ref=e216]: $194.33
+        - generic [ref=e217]:
+          - generic [ref=e218]:
+            - generic [ref=e219]:
+              - generic [ref=e220]: Subtotal (3 items)
+              - generic [ref=e221]: $582.99
+            - button "Shipping Select State" [ref=e223] [cursor=pointer]:
+              - generic [ref=e224]: Shipping
+              - button "Select State" [ref=e229]
+            - generic [ref=e230]:
+              - generic [ref=e231]: Total
+              - generic [ref=e232]: $582.99
+          - generic [ref=e233]:
+            - paragraph [ref=e234]: Express Checkouts
+            - generic [ref=e235]:
+              - generic [ref=e236]:
+                - img "Amazon Pay"
+                - generic:
+                  - generic:
+                    - img "AmazonPay"
+                - button "Pay with Amazon Pay" [ref=e237] [cursor=pointer]
+              - generic [ref=e238]:
+                - img "Google Pay"
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - button "Pay with GPay"
+                - button "Pay with Google Pay" [ref=e239] [cursor=pointer]
+          - button "Complete Checkout" [ref=e241] [cursor=pointer]
+          - generic [ref=e242]:
+            - img "American Express" [ref=e244]
+            - img "Visa" [ref=e246]
+            - img "Mastercard" [ref=e248]
+            - img "PayPal" [ref=e250]
+            - img "Discover" [ref=e252]
+            - img "Apple Pay" [ref=e254]
+            - img "Affirm" [ref=e256]
+          - separator [ref=e257]
+          - generic [ref=e258]:
+            - paragraph [ref=e259]: Questions?
+            - generic [ref=e260]:
+              - link [ref=e261] [cursor=pointer]:
+                - /url: tel:1-888-790-5899
+              - link [ref=e265] [cursor=pointer]:
+                - /url: mailto:support@roadreadywheels.com
+              - button "Open live chat" [ref=e270] [cursor=pointer]
+          - generic [ref=e274]:
+            - paragraph [ref=e275]: Awesomely Secured 🔒
+            - img "Trusted Secure" [ref=e277]
+    - generic [ref=e280]:
+      - paragraph [ref=e282]: 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim
+      - generic [ref=e283]:
+        - generic [ref=e284]: $194.33
+        - button "Add To Cart" [ref=e287] [cursor=pointer]
+    - generic [ref=e293]:
+      - navigation [ref=e294]:
+        - button "Ford" [ref=e295] [cursor=pointer]
+        - generic [ref=e296]: ">"
+        - button "F-550" [ref=e297] [cursor=pointer]
+        - generic [ref=e298]: ">"
+        - generic [ref=e299]: 2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim
+      - generic [ref=e300]:
+        - generic [ref=e301]:
+          - generic [ref=e302]:
+            - generic [ref=e303]:
+              - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e305]
+              - button [ref=e306] [cursor=pointer]
+              - button [ref=e309] [cursor=pointer]
+            - generic:
+              - generic [ref=e313]:
+                - generic [ref=e314]: Top Trending Ford
+                - button "Show 4 more top seller titles" [ref=e315] [cursor=pointer]: "+4"
+              - generic: 16,540 All-Time Units Sold
+            - generic [ref=e316]:
+              - button [disabled] [ref=e317]
+              - generic [ref=e320]:
+                - button [ref=e321] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 1" [ref=e323]
+                - button [ref=e324] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 2" [ref=e326]
+                - button [ref=e327] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 3" [ref=e329]
+                - button [ref=e330] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 4" [ref=e332]
+                - button [ref=e333] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 5" [ref=e335]
+                - button [ref=e336] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 6" [ref=e338]
+                - button [ref=e339] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 7" [ref=e341]
+                - button [ref=e342] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 8" [ref=e344]
+                - button [ref=e345] [cursor=pointer]:
+                  - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim view 9" [ref=e347]
+              - button [ref=e348] [cursor=pointer]
+          - table [ref=e352]:
+            - rowgroup [ref=e353]:
+              - row [ref=e354]:
+                - cell "Condition" [ref=e355]
+                - cell "New" [ref=e356]
+              - row [ref=e357]:
+                - cell "Brand" [ref=e358]
+                - cell "Road Ready" [ref=e359]
+              - row [ref=e360]:
+                - cell "Hollander" [ref=e361]
+                - cell "99042" [ref=e362]
+              - row [ref=e363]:
+                - cell "OEM Part Number(s)" [ref=e364]
+                - cell "6C341015DA, 8C3Z1015K, 8C341015DB, 50341015DA, CM11TRMAA" [ref=e365]
+              - row [ref=e366]:
+                - cell "Vehicle Fitment" [ref=e367]
+                - cell "Ford F-550" [ref=e368]
+              - row [ref=e369]:
+                - cell "Type" [ref=e370]
+                - cell "OEM Replacement Wheel" [ref=e371]
+              - row [ref=e372]:
+                - cell "Material" [ref=e373]
+                - cell "Steel" [ref=e374]
+              - row [ref=e375]:
+                - cell "Years of fitment" [ref=e376]
+                - cell "2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026" [ref=e377]
+              - row [ref=e378]:
+                - cell "Diameter" [ref=e379]
+                - cell "19.5\"" [ref=e380]
+              - row [ref=e381]:
+                - cell "Width" [ref=e382]
+                - cell "6″" [ref=e383]
+              - row [ref=e384]:
+                - cell "Gross Weight" [ref=e385]
+                - cell "60.3" [ref=e386]
+              - row [ref=e387]:
+                - cell "Color" [ref=e388]
+                - cell "Gray" [ref=e389]
+              - row [ref=e390]:
+                - cell "Bolt Pattern" [ref=e391]
+                - cell "10x225mm or 10x8.9\"" [ref=e392]
+              - row [ref=e393]:
+                - cell "Offset" [ref=e394]
+                - cell "136mm" [ref=e395]
+              - row [ref=e396]:
+                - cell "Center Bore" [ref=e397]
+                - cell "170.1mm" [ref=e398]
+              - row [ref=e399]:
+                - cell "Finish" [ref=e400]
+                - cell "Powder-Coated" [ref=e401]
+              - row [ref=e402]:
+                - cell "OEM Tire Size" [ref=e403]
+                - cell "245/70R19.5" [ref=e404]
+              - row [ref=e405]:
+                - cell "Lug Nut Thread Size" [ref=e406]
+                - cell "M14 x 1.5" [ref=e407]
+              - row [ref=e408]:
+                - cell "Tire Pressure (PSI)" [ref=e409]
+                - cell "80" [ref=e410]
+              - row [ref=e411]:
+                - cell "UPC" [ref=e412]
+                - cell "851787006897" [ref=e413]
+        - generic [ref=e414]:
+          - generic [ref=e416]:
+            - heading "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [level=1] [ref=e417]
+            - generic [ref=e418]:
+              - generic [ref=e419]:
+                - img "Year range arrow" [ref=e421]
+                - generic [ref=e422]:
+                  - generic [ref=e423]: "2005"
+                  - generic [ref=e425]: "2026"
+              - link "See Product Details" [ref=e428] [cursor=pointer]:
+                - /url: "#product-details-tabs"
+          - generic [ref=e429]: $194.33
+          - generic [ref=e433]:
+            - generic [ref=e436] [cursor=pointer]:
+              - combobox [ref=e438]
+              - generic "1" [ref=e439]
+            - button "Add To Cart" [ref=e440] [cursor=pointer]
+          - generic [ref=e446]:
+            - generic [ref=e447]:
+              - paragraph [ref=e448]: Express Checkouts
+              - generic [ref=e449]:
+                - generic [ref=e450]:
+                  - img "Amazon Pay"
+                  - generic:
+                    - generic:
+                      - img "AmazonPay"
+                  - button "Pay with Amazon Pay" [ref=e451] [cursor=pointer]
+                - generic [ref=e452]:
+                  - img "Google Pay"
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - button "Pay with GPay"
+                  - button "Pay with Google Pay" [ref=e453] [cursor=pointer]
+            - generic [ref=e454]:
+              - generic [ref=e455]: In Stock
+              - generic [ref=e456]: Free Shipping
+              - generic [ref=e457]: 1 Year Warranty
+            - separator [ref=e458]
+            - generic [ref=e459]: Ships Today if you order in the next 10 hrs 50 mins
+            - generic [ref=e466]:
+              - generic [ref=e467]: "Expected Delivery:"
+              - generic [ref=e473] [cursor=pointer]: Please Select State
+      - generic [ref=e474]:
+        - heading "Customers Who Viewed This Item Also Viewed" [level=2] [ref=e475]
+        - generic [ref=e476]:
+          - region [ref=e477]:
+            - generic [ref=e479]:
+              - group [ref=e480]:
+                - generic [ref=e481]:
+                  - generic [ref=e482]:
+                    - button "Add to wishlist" [ref=e485] [cursor=pointer]
+                    - link [ref=e488] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f-550-genuine-oem-steel-wheel-rim1
+                      - img "2005-2025 19.5x6 Ford F-550 Genuine OEM Steel Wheel / Rim" [ref=e491]
+                  - generic [ref=e492]:
+                    - link [ref=e493] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f-550-genuine-oem-steel-wheel-rim1
+                      - heading "2005-2025 19.5x6 Ford F-550 Genuine OEM Steel Wheel / Rim" [level=3] [ref=e494]
+                    - generic [ref=e496]:
+                      - generic [ref=e497] [cursor=pointer]
+                      - link "197 All-Time Units Sold" [ref=e511] [cursor=pointer]:
+                        - /url: /products/2005-2025-19-5x6-ford-f-550-genuine-oem-steel-wheel-rim1
+                    - generic [ref=e513]: $213.62
+                    - generic [ref=e515]: "Hollander: F550W"
+                    - generic [ref=e518]:
+                      - generic [ref=e519]: 🚚
+                      - button "Please Select State" [ref=e520] [cursor=pointer]
+                    - generic [ref=e522]:
+                      - button "1" [ref=e524] [cursor=pointer]
+                      - button "Add To Cart" [ref=e528] [cursor=pointer]
+              - group [ref=e529]:
+                - generic [ref=e530]:
+                  - generic [ref=e531]:
+                    - button "Add to wishlist" [ref=e534] [cursor=pointer]
+                    - link [ref=e537] [cursor=pointer]:
+                      - /url: /products/2000-2003-19-5x6-ford-f-550sd-aluminum-wheel-rim
+                      - img "2000-2003 19.5x6 Ford F-550SD Alloy Wheel / Rim" [ref=e540]
+                  - generic [ref=e541]:
+                    - link [ref=e542] [cursor=pointer]:
+                      - /url: /products/2000-2003-19-5x6-ford-f-550sd-aluminum-wheel-rim
+                      - heading "2000-2003 19.5x6 Ford F-550SD Alloy Wheel / Rim" [level=3] [ref=e543]
+                    - generic [ref=e545]:
+                      - generic [ref=e546] [cursor=pointer]
+                      - link "7,749 All-Time Units Sold" [ref=e560] [cursor=pointer]:
+                        - /url: /products/2000-2003-19-5x6-ford-f-550sd-aluminum-wheel-rim
+                    - generic [ref=e562]: $352.75
+                    - generic [ref=e564]: "Hollander: 560-03423"
+                    - generic [ref=e566]:
+                      - generic [ref=e567]: 🚚
+                      - button "Please Select State" [ref=e568] [cursor=pointer]
+                    - generic [ref=e570]:
+                      - button "1" [ref=e572] [cursor=pointer]
+                      - button "Add To Cart" [ref=e576] [cursor=pointer]
+              - group [ref=e577]:
+                - generic [ref=e578]:
+                  - generic [ref=e579]:
+                    - button "Add to wishlist" [ref=e582] [cursor=pointer]
+                    - link [ref=e585] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-75-ford-f-550-steel-wheel-rim1
+                      - img "2005-2025 19.5x6.75 Ford F-550 Steel Wheel / Rim" [ref=e588]
+                  - generic [ref=e589]:
+                    - link [ref=e590] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-75-ford-f-550-steel-wheel-rim1
+                      - heading "2005-2025 19.5x6.75 Ford F-550 Steel Wheel / Rim" [level=3] [ref=e591]
+                    - generic [ref=e593]:
+                      - generic [ref=e594] [cursor=pointer]
+                      - link "On Sale" [ref=e608] [cursor=pointer]:
+                        - /url: /products/2005-2025-19-5x6-75-ford-f-550-steel-wheel-rim1
+                    - generic [ref=e610]: $227.09
+                    - generic [ref=e612]: "Hollander: F550W-V2"
+                    - generic [ref=e615]:
+                      - generic [ref=e616]: 🚚
+                      - button "Please Select State" [ref=e617] [cursor=pointer]
+                    - generic [ref=e619]:
+                      - button "1" [ref=e621] [cursor=pointer]
+                      - button "Add To Cart" [ref=e625] [cursor=pointer]
+              - group [ref=e626]:
+                - generic [ref=e627]:
+                  - generic [ref=e628]:
+                    - button "Add to wishlist" [ref=e631] [cursor=pointer]
+                    - link [ref=e634] [cursor=pointer]:
+                      - /url: /products/2005-2026-ford-f-550-19-5x6-steel-wheel-rim
+                      - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e637]
+                  - generic [ref=e638]:
+                    - link [ref=e639] [cursor=pointer]:
+                      - /url: /products/2005-2026-ford-f-550-19-5x6-steel-wheel-rim
+                      - heading "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [level=3] [ref=e640]
+                    - generic [ref=e642]:
+                      - generic [ref=e643] [cursor=pointer]
+                      - link "16,540 All-Time Units Sold" [ref=e657] [cursor=pointer]:
+                        - /url: /products/2005-2026-ford-f-550-19-5x6-steel-wheel-rim
+                    - generic [ref=e659]: $194.33
+                    - generic [ref=e661]: "Hollander: 99042"
+                    - generic [ref=e663]:
+                      - generic [ref=e664]: 🚚
+                      - button "Please Select State" [ref=e665] [cursor=pointer]
+                    - generic [ref=e667]:
+                      - button [ref=e668] [cursor=pointer]
+                      - button "3" [ref=e671] [cursor=pointer]
+                      - button [ref=e675] [cursor=pointer]
+              - group [ref=e677]:
+                - generic [ref=e678]:
+                  - generic [ref=e679]:
+                    - button "Add to wishlist" [ref=e682] [cursor=pointer]
+                    - link [ref=e685] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f550sd-outside-aluminum-wheel-rim
+                      - img "2005-2025 19.5x6 Ford F550SD Outside Alloy Wheel / Rim" [ref=e688]
+                  - generic [ref=e689]:
+                    - link [ref=e690] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f550sd-outside-aluminum-wheel-rim
+                      - heading "2005-2025 19.5x6 Ford F550SD Outside Alloy Wheel / Rim" [level=3] [ref=e691]
+                    - generic [ref=e693]:
+                      - generic [ref=e694] [cursor=pointer]
+                      - link "7,883 All-Time Units Sold" [ref=e708] [cursor=pointer]:
+                        - /url: /products/2005-2025-19-5x6-ford-f550sd-outside-aluminum-wheel-rim
+                    - generic [ref=e710]: $387.38
+                    - generic [ref=e712]: "Hollander: F550B"
+                    - generic [ref=e714]:
+                      - generic [ref=e715]: 🚚
+                      - button "Please Select State" [ref=e716] [cursor=pointer]
+                    - generic [ref=e718]:
+                      - button "1" [ref=e720] [cursor=pointer]
+                      - button "Add To Cart" [ref=e724] [cursor=pointer]
+              - group [ref=e725]:
+                - generic [ref=e726]:
+                  - generic [ref=e727]:
+                    - button "Add to wishlist" [ref=e730] [cursor=pointer]
+                    - link [ref=e733] [cursor=pointer]:
+                      - /url: /products/00-03-19-5x6-ford-f-550sd-aluminum-wheel-rim
+                      - img "2000-2003 19.5x6 Ford F-550SD Alloy Wheel / Rim" [ref=e736]
+                  - generic [ref=e737]:
+                    - link [ref=e738] [cursor=pointer]:
+                      - /url: /products/00-03-19-5x6-ford-f-550sd-aluminum-wheel-rim
+                      - heading "2000-2003 19.5x6 Ford F-550SD Alloy Wheel / Rim" [level=3] [ref=e739]
+                    - generic [ref=e741]:
+                      - generic [ref=e742] [cursor=pointer]
+                      - link "7,749 All-Time Units Sold" [ref=e756] [cursor=pointer]:
+                        - /url: /products/00-03-19-5x6-ford-f-550sd-aluminum-wheel-rim
+                    - generic [ref=e758]: $352.75
+                    - generic [ref=e760]: "Hollander: 560-03424"
+                    - generic [ref=e762]:
+                      - generic [ref=e763]: 🚚
+                      - button "Please Select State" [ref=e764] [cursor=pointer]
+                    - generic [ref=e766]:
+                      - button "1" [ref=e768] [cursor=pointer]
+                      - button "Add To Cart" [ref=e772] [cursor=pointer]
+              - group [ref=e773]:
+                - generic [ref=e774]:
+                  - generic [ref=e775]:
+                    - button "Add to wishlist" [ref=e778] [cursor=pointer]
+                    - link [ref=e781] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f-550-genuine-oem-steel-wheel-rim334
+                      - img "2005-2025 19.5x6 Ford F-550 Genuine OEM Steel Wheel / Rim" [ref=e784]
+                  - generic [ref=e785]:
+                    - link [ref=e786] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f-550-genuine-oem-steel-wheel-rim334
+                      - heading "2005-2025 19.5x6 Ford F-550 Genuine OEM Steel Wheel / Rim" [level=3] [ref=e787]
+                    - generic [ref=e789]:
+                      - generic [ref=e790] [cursor=pointer]
+                      - link "258 All-Time Units Sold" [ref=e804] [cursor=pointer]:
+                        - /url: /products/2005-2025-19-5x6-ford-f-550-genuine-oem-steel-wheel-rim334
+                    - generic [ref=e806]: $213.62
+                    - generic [ref=e808]: "Hollander: F550C"
+                    - generic [ref=e811]:
+                      - generic [ref=e812]: 🚚
+                      - button "Please Select State" [ref=e813] [cursor=pointer]
+                    - generic [ref=e815]:
+                      - button "1" [ref=e817] [cursor=pointer]
+                      - button "Add To Cart" [ref=e821] [cursor=pointer]
+              - group [ref=e822]:
+                - generic [ref=e823]:
+                  - generic [ref=e824]:
+                    - button "Add to wishlist" [ref=e827] [cursor=pointer]
+                    - link [ref=e830] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f-550sd-inside-aluminum-wheel-rim
+                      - img "2005-2025 19.5x6 Ford F-550SD Inside Alloy Wheel / Rim" [ref=e833]
+                  - generic [ref=e834]:
+                    - link [ref=e835] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f-550sd-inside-aluminum-wheel-rim
+                      - heading "2005-2025 19.5x6 Ford F-550SD Inside Alloy Wheel / Rim" [level=3] [ref=e836]
+                    - generic [ref=e838]:
+                      - generic [ref=e839] [cursor=pointer]
+                      - link "1,944 All-Time Units Sold" [ref=e853] [cursor=pointer]:
+                        - /url: /products/2005-2025-19-5x6-ford-f-550sd-inside-aluminum-wheel-rim
+                    - generic [ref=e855]: $258.36
+                    - generic [ref=e857]: "Hollander: F550A"
+                    - generic [ref=e859]:
+                      - generic [ref=e860]: 🚚
+                      - button "Please Select State" [ref=e861] [cursor=pointer]
+                    - generic [ref=e863]:
+                      - button "1" [ref=e865] [cursor=pointer]
+                      - button "Add To Cart" [ref=e869] [cursor=pointer]
+              - group [ref=e870]:
+                - generic [ref=e871]:
+                  - generic [ref=e872]:
+                    - button "Add to wishlist" [ref=e875] [cursor=pointer]
+                    - link [ref=e878] [cursor=pointer]:
+                      - /url: /products/1999-2003-19-5x6-ford-f-550sd-steel-wheel-rim
+                      - img "1999-2003 19.5x6 Ford F-550SD Steel Wheel / Rim" [ref=e881]
+                  - generic [ref=e882]:
+                    - link [ref=e883] [cursor=pointer]:
+                      - /url: /products/1999-2003-19-5x6-ford-f-550sd-steel-wheel-rim
+                      - heading "1999-2003 19.5x6 Ford F-550SD Steel Wheel / Rim" [level=3] [ref=e884]
+                    - generic [ref=e886]:
+                      - generic [ref=e887] [cursor=pointer]
+                      - link "2,284 All-Time Units Sold" [ref=e901] [cursor=pointer]:
+                        - /url: /products/1999-2003-19-5x6-ford-f-550sd-steel-wheel-rim
+                    - generic [ref=e903]: $176.77
+                    - generic [ref=e905]: "Hollander: 560-03342"
+                    - generic [ref=e907]:
+                      - generic [ref=e908]: 🚚
+                      - button "Please Select State" [ref=e909] [cursor=pointer]
+                    - generic [ref=e911]:
+                      - button "1" [ref=e913] [cursor=pointer]
+                      - button "Add To Cart" [ref=e917] [cursor=pointer]
+              - group [ref=e918]:
+                - generic [ref=e919]:
+                  - generic [ref=e920]:
+                    - button "Add to wishlist" [ref=e923] [cursor=pointer]
+                    - link [ref=e926] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f550sd-inside-aluminum-wheel-rim
+                      - img "2005-2025 19.5x6 Ford F550SD Inside Alloy Wheel / Rim" [ref=e929]
+                  - generic [ref=e930]:
+                    - link [ref=e931] [cursor=pointer]:
+                      - /url: /products/2005-2025-19-5x6-ford-f550sd-inside-aluminum-wheel-rim
+                      - heading "2005-2025 19.5x6 Ford F550SD Inside Alloy Wheel / Rim" [level=3] [ref=e932]
+                    - generic [ref=e934]:
+                      - generic [ref=e935] [cursor=pointer]
+                      - link "7,883 All-Time Units Sold" [ref=e949] [cursor=pointer]:
+                        - /url: /products/2005-2025-19-5x6-ford-f550sd-inside-aluminum-wheel-rim
+                    - generic [ref=e951]: $387.38
+                    - generic [ref=e953]: "Hollander: F550B"
+                    - generic [ref=e955]:
+                      - generic [ref=e956]: 🚚
+                      - button "Please Select State" [ref=e957] [cursor=pointer]
+                    - generic [ref=e959]:
+                      - button "1" [ref=e961] [cursor=pointer]
+                      - button "Add To Cart" [ref=e965] [cursor=pointer]
+          - generic [ref=e966]:
+            - button [ref=e967] [cursor=pointer]
+            - button [ref=e970] [cursor=pointer]
+      - generic [ref=e974]:
+        - generic: "\""
+        - generic: "\""
+        - generic [ref=e975]:
+          - generic [ref=e977]:
+            - generic [ref=e978]:
+              - blockquote [ref=e979]: “5 stars for super fast shipping. Another 5 stars for excellent packaging — rim arrived in great condition, no dents or scratches. Fits perfectly and has no issue clearing the caliper or steering components. A great experience; I wouldn't hesitate to use them again.”
+              - separator [ref=e980]
+              - generic [ref=e981]: B. Greasor
+            - generic [ref=e982]:
+              - blockquote [ref=e983]: “Ordered a set of rims and they came in pristine condition. Highly recommend this company.”
+              - separator [ref=e984]
+              - generic [ref=e985]: G. Fuller
+            - generic [ref=e986]:
+              - blockquote [ref=e987]: “The rim came in quick and looked great — no damage to it or the packaging. It matched the factory rims perfectly! I will be ordering here again when the time comes.”
+              - separator [ref=e988]
+              - generic [ref=e989]: A. Mini
+            - generic [ref=e990]:
+              - blockquote [ref=e991]: “Item received as described, shipped fast, and a spot-on match as far as looks and size. I will be looking for all my rims at Road Ready. Thank you!”
+              - separator [ref=e992]
+              - generic [ref=e993]: P. Rockland
+            - generic [ref=e994]:
+              - blockquote [ref=e995]: “Looks like the factory wheels at half the price!”
+              - separator [ref=e996]
+              - generic [ref=e997]: T. Thurman
+            - generic [ref=e998]:
+              - blockquote [ref=e999]: “Absolutely love them! They will be used as my 'winter wheels' here in the Buffalo, NY area.”
+              - separator [ref=e1000]
+              - generic [ref=e1001]: E. Bienas
+            - generic [ref=e1002]:
+              - blockquote [ref=e1003]: “Very quick and fast service — had exactly what I was looking for at a very reasonable price!”
+              - separator [ref=e1004]
+              - generic [ref=e1005]: C. Bock
+            - generic [ref=e1006]:
+              - blockquote [ref=e1007]: “Arrived quicker than expected and works fine on our Smart Car.”
+              - separator [ref=e1008]
+              - generic [ref=e1009]: Redbudok86
+            - generic [ref=e1010]:
+              - blockquote [ref=e1011]: “Wheels came as advertised. Opened the boxes the following week and found one damaged. Took a picture and sent to customer service — they delivered a replacement. I'll shop here again.”
+              - separator [ref=e1012]
+              - generic [ref=e1013]: Folgers4545
+            - generic [ref=e1014]:
+              - blockquote [ref=e1015]: “Great rims at a great price. The guys at the tire store insisted on checking balance before mounting — they were nearly perfect, better than most factory rims! One rim was damaged in shipment and RoadReady replaced it immediately, without waiting for the shipper to resolve the claim.”
+              - separator [ref=e1016]
+              - generic [ref=e1017]: WN4ISX
+          - generic [ref=e1018]:
+            - button "Go to testimonial 1" [ref=e1019] [cursor=pointer]
+            - button "Go to testimonial 2" [ref=e1020] [cursor=pointer]
+            - button "Go to testimonial 3" [ref=e1021] [cursor=pointer]
+            - button "Go to testimonial 4" [ref=e1022] [cursor=pointer]
+            - button "Go to testimonial 5" [ref=e1023] [cursor=pointer]
+            - button "Go to testimonial 6" [ref=e1024] [cursor=pointer]
+            - button "Go to testimonial 7" [ref=e1025] [cursor=pointer]
+            - button "Go to testimonial 8" [ref=e1026] [cursor=pointer]
+            - button "Go to testimonial 9" [ref=e1027] [cursor=pointer]
+            - button "Go to testimonial 10" [ref=e1028] [cursor=pointer]
+      - generic [ref=e1029]:
+        - generic [ref=e1032]:
+          - generic [ref=e1033]:
+            - img "Wheels sold" [ref=e1035]
+            - generic [ref=e1036]: 1,000,000wheels sold
+          - generic [ref=e1037]:
+            - img "Shipments on time" [ref=e1039]
+            - generic [ref=e1040]: 99% of shipmentson time
+          - generic [ref=e1041]:
+            - img "Customers back on the road" [ref=e1043]
+            - generic [ref=e1044]: 500,000 customersback on the road
+          - generic [ref=e1045]:
+            - img "24 hour fulfillment" [ref=e1047]
+            - generic [ref=e1048]: 24 hour fulfillmentturnaround
+          - generic [ref=e1049]:
+            - img "Strong carton packaging" [ref=e1051]
+            - generic [ref=e1052]: Strong cartonpackaging
+          - generic [ref=e1053]:
+            - img "Insurance grade verified" [ref=e1055]
+            - generic [ref=e1056]: Insurance gradeverified
+          - generic [ref=e1057]:
+            - img "Free shipping" [ref=e1059]
+            - generic [ref=e1060]: Free shippingon all orders
+          - generic [ref=e1061]:
+            - img "1-Year Warranty" [ref=e1063]
+            - generic [ref=e1064]: 1-YearWarranty
+          - generic [ref=e1065]:
+            - img "Quality tested and DOT approved" [ref=e1067]
+            - generic [ref=e1068]: Quality tested andDOT approved
+        - generic [ref=e1071]:
+          - generic [ref=e1072]:
+            - heading "Shipping Information" [level=4] [ref=e1073]
+            - generic [ref=e1074]:
+              - paragraph [ref=e1075]: "Road Ready Wheels is committed to fulfilling customer orders as quickly as possible for your convenience. Below is detailed information about our shipping processes:"
+              - generic [ref=e1076]:
+                - heading "Same-Day and Next-Day Shipping" [level=5] [ref=e1077]
+                - list [ref=e1078]:
+                  - listitem [ref=e1079]:
+                    - strong [ref=e1080]: "Same-Day Shipping Cut-Off:"
+                    - text: Orders placed by 1:30 PM CST will ship the same business day. Orders placed after 1:30 PM CST will ship the next business day.
+                  - listitem [ref=e1081]:
+                    - strong [ref=e1082]: "Weekend Orders:"
+                    - text: Orders placed on Friday after 1:30 PM CST, Saturday, or Sunday will be shipped on the following Monday. This excludes federal or national holidays when our warehouses are closed.
+              - button "See More" [ref=e1083] [cursor=pointer]
+          - generic [ref=e1084]:
+            - heading "Warranty Information" [level=4] [ref=e1085]
+            - generic [ref=e1086]:
+              - paragraph [ref=e1087]: At Road Ready Wheels, we stand behind the quality of our products. All wheels sold on our website are covered by a one-year warranty from the original date of purchase. This warranty ensures that the wheels are free from defects in materials and workmanship and are in full functioning condition.
+              - button "See More" [ref=e1088] [cursor=pointer]
+      - generic [ref=e1090]:
+        - generic [ref=e1091]:
+          - generic [ref=e1092]:
+            - heading "Will this rim fit my tire?" [level=2] [ref=e1093]
+            - paragraph [ref=e1094]: "That's a great question. An easy way to answer this is by looking at your tire and finding the letter \"R\". For example:"
+            - generic [ref=e1095]:
+              - generic [ref=e1096]:
+                - generic [ref=e1098]: R14
+                - generic [ref=e1099]: = 14" Tire (fits a 14" rim)
+              - generic [ref=e1100]:
+                - generic [ref=e1102]: R15
+                - generic [ref=e1103]: = 15" Tire (fits a 15" rim)
+              - generic [ref=e1104]:
+                - generic [ref=e1106]: R16
+                - generic [ref=e1107]: = 16" Tire (fits a 16" rim)
+              - generic [ref=e1108]:
+                - generic [ref=e1110]: R17
+                - generic [ref=e1111]: = 17" Tire (fits a 17" rim)
+              - generic [ref=e1112]:
+                - generic [ref=e1114]: R18
+                - generic [ref=e1115]: = 18" Tire (fits a 18" rim)
+              - generic [ref=e1116]:
+                - generic [ref=e1118]: R19
+                - generic [ref=e1119]: = 19" Tire (fits a 19" rim)
+              - generic [ref=e1120]:
+                - generic [ref=e1122]: R20
+                - generic [ref=e1123]: = 20" Tire (fits a 20" rim)
+              - generic [ref=e1124]:
+                - generic [ref=e1126]: R22
+                - generic [ref=e1127]: = 22" Tire (fits a 22" rim)
+          - img "Stack of tires" [ref=e1129]
+        - generic [ref=e1130]:
+          - img "Wheel close-up" [ref=e1132]
+          - generic [ref=e1133]:
+            - heading "Assurance of Quality and Value" [level=2] [ref=e1134]
+            - paragraph [ref=e1135]: At Road Ready Wheels, we understand the importance of offering a single, specialized product at an unparalleled level of quality and value. To achieve this, we have meticulously researched and partnered with the most reputable suppliers in the industry. After extensive efforts, we have identified and collaborated with 24 distinguished manufacturers across 10 countries. These partnerships enable us to deliver premium-grade wheels at the most competitive prices available on the market.
+            - heading "Guaranteed Compatibility" [level=3] [ref=e1136]
+            - paragraph [ref=e1137]: Road Ready Wheels products are engineered to meet and exceed OEM (Original Equipment Manufacturer) specifications. They are designed to integrate seamlessly with key components, including hubcaps, center caps, TPMS sensors, tires, and lug nuts, ensuring dependable performance and optimal fit for your vehicle.
+      - generic [ref=e1138]:
+        - generic [ref=e1139]:
+          - heading "Road Ready Overall Ratings and Reviews" [level=2] [ref=e1140]
+          - separator [ref=e1141]
+        - generic [ref=e1143]:
+          - generic [ref=e1146]:
+            - generic [ref=e1147]: 1,862 Reviews
+            - generic [ref=e1160]: 4.7 out of 5 stars
+            - generic [ref=e1162]:
+              - generic [ref=e1163]:
+                - generic [ref=e1164]: 5 Stars
+                - generic [ref=e1167]: 89%
+              - generic [ref=e1168]:
+                - generic [ref=e1169]: 4 Stars
+                - generic [ref=e1172]: 4%
+              - generic [ref=e1173]:
+                - generic [ref=e1174]: 3 Stars
+                - generic [ref=e1177]: 2%
+              - generic [ref=e1178]:
+                - generic [ref=e1179]: 2 Stars
+                - generic [ref=e1182]: 2%
+              - generic [ref=e1183]:
+                - generic [ref=e1184]: 1 Stars
+                - generic [ref=e1187]: 3%
+          - generic [ref=e1188]:
+            - generic [ref=e1189]:
+              - generic [ref=e1191]:
+                - img "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [ref=e1193]
+                - generic [ref=e1194]:
+                  - generic [ref=e1206]:
+                    - generic [ref=e1207]:
+                      - text: "5"
+                      - generic [ref=e1208]: ★
+                    - link [ref=e1209] [cursor=pointer]:
+                      - /url: /products/2005-2026-ford-f-550-19-5x6-steel-wheel-rim
+                      - heading "2005-2026 Ford F-550 19.5x6 Steel Wheel / Rim" [level=3] [ref=e1210]
+                  - paragraph [ref=e1211]: support was very helpful in confirming this was rim i needed---shipped quickly
+                  - generic [ref=e1212]:
+                    - generic [ref=e1213]: shorty2kitty@verizon.net
+                    - generic [ref=e1214]:
+                      - generic [ref=e1218]: Certified Buyer
+                      - generic [ref=e1219]: •
+                      - generic [ref=e1220]: June 4, 2026
+              - generic [ref=e1222]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1224]
+                - generic [ref=e1225]:
+                  - generic [ref=e1237]:
+                    - generic [ref=e1238]:
+                      - text: "5"
+                      - generic [ref=e1239]: ★
+                    - link [ref=e1240] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1241]
+                  - paragraph [ref=e1242]: Loved it!
+                  - generic [ref=e1243]:
+                    - generic [ref=e1244]: Tom
+                    - generic [ref=e1245]:
+                      - generic [ref=e1249]: Certified Buyer
+                      - generic [ref=e1250]: •
+                      - generic [ref=e1251]: September 6, 2026
+              - generic [ref=e1253]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1255]
+                - generic [ref=e1256]:
+                  - generic [ref=e1268]:
+                    - generic [ref=e1269]:
+                      - text: "5"
+                      - generic [ref=e1270]: ★
+                    - link [ref=e1271] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1272]
+                  - paragraph [ref=e1273]: Loved it!
+                  - generic [ref=e1274]:
+                    - generic [ref=e1275]: Tom
+                    - generic [ref=e1276]:
+                      - generic [ref=e1280]: Certified Buyer
+                      - generic [ref=e1281]: •
+                      - generic [ref=e1282]: September 5, 2026
+              - generic [ref=e1284]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1286]
+                - generic [ref=e1287]:
+                  - generic [ref=e1299]:
+                    - generic [ref=e1300]:
+                      - text: "5"
+                      - generic [ref=e1301]: ★
+                    - link [ref=e1302] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1303]
+                  - paragraph [ref=e1304]: Loved it!
+                  - generic [ref=e1305]:
+                    - generic [ref=e1306]: Tom
+                    - generic [ref=e1307]:
+                      - generic [ref=e1311]: Certified Buyer
+                      - generic [ref=e1312]: •
+                      - generic [ref=e1313]: September 4, 2026
+              - generic [ref=e1315]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1317]
+                - generic [ref=e1318]:
+                  - generic [ref=e1330]:
+                    - generic [ref=e1331]:
+                      - text: "5"
+                      - generic [ref=e1332]: ★
+                    - link [ref=e1333] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1334]
+                  - paragraph [ref=e1335]: Loved it!
+                  - generic [ref=e1336]:
+                    - generic [ref=e1337]: Tom
+                    - generic [ref=e1338]:
+                      - generic [ref=e1342]: Certified Buyer
+                      - generic [ref=e1343]: •
+                      - generic [ref=e1344]: September 3, 2026
+              - generic [ref=e1346]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1348]
+                - generic [ref=e1349]:
+                  - generic [ref=e1361]:
+                    - generic [ref=e1362]:
+                      - text: "5"
+                      - generic [ref=e1363]: ★
+                    - link [ref=e1364] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1365]
+                  - paragraph [ref=e1366]: Loved it!
+                  - generic [ref=e1367]:
+                    - generic [ref=e1368]: Tom
+                    - generic [ref=e1369]:
+                      - generic [ref=e1373]: Certified Buyer
+                      - generic [ref=e1374]: •
+                      - generic [ref=e1375]: September 2, 2026
+              - generic [ref=e1377]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1379]
+                - generic [ref=e1380]:
+                  - generic [ref=e1392]:
+                    - generic [ref=e1393]:
+                      - text: "5"
+                      - generic [ref=e1394]: ★
+                    - link [ref=e1395] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1396]
+                  - paragraph [ref=e1397]: Loved it!
+                  - generic [ref=e1398]:
+                    - generic [ref=e1399]: Tom
+                    - generic [ref=e1400]:
+                      - generic [ref=e1404]: Certified Buyer
+                      - generic [ref=e1405]: •
+                      - generic [ref=e1406]: September 1, 2026
+              - generic [ref=e1408]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1410]
+                - generic [ref=e1411]:
+                  - generic [ref=e1423]:
+                    - generic [ref=e1424]:
+                      - text: "5"
+                      - generic [ref=e1425]: ★
+                    - link [ref=e1426] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1427]
+                  - paragraph [ref=e1428]: Loved it!
+                  - generic [ref=e1429]:
+                    - generic [ref=e1430]: Tom
+                    - generic [ref=e1431]:
+                      - generic [ref=e1435]: Certified Buyer
+                      - generic [ref=e1436]: •
+                      - generic [ref=e1437]: August 31, 2026
+              - generic [ref=e1439]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1441]
+                - generic [ref=e1442]:
+                  - generic [ref=e1454]:
+                    - generic [ref=e1455]:
+                      - text: "5"
+                      - generic [ref=e1456]: ★
+                    - link [ref=e1457] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1458]
+                  - paragraph [ref=e1459]: Loved it!
+                  - generic [ref=e1460]:
+                    - generic [ref=e1461]: Tom
+                    - generic [ref=e1462]:
+                      - generic [ref=e1466]: Certified Buyer
+                      - generic [ref=e1467]: •
+                      - generic [ref=e1468]: August 30, 2026
+              - generic [ref=e1470]:
+                - img "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [ref=e1472]
+                - generic [ref=e1473]:
+                  - generic [ref=e1485]:
+                    - generic [ref=e1486]:
+                      - text: "5"
+                      - generic [ref=e1487]: ★
+                    - link [ref=e1488] [cursor=pointer]:
+                      - /url: /products/2011-2025-17x6-5-chevrolet-silverado-3500-steel-wheel-rim
+                      - heading "2011-2025 17x6.5 Chevrolet Silverado 3500 Steel Wheel / Rim" [level=3] [ref=e1489]
+                  - paragraph [ref=e1490]: Loved it!
+                  - generic [ref=e1491]:
+                    - generic [ref=e1492]: Tom
+                    - generic [ref=e1493]:
+                      - generic [ref=e1497]: Certified Buyer
+                      - generic [ref=e1498]: •
+                      - generic [ref=e1499]: August 29, 2026
+            - button "Load More" [ref=e1501] [cursor=pointer]
+    - generic [ref=e1503] [cursor=pointer]:
+      - generic [ref=e1504]: ↑
+      - generic [ref=e1505]: Back to Top
+```
+
+# Test source
+
+```ts
+  1  | import { Page, Locator, expect } from '@playwright/test';
+  2  | 
+  3  | export default class BasePage {
+  4  |   readonly page: Page;
+  5  | 
+  6  |   constructor(page: Page) {
+  7  |     this.page = page;
+  8  |   }
+  9  | 
+  10 |   async goto(path: string = '/') {
+  11 |     await this.page.goto(path);
+  12 |   }
+  13 | 
+  14 |   async getTitle(): Promise<string> {
+  15 |     return this.page.title();
+  16 |   }
+  17 | 
+  18 |  async click(locator: Locator) {
+> 19 |   await locator.waitFor({ state: 'visible' });
+     |                 ^ Error: locator.waitFor: Test timeout of 30000ms exceeded.
+  20 |   await locator.scrollIntoViewIfNeeded();
+  21 |   await locator.click();
+  22 | }
+  23 | 
+  24 |   async fill(locator: Locator, value: string) {
+  25 |     await locator.waitFor({ state: 'visible' });
+  26 |     await locator.fill(value);
+  27 |   }
+  28 | 
+  29 |   async isVisible(locator: Locator): Promise<boolean> {
+  30 |     return locator.isVisible();
+  31 |   }
+  32 | 
+  33 |   async expectVisible(locator: Locator) {
+  34 |     await expect(locator).toBeVisible();
+  35 |   }
+  36 | 
+  37 |   async expectText(locator: Locator, text: string) {
+  38 |     await expect(locator).toContainText(text);
+  39 |   }
+  40 | }
+  41 | 
+```
