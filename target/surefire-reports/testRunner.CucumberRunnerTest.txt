@@ -1,9 +1,0 @@
--------------------------------------------------------------------------------
-Test set: testRunner.CucumberRunnerTest
--------------------------------------------------------------------------------
-Tests run: 10, Failures: 1, Errors: 0, Skipped: 9, Time elapsed: 9.835 s <<< FAILURE! -- in testRunner.CucumberRunnerTest
-Product Description Page Validation.Validate first product details ( price , name )  on UI against API -- Time elapsed: 6.614 s <<< FAILURE!
-org.junit.ComparisonFailure: expected:<...roadreadywheels.com/[]> but was:<...roadreadywheels.com/[t/categories]>
-	at com.stepDefinations.Dashboard_validation.the_user_should_be_redirected_to_the_product_listing_page(Dashboard_validation.java:45)
-	at ✽.the user should be redirected to the Product Listing Page(classpath:features/05_dashboard.feature:10)
-
