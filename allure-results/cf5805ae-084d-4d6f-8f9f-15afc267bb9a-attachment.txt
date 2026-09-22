@@ -1,5 +1,0 @@
-Unit price: 233.58
-Quantity before toggle: 1
-Current quantity: 1
-Clicking increase quantity
-Quantity after toggle: 1

@@ -1,7 +1,0 @@
-Unit price: 233.58
-Current quantity: 1
-Clicking increase quantity
-Final quantity: 2
-Selecting random address: 1 of 1
-Selected address: TCS, raja sharma, w3vvvvvvvvvvvvvv, Mountain View, California 90012 , 9368047877
-Selected shipping option: 
