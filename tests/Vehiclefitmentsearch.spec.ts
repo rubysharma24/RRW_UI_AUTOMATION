@@ -12,19 +12,12 @@ test.describe('Vehicle Fitment Search - End to End', () => {
     vehicleFitmentPage,
     productPage,
   }) => {
-    // --------------------------------------------------
-    // 1. Mandatory "Shop As" modal right after login — no separate
-    // "open finder" trigger exists, selecting Resale here is what lands
-    // us on the categories page with the Make/Model/Year selects.
-    // --------------------------------------------------
+    
     await test.step('Select Resale shop mode', async () => {
       await vehicleFitmentPage.selectShopMode('Resale');
     });
 
-    // --------------------------------------------------
-    // 2. First vehicle: Audi, A Series, 2013 — no Category/Material/
-    // Diameter filters this time, matches the recorded flow.
-    // --------------------------------------------------
+  
     await test.step('Search Audi, A Series, 2013', async () => {
       await vehicleFitmentPage.selectMake('Audi');
       await vehicleFitmentPage.selectModel('A Series');
@@ -46,10 +39,7 @@ test.describe('Vehicle Fitment Search - End to End', () => {
       expect(price).toBeGreaterThan(0);
     });
 
-    // --------------------------------------------------
-    // 3. Deep-link back to the Audi listing, then Reset — mirrors the
-    // recorded page.goto(...) + Reset click.
-    // --------------------------------------------------
+    
     await test.step('Return to the Audi listing and reset filters', async () => {
       await vehicleFitmentPage.goToFilteredCategory({
         make: 'Audi',
@@ -61,10 +51,7 @@ test.describe('Vehicle Fitment Search - End to End', () => {
       await vehicleFitmentPage.expectFiltersCleared('A Series', '2013');
     });
 
-    // --------------------------------------------------
-    // 4. Second vehicle: Cadillac Escalade, OEM Replacement Wheel,
-    // Alloy, 20" — this combination is out of stock.
-    // --------------------------------------------------
+
     await test.step('Search Cadillac Escalade with Category/Material/Diameter filters', async () => {
       await vehicleFitmentPage.selectMake('Cadillac');
       await vehicleFitmentPage.selectModel('Escalade');
@@ -81,10 +68,7 @@ test.describe('Vehicle Fitment Search - End to End', () => {
       );
     });
 
-    // --------------------------------------------------
-    // 5. Open the matching product, then Notify Me for it via the PDP
-    // Add To Cart -> Submit flow (out of stock, no email field needed).
-    // --------------------------------------------------
+    
     await test.step('Open the Cadillac Escalade wheel and verify PDP', async () => {
       await vehicleFitmentPage.clickProductByName('2015-2023 Cadillac Escalade');
 

@@ -195,12 +195,6 @@ test.describe('Checkout Flow - RoadReady Wheels', () => {
       await test.step(
         'Verify subtotal, shipping, tax and total calculation',
         async () => {
-          // waitForTotalsToSettle only reads subtotal + total (the two
-          // rows that have proven reliable every run) and derives the
-          // combined tax+shipping mathematically — tax/shipping recalculate
-          // asynchronously after shipping selection and were blowing past
-          // 8-15s waits on staging even when correctly scoped, which is a
-          // real backend delay, not something a locator fix can solve.
           const { subtotal, taxPlusShipping, total } =
             await checkoutReviewPage.waitForTotalsToSettle(
               unitPrice,
@@ -277,25 +271,19 @@ test.describe('Checkout Flow - RoadReady Wheels', () => {
         async () => {
           await orderConfirmationPage.expectOrderPlaced();
 
-          // Read straight from the URL (?orderNumber=...) instead of
-          // scraping the DOM — no rendering race condition to fight.
+         
           orderNumber = orderConfirmationPage.getOrderNumberFromUrl();
           console.log('Order Number:', orderNumber);
           expect(orderNumber.length).toBeGreaterThan(0);
 
-          // We already know the expected email (the logged-in user's) —
-          // just confirm it's visible on the page instead of extracting
-          // and comparing.
+        
           await orderConfirmationPage.expectCustomerEmailVisible(
             validUser.email
           );
         }
       );
 
-      // --------------------------------------------------
-      // 13. Verify order via Storefront API (real persisted record,
-      // instead of re-scraping DOM totals)
-      // --------------------------------------------------
+      
 
       await test.step(
         'Verify order totals via Storefront API',

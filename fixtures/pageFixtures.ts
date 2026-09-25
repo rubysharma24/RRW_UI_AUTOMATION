@@ -9,6 +9,9 @@ import AddressPage from '../pages/AddressPage';
 import CheckoutReviewPage from '../pages/CheckoutReviewPage';
 import OrderConfirmationPage from '../pages/OrderConfirmationPage';
 import VehicleFitmentPage from '../pages/VehicleFitmentPage';
+import AmazonPayCheckoutPage from '../pages/AmazonPayCheckoutPage';
+import PayPalCheckoutPage from '../pages/PayPalCheckoutPage';
+import AffirmCheckoutPage from '../pages/AffirmCheckoutPage';
 
 type Fixtures = {
   homePage: HomePage;
@@ -20,7 +23,9 @@ type Fixtures = {
   checkoutReviewPage: CheckoutReviewPage;
   orderConfirmationPage: OrderConfirmationPage;
   vehicleFitmentPage: VehicleFitmentPage;
-
+  amazonPayCheckoutPage: AmazonPayCheckoutPage;
+  paypalCheckoutPage: PayPalCheckoutPage;
+  affirmCheckoutPage: AffirmCheckoutPage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -58,6 +63,18 @@ export const test = base.extend<Fixtures>({
 
   vehicleFitmentPage: async ({ page }, use) => {
     await use(new VehicleFitmentPage(page));
+  },
+
+  amazonPayCheckoutPage: async ({ page }, use) => {
+    await use(new AmazonPayCheckoutPage(page));
+  },
+
+  paypalCheckoutPage: async ({ page }, use) => {
+    await use(new PayPalCheckoutPage(page));
+  },
+
+  affirmCheckoutPage: async ({ page }, use) => {
+    await use(new AffirmCheckoutPage(page));
   },
 });
 

@@ -51,6 +51,13 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
         console.log('Unit price:', unitPrice);
         expect(unitPrice).toBeGreaterThan(0);
 
+        // Shows up in the Playwright HTML report under Annotations, unlike
+        // console.log which is tucked away in the stdout tab.
+        test.info().annotations.push({
+          type: 'Unit Price',
+          description: `$${unitPrice}`,
+        });
+
         await productPage.addToCart();
       });
 
@@ -85,6 +92,10 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
       await test.step('Select shipping and verify totals', async () => {
         const shippingLabel = await checkoutReviewPage.selectAvailableShippingOption();
         console.log('Selected shipping option:', shippingLabel);
+        test.info().annotations.push({
+          type: 'Shipping Option',
+          description: shippingLabel,
+        });
 
         await checkoutReviewPage.page.waitForTimeout(3000);
 
@@ -102,6 +113,17 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
         console.log('Subtotal:', subtotal);
         console.log('Total:', total);
         console.log('--------------------------------');
+
+        test.info().annotations.push(
+          { type: 'Quantity', description: String(quantity) },
+          { type: 'Subtotal', description: `$${subtotal}` },
+          { type: 'Total', description: `$${total}` }
+        );
+
+        // Sanity check: subtotal on the review page should match what we
+        // expect from the PDP price × quantity — catches a pricing
+        // mismatch here rather than only at the very end via the API.
+        expect(subtotal).toBeCloseTo(expectedSubtotal, 2);
       });
 
       // --------------------------------------------------
@@ -145,6 +167,11 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
         console.log('Order Number:', orderNumber);
         expect(orderNumber.length).toBeGreaterThan(0);
 
+        test.info().annotations.push({
+          type: 'Order Number',
+          description: orderNumber,
+        });
+
         await orderConfirmationPage.expectCustomerEmailVisible(validUser.email);
       });
 
@@ -163,6 +190,12 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
         console.log('API order number:', order.number);
         console.log('API email:', order.email);
         console.log('API total:', order.total);
+
+        test.info().annotations.push(
+          { type: 'API Order Number', description: order.number },
+          { type: 'API Email', description: order.email },
+          { type: 'API Total', description: `$${order.total}` }
+        );
 
         expect(order.number).toBe(orderNumber);
         expect(order.email.toLowerCase()).toBe(validUser.apiemail.toLowerCase());
