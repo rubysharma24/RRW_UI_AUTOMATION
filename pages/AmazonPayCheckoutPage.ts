@@ -42,17 +42,16 @@ export default class AmazonPayCheckoutPage extends BasePage {
 
     this.addToCartButton = page.locator('#add-to-cart-button');
     this.openCartButton = page.getByRole('button', { name: 'Open cart' });
-   
+    
     this.cartSubtotalText = page.getByText(/^Subtotal \(\d+ items?\)\$/).first();
 
-    
     this.cartDrawer = page.locator('[class*="z-[1000]"]');
-   
+    
     this.payWithAmazonPayButtonInCart = this.cartDrawer
       .getByRole('button', { name: 'Pay with Amazon Pay' })
       .last();
 
-   
+    
     this.payWithAmazonPayButtonOnPDP = page
       .getByRole('button', { name: 'Pay with Amazon Pay' })
       .first();
@@ -84,18 +83,16 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await this.passwordInput.fill(password);
     await this.click(this.loginButton);
 
-    // Confirm login actually succeeded before moving on — "Login" link
-    // should disappear once signed in.
+    
     await expect(this.loginLink).toBeHidden({ timeout: 10000 });
   }
 
-  /** Call right after login — lands on the categories/resale listing. */
   async selectResaleMode() {
     await this.click(this.resaleOrdersButton);
     await expect(this.resaleOrdersButton).toBeHidden({ timeout: 10000 });
   }
 
-  
+ 
   async clickShopNow() {
     await expect(async () => {
       await this.click(this.shopNowButton);
@@ -114,18 +111,18 @@ export default class AmazonPayCheckoutPage extends BasePage {
     ).toBeVisible({ timeout: 10000 });
   }
 
-  
+ 
   private async waitForListingReady() {
     const pageLoader = this.page.locator('.page-loader');
     if (await pageLoader.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await pageLoader.waitFor({ state: 'hidden', timeout: 15000 });
+      await pageLoader.waitFor({ state: 'hidden', timeout: 30000 });
     }
 
     const updatingFiltersText = this.page.getByText('Updating filters', {
       exact: false,
     });
     if (await updatingFiltersText.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await updatingFiltersText.waitFor({ state: 'hidden', timeout: 15000 });
+      await updatingFiltersText.waitFor({ state: 'hidden', timeout: 30000 });
     }
   }
 
@@ -153,7 +150,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
     return productName;
   }
 
- 
+  
   async addProductToCart() {
     await this.click(this.addToCartButton);
 
@@ -191,6 +188,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await expect(async () => {
       const popupPromise = this.page.waitForEvent('popup', { timeout: 8000 });
 
+     
       await button.scrollIntoViewIfNeeded();
       await this.page.mouse.wheel(0, -150);
       await button.click({ timeout: 5000 }).catch(async () => {
@@ -216,13 +214,13 @@ export default class AmazonPayCheckoutPage extends BasePage {
     });
   }
 
-  
+ 
   async signInWithAmazonPay(email: string, password: string) {
     await this.signInThroughAmazonPopup(
       this.payWithAmazonPayButtonInCart,
       email,
       password
-    
+      
     );
   }
 

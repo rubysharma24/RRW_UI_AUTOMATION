@@ -57,7 +57,7 @@ readonly successToast: Locator;
   }
 
   async clickForgotPassword() {
-    await this.click(this.forgotPasswordLink);
-      await this.page.waitForTimeout(3000);
-  }
+  await this.click(this.forgotPasswordLink);
+  await this.page.waitForURL(/forgot.*password/i, { timeout: 10000 });
+}
 }

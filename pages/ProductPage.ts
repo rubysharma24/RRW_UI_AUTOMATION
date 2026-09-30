@@ -13,10 +13,7 @@ export default class ProductPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.productTitle = page.getByRole('heading', { level: 1 });
-    // Scoped to the PDP's big price styling (text-3xl font-bold), not just
-    // any "$X.XX" text on the page — the cart drawer shows its own price
-    // in a smaller span (text-sm font-semibold), and after addToCart() that
-    // extra match was winning the old .first() and returning a stale value.
+    
     this.price = page
       .locator('span.text-3xl.font-bold')
       .filter({ hasText: /^\$\d{1,3}(,\d{3})*\.\d{2}$/ })
@@ -58,9 +55,7 @@ export default class ProductPage extends BasePage {
   }
 
   async switchToWholesalePricing() {
-    // TEMP DEBUG: confirming the click actually registers and what the
-    // button's state looks like before/after — remove once the real
-    // cause is confirmed.
+    
     console.log('Wholesale button count:', await this.wholesaleToggleButton.count());
     console.log(
       'Wholesale button class BEFORE click:',

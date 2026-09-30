@@ -12,15 +12,7 @@ export interface GuestCheckoutInfo {
   phone: string;
 }
 
-/**
- * Guest checkout via Affirm. Identical pre-payment flow to
- * PayPalCheckoutPage (homepage → PDP → Add To Cart → Complete Checkout →
- * guest registration → review → Payment page) - only the payment method
- * selection differs. Built from a raw recording that stops right after
- * filling the phone number field, so payWithAffirm() only covers that
- * far; whatever comes next (OTP code, plan selection, confirm) is
- * unknown and needs to be added once observed.
- */
+
 export default class AffirmCheckoutPage extends BasePage {
   readonly shopNowButton: Locator;
   readonly addToCartButton: Locator;
@@ -28,7 +20,7 @@ export default class AffirmCheckoutPage extends BasePage {
   readonly cartSubtotalText: Locator;
   readonly completeCheckoutButton: Locator;
 
-  // Guest registration (/checkout/registration)
+  
   readonly emailInput: Locator;
   readonly firstNameInput: Locator;
   readonly lastNameInput: Locator;
@@ -40,7 +32,7 @@ export default class AffirmCheckoutPage extends BasePage {
   readonly useShippingAddressCheckbox: Locator;
   readonly registrationContinueButton: Locator;
 
-  // Review (/checkout/review)
+  
   readonly reviewOrderTotalText: Locator;
   readonly reviewContinueButton: Locator;
 
@@ -80,8 +72,7 @@ export default class AffirmCheckoutPage extends BasePage {
     this.registrationContinueButton = page.getByRole('button', { name: 'Continue' });
 
     this.reviewOrderTotalText = page.getByText(/Total\s*\$/);
-    // Same caveat as PayPalCheckoutPage: a second "Continue" exists on
-    // this page for an unconfirmed reason - inherited as-is.
+    
     this.reviewContinueButton = page.getByRole('button', { name: 'Continue' }).nth(1);
 
     // --- Affirm-specific ---
@@ -212,12 +203,7 @@ export default class AffirmCheckoutPage extends BasePage {
     await expect(this.reviewOrderTotalText).toBeVisible({ timeout: 10000 });
   }
 
-  /**
-   * Selects Affirm and clicks its "Pay $" button. Per instruction, no
-   * further validation is needed - reaching this click is sufficient to
-   * confirm Affirm opens; nothing about what appears afterward is
-   * checked.
-   */
+  
   async payWithAffirm() {
     await expect(async () => {
       const collapsedToggle = this.page.getByRole('button', { name: 'Affirm ▶' });

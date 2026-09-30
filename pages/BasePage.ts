@@ -15,11 +15,13 @@ export default class BasePage {
     return this.page.title();
   }
 
- async click(locator: Locator) {
-  await locator.waitFor({ state: 'visible' });
-  await locator.scrollIntoViewIfNeeded();
-  await expect(locator).toBeEnabled({ timeout: 15000 });
-  await locator.click();
+async click(locator: Locator) {
+  await expect(async () => {
+    await locator.waitFor({ state: 'visible' });
+    await locator.scrollIntoViewIfNeeded();
+    await expect(locator).toBeEnabled({ timeout: 5000 });
+    await locator.click({ timeout: 5000 });
+  }).toPass({ timeout: 20000 });
 }
 
   async fill(locator: Locator, value: string) {

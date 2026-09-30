@@ -297,7 +297,7 @@ export default class CheckoutReviewPage extends BasePage {
 
   async clickChargeOrder() {
   
-    await this.chargeOrderButton.check();
+    await this.click(this.page.getByRole('button', { name: /Charge Order/i }));
   }
 
   async clickContinueWithChargeOrder() {

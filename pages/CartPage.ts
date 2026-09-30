@@ -11,11 +11,16 @@ export default class CartPage extends BasePage {
   readonly quantityValue: Locator;
   readonly completeCheckoutButton: Locator;
   readonly dontHavePOButton: Locator;
+  readonly switchToResaleButton: Locator;
   readonly completeOrderButton: Locator;
   readonly closeRebillModalButton: Locator;
   readonly cartSubtotalRow: Locator;
   readonly cartTaxRow: Locator;
   readonly cartTotalRow: Locator;
+  readonly resaleToggleButton: Locator;
+  readonly wholesaleToggleButton: Locator;
+  readonly shopAsHeading: Locator;
+  readonly shopAsResaleOption: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -24,6 +29,19 @@ export default class CartPage extends BasePage {
 
     this.cartHeading = page.getByRole('heading', { name: /Your Cart/ }).last();
     this.cartDrawer = this.cartHeading.locator('..').locator('..');
+
+    // Header Resale/Wholesale toggle. exact: true because these words
+    // also appear in other buttons (e.g. "Resale Orders of...", "Switch
+    // to resale").
+    this.resaleToggleButton = page.getByRole('button', { name: 'Resale', exact: true });
+    this.wholesaleToggleButton = page.getByRole('button', { name: 'Wholesale', exact: true });
+
+    // "Shop As" modal (Wholesale "Orders of: (15+)" / Resale "Orders of:
+    // (1-14)"). Its buttons' accessible names are "Resale Orders of:
+    // (1-14)" etc., so they don't collide with the header toggles above
+    // (exact: true).
+    this.shopAsHeading = page.getByRole('heading', { name: 'Shop As' });
+    this.shopAsResaleOption = page.getByRole('button', { name: /Resale Orders of/i });
 
     this.removeItemButtons = this.cartDrawer.getByRole('button', {
       name: /Remove .* from cart/i,
@@ -48,6 +66,9 @@ export default class CartPage extends BasePage {
 
     this.completeOrderButton = page.getByRole('button', { name: 'Complete Order' });
     this.dontHavePOButton = page.getByRole('button', { name: "Don't Have PO" });
+    // The "Oops! You need at least 15 units..." modal's own button -
+    // different from the header's resaleToggleButton.
+    this.switchToResaleButton = page.getByRole('button', { name: 'Switch to resale' });
     this.closeRebillModalButton = page.getByRole('button', { name: 'Close modal' });
 
     // Cart drawer ke andar totals (Subtotal, Tax, Total)
@@ -67,6 +88,57 @@ export default class CartPage extends BasePage {
       .locator('..');
   }
 
+  /**
+   * Forces the header toggle to end on Resale regardless of its starting
+   * state, using the fixed Resale -> Wholesale -> Resale sequence. Avoids
+   * depending on aria-pressed/class detection (unconfirmed on this
+   * toggle) and guarantees the "Oops! You need at least 15 units..."
+   * wholesale-minimum modal can't appear later in checkout. Call right
+   * after login (the toggle only exists once logged in) and after the
+   * Shop-As modal is closed.
+   */
+  async forceResaleMode() {
+    // Mirrors the recorded flow: (1) pick "Resale Orders of: (1-14)" in
+    // the Shop As modal that shows up after login - that's the real mode
+    // setter; (2) reload a clean /t/categories so no modal/overlay is
+    // left over (without this, the modal stayed open and its
+    // z-[9999] overlay blocked the header toggle clicks - a real run
+    // failed exactly there); (3) header Wholesale, then header Resale, so
+    // the toggle always ends on Resale.
+    await this.chooseResaleInShopAsModalIfOpen(8000);
+
+    const categoriesUrl = new URL('/t/categories', this.page.url()).toString();
+    await this.page.goto(categoriesUrl, { waitUntil: 'domcontentloaded' });
+
+    for (const toggle of [this.wholesaleToggleButton, this.resaleToggleButton]) {
+      // Safety net: if the modal re-appears, resolve it before clicking.
+      await this.chooseResaleInShopAsModalIfOpen(1500);
+      await this.click(toggle);
+      await this.page.waitForLoadState('domcontentloaded');
+    }
+
+    await this.chooseResaleInShopAsModalIfOpen(1500);
+  }
+
+  /**
+   * NOTE: locator.isVisible() ignores its `timeout` option and returns
+   * immediately - it never waits. Use waitFor() when you actually need
+   * to wait for something that may appear a moment later.
+   */
+  private async appearsWithin(locator: Locator, timeout: number): Promise<boolean> {
+    return locator
+      .waitFor({ state: 'visible', timeout })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  private async chooseResaleInShopAsModalIfOpen(waitMs: number) {
+    if (!(await this.appearsWithin(this.shopAsHeading, waitMs))) return;
+
+    await this.shopAsResaleOption.click();
+    await expect(this.shopAsHeading).toBeHidden({ timeout: 10000 });
+  }
+
   async getQuantity(): Promise<number> {
     const text = await this.quantityValue.textContent();
     if (!text) {
@@ -80,29 +152,56 @@ export default class CartPage extends BasePage {
   }
 
   async toggleQuantity() {
-  const currentQty = await this.getQuantity();
-  console.log('Current quantity:', currentQty);
+    const currentQty = await this.getQuantity();
+    console.log('Current quantity:', currentQty);
 
-  const button =
-    currentQty > 1 ? this.quantityDecreaseButton : this.quantityIncreaseButton;
-  const action = currentQty > 1 ? 'decrease' : 'increase';
+    const button =
+      currentQty > 1 ? this.quantityDecreaseButton : this.quantityIncreaseButton;
+    const action = currentQty > 1 ? 'decrease' : 'increase';
 
-  
-  await expect(async () => {
-    console.log(`Clicking ${action} quantity`);
-    await button.click();
-    await expect(this.quantityValue).not.toHaveText(String(currentQty), {
-      timeout: 3000,
-    });
-  }).toPass({ timeout: 12000 });
-}
+    await expect(async () => {
+      console.log(`Clicking ${action} quantity`);
+      await button.click();
+      await expect(this.quantityValue).not.toHaveText(String(currentQty), {
+        timeout: 3000,
+      });
+    }).toPass({ timeout: 12000 });
+  }
 
   async clickCompleteCheckout() {
     await this.completeCheckoutButton.click();
   }
 
+  /**
+   * Originally only expected the PO prompt ("Don't Have PO"), but a real
+   * run showed a DIFFERENT modal can appear instead: the wholesale-
+   * minimum-quantity warning ("You need at least 15 units in your cart
+   * to checkout with 'wholesale' pricing ... Switch to resale"). That
+   * only happens in Wholesale mode with under 15 units - forceResaleMode()
+   * in beforeEach should prevent it, but handle it here too as a safety
+   * net.
+   */
   async dismissRebillPOModal() {
-    await this.dontHavePOButton.click();
+    // Race the two possible modals with real waits (isVisible() doesn't
+    // wait) - each promise swallows its own timeout so the loser can't
+    // surface as an unhandled rejection.
+    const po = this.dontHavePOButton
+      .waitFor({ state: 'visible', timeout: 8000 })
+      .then(() => 'po' as const)
+      .catch(() => null);
+    const resale = this.switchToResaleButton
+      .waitFor({ state: 'visible', timeout: 8000 })
+      .then(() => 'resale' as const)
+      .catch(() => null);
+
+    const which = await Promise.race([po, resale]);
+
+    if (which === 'po') {
+      await this.dontHavePOButton.click();
+    } else if (which === 'resale') {
+      await this.switchToResaleButton.click();
+    }
+    // null: neither modal showed up - nothing to dismiss.
   }
 
   private extractAmount(text: string): number {
@@ -119,7 +218,7 @@ export default class CartPage extends BasePage {
   }
 
   async getCartTax(): Promise<number> {
-    const isVisible = await this.cartTaxRow.isVisible({ timeout: 5000 }).catch(() => false);
+    const isVisible = await this.appearsWithin(this.cartTaxRow, 5000);
     if (!isVisible) {
       console.log('Tax row not present in cart — treating as $0.00');
       return 0;

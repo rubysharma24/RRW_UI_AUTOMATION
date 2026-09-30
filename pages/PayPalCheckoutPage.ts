@@ -165,14 +165,14 @@ export default class PayPalCheckoutPage extends BasePage {
   private async waitForListingReady() {
     const pageLoader = this.page.locator('.page-loader');
     if (await pageLoader.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await pageLoader.waitFor({ state: 'hidden', timeout: 15000 });
+      await pageLoader.waitFor({ state: 'hidden', timeout: 30000 });
     }
 
     const updatingFiltersText = this.page.getByText('Updating filters', {
       exact: false,
     });
     if (await updatingFiltersText.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await updatingFiltersText.waitFor({ state: 'hidden', timeout: 15000 });
+      await updatingFiltersText.waitFor({ state: 'hidden', timeout: 30000 });
     }
   }
 
@@ -318,23 +318,164 @@ export default class PayPalCheckoutPage extends BasePage {
    * baked into a goto(), which only worked for that one past order).
    */
   /**
-   * PayPal's own popup can get lost/closed after Log In (browser popup
-   * handling varies) - when that happens, PayPal shows a "Don't see the
-   * secure paypal browser?" recovery prompt on the MAIN page with a
-   * "Click to Continue" link that re-launches the window. A real run hit
-   * exactly this: the original popup reference went stale, and waiting
-   * on an element inside it hung for the full test timeout instead of
-   * failing with a clear error. Detect the prompt and click through it
-   * if present, returning the freshly relaunched popup.
+   * The "Click to Continue" recovery link (shown when PayPal's popup gets
+   * lost/closed) can render inside an unnamed overlay iframe rather than
+   * on the main page - confirmed from a real failure where
+   * page.getByRole() never found it (page-level locators don't search
+   * iframes) even though the prompt was visible on screen, so the stale
+   * popup got reused silently instead of relaunched. Search every frame,
+   * not just the main page.
    */
-  private async recoverPayPalPopupIfLost(currentPopup: Page): Promise<Page> {
-    const reLaunchLink = this.page.getByRole('link', { name: 'Click to Continue' });
-    const isLost = await reLaunchLink.isVisible({ timeout: 3000 }).catch(() => false);
-    if (!isLost) return currentPopup;
+  private async findClickToContinueLink(): Promise<Locator | null> {
+    const onPage = this.page.getByRole('link', { name: 'Click to Continue' });
+    if (await onPage.isVisible().catch(() => false)) {
+      return onPage;
+    }
+    for (const frame of this.page.frames()) {
+      const inFrame = frame.getByRole('link', { name: 'Click to Continue' });
+      if (await inFrame.isVisible().catch(() => false)) {
+        return inFrame;
+      }
+    }
+    return null;
+  }
 
-    const newPopupPromise = this.page.waitForEvent('popup');
-    await reLaunchLink.click();
-    return await newPopupPromise;
+  /**
+   * Waits (really waits - isVisible() doesn't) for whichever final-confirm
+   * button PayPal shows: "submit-button-initial" or the payment-method
+   * screen's "Complete Purchase". Returns null if neither appears in time
+   * or the popup closes meanwhile.
+   */
+  private async waitForPayPalConfirmButton(popup: Page, timeout: number): Promise<Locator | null> {
+    const initialSubmit = popup.getByTestId('submit-button-initial');
+    const completePurchase = popup.getByRole('button', { name: 'Complete Purchase' });
+
+    // Each promise swallows its own timeout/closed-page error, so the
+    // loser can never surface as an unhandled rejection.
+    const a = initialSubmit.waitFor({ state: 'visible', timeout }).then(() => initialSubmit).catch(() => null);
+    const b = completePurchase.waitFor({ state: 'visible', timeout }).then(() => completePurchase).catch(() => null);
+    return (await Promise.race([a, b])) ?? (await a) ?? (await b);
+  }
+
+  /**
+   * Drives PayPal's popup to completion and waits for our order
+   * confirmation page.
+   *
+   * IMPORTANT - the "Don't see the secure paypal browser? ... Click to
+   * Continue" overlay on the main page is shown for as long as the popup
+   * is OPEN; it is not a sign the popup was lost. Confirmed from a real
+   * run's logs: clicking it while the popup was healthy re-navigated the
+   * popup to PayPal's genericError page, and clicking it again right
+   * after "Complete Purchase" restarted a payment that was already being
+   * processed - the popup then closed but the main page never redirected.
+   * So the overlay is left alone; it is only used as a last resort when
+   * the popup has been CLOSED for 15s with no redirect (max 2 relaunches).
+   *
+   * Each pass:
+   *  - popup open + PayPal's own error page ("Things don't appear to be
+   *    working" + "Try again") -> click "Try again" (3 attempts, then fail
+   *    fast: that page is PayPal-side).
+   *  - popup open otherwise -> wait for the confirm button ("Complete
+   *    Purchase" / "submit-button-initial") and click it ONCE; no second
+   *    click for 20s while PayPal processes it.
+   *  - popup closed -> just wait for the redirect (last-resort relaunch above).
+   * then it asserts we've reached the confirmation URL, otherwise retries.
+   * Progress is logged so a failure shows which state it was stuck in.
+   */
+  private async finishPayPalPayment(initialPopup: Page) {
+    // Login + confirm + PayPal processing + redirect can take a couple of
+    // minutes; the default 60s test timeout cut it off.
+    test.setTimeout(Math.max(test.info().timeout, 150000));
+
+    const CONFIRMATION_URL = /order-confirmation-invoice\?orderNumber=/;
+    const MAX_PAYPAL_ERRORS = 3;
+    const CLOSED_GRACE_MS = 15000;
+    const MAX_RELAUNCHES = 2;
+    const log = (msg: string) =>
+      console.log(`[PayPal ${new Date().toISOString().slice(11, 19)}] ${msg}`);
+    const where = (p: Page) => {
+      try {
+        return new URL(p.url()).pathname;
+      } catch {
+        return p.url();
+      }
+    };
+
+    let popup = initialPopup;
+    let confirmClickedAt = 0;
+    let closedSince = 0;
+    let loggedClosed = false;
+    let relaunches = 0;
+    let lastTryAgainAt = 0;
+    let paypalErrorCount = 0;
+    let gaveUp = false;
+
+    await expect(async () => {
+      if (CONFIRMATION_URL.test(this.page.url())) return;
+
+      if (!popup.isClosed()) {
+        closedSince = 0;
+        loggedClosed = false;
+
+        const errorPage = popup.getByText(/Things don.t appear to be working/i);
+        if (await errorPage.isVisible().catch(() => false)) {
+          if (Date.now() - lastTryAgainAt > 8000) {
+            paypalErrorCount++;
+            log(`PayPal error page shown (#${paypalErrorCount}) at ${where(popup)}`);
+            if (paypalErrorCount >= MAX_PAYPAL_ERRORS) {
+              gaveUp = true;
+              return; // leave toPass; the error is thrown below
+            }
+            const tryAgain = popup
+              .getByRole('button', { name: /try again/i })
+              .or(popup.getByRole('link', { name: /try again/i }));
+            await tryAgain.first().click({ timeout: 5000 }).catch(() => {});
+            lastTryAgainAt = Date.now();
+          }
+        } else if (Date.now() - confirmClickedAt > 20000) {
+          log(`popup open at ${where(popup)}`);
+          const target = await this.waitForPayPalConfirmButton(popup, 5000);
+          if (target) {
+            log('confirm button visible -> clicking once');
+            // The popup can close as this click lands - that's expected.
+            await target.click({ timeout: 5000 }).catch(() => {});
+            confirmClickedAt = Date.now();
+          }
+        }
+      } else {
+        if (!closedSince) closedSince = Date.now();
+        if (!loggedClosed) {
+          log('popup closed - waiting for the redirect to the confirmation page');
+          loggedClosed = true;
+        }
+
+        // Last resort only: closed for 15s and still no redirect.
+        if (Date.now() - closedSince > CLOSED_GRACE_MS && relaunches < MAX_RELAUNCHES) {
+          const reLaunchLink = await this.findClickToContinueLink();
+          if (reLaunchLink) {
+            relaunches++;
+            log(`popup closed with no redirect -> relaunch attempt ${relaunches}/${MAX_RELAUNCHES}`);
+            const popupPromise = this.page.waitForEvent('popup', { timeout: 8000 }).catch(() => null);
+            await reLaunchLink.click();
+            popup = (await popupPromise) ?? popup;
+            closedSince = 0;
+            loggedClosed = false;
+            confirmClickedAt = 0;
+          }
+        }
+      }
+
+      expect(this.page.url()).toMatch(CONFIRMATION_URL);
+    }).toPass({ timeout: 120000, intervals: [1000] });
+
+    if (gaveUp) {
+      throw new Error(
+        `PayPal's popup showed its own error page ("Things don't appear to be working at the moment") ` +
+          `${MAX_PAYPAL_ERRORS} times, even after clicking "Try again". This is a PayPal-side/sandbox ` +
+          `failure, not a locator problem - re-run later, or check the sandbox buyer account and PayPal ` +
+          `sandbox status.`
+      );
+    }
   }
 
   async payWithPayPal(email: string, password: string) {
@@ -343,28 +484,28 @@ export default class PayPalCheckoutPage extends BasePage {
       .contentFrame()
       .getByRole('link', { name: 'PayPal' });
 
-    // Ensure the PayPal section's iframe widget has actually mounted.
-    // Skipping the click when the button already read "PayPal ▼"
-    // (already expanded, radio checked) turned out to be wrong on a
-    // real run: the section was visually expanded but the iframe still
-    // hadn't loaded, so there was nothing to click inside. Whether this
-    // button toggles or just re-triggers a mount isn't confirmed either
-    // way, so retry clicking (matching either arrow) until the iframe
-    // link genuinely appears, rather than trying to guess its state.
+    // Same fix as AffirmCheckoutPage.payWithAffirm(): only ever click the
+    // toggle when it's genuinely showing "▶" (collapsed) on that specific
+    // attempt. The previous version matched either arrow and re-clicked
+    // whenever the iframe link wasn't visible yet, which meant
+    // re-clicking an ALREADY-EXPANDED toggle too - likely collapsing it
+    // and restarting the widget's load each retry, the same root cause
+    // confirmed on the Affirm flow's near-identical "Loading payment
+    // options..." bug. A real run here showed the same symptom: "PayPal
+    // ▼" already expanded, radio checked, but the iframe link never
+    // mounted within 15s.
     await expect(async () => {
-      const payPalToggle = this.page.getByRole('button', {
-        name: /^PayPal [▶▼]$/,
-      });
-      if (await payPalToggle.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await payPalToggle.click();
+      const collapsedToggle = this.page.getByRole('button', { name: 'PayPal ▶' });
+      if (await collapsedToggle.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await collapsedToggle.click();
       }
-      await expect(payPalLink).toBeVisible({ timeout: 3000 });
-    }).toPass({ timeout: 15000 });
+      await expect(payPalLink).toBeVisible({ timeout: 5000 });
+    }).toPass({ timeout: 30000 });
 
     const popupPromise = this.page.waitForEvent('popup');
     await payPalLink.click();
 
-    let payPalPopup = await popupPromise;
+    const payPalPopup = await popupPromise;
 
     await payPalPopup.getByRole('textbox', { name: 'Email or mobile number' }).fill(email);
     await payPalPopup.getByRole('button', { name: 'Next' }).click();
@@ -372,14 +513,7 @@ export default class PayPalCheckoutPage extends BasePage {
     await payPalPopup.getByRole('textbox', { name: 'Password' }).fill(password);
     await payPalPopup.getByRole('button', { name: 'Log In' }).click();
 
-    payPalPopup = await this.recoverPayPalPopupIfLost(payPalPopup);
-
-    await payPalPopup.getByTestId('submit-button-initial').click();
-
-    await this.page.waitForURL(/order-confirmation-invoice\?orderNumber=/, {
-      timeout: 40000,
-      waitUntil: 'domcontentloaded',
-    });
+    await this.finishPayPalPayment(payPalPopup);
 
     await this.declinePaymentVerificationIfPresent();
   }

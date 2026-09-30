@@ -1,20 +1,7 @@
 import { Page, Locator, expect } from '@playwright/test';
 import BasePage from './BasePage';
 
-/**
- * Handles the "vehicle fitment" search widget — the Make / Model / Year /
- * Category cascading selects (Ant Design dropdowns) on the categories page.
- *
- * The "Shop As" modal (Resale/Wholesale) shows up automatically right after
- * login — there's no separate "open finder" trigger button. What we used to
- * chase as an "openFinderButton" (matching /Resale Orders/i) was actually
- * this same modal's "Resale" option all along — its accessible name is the
- * concatenation of its heading ("Resale") and paragraph ("Orders of: (1-14)"),
- * i.e. "Resale Orders of: (1-14)". Selecting it is what lands you on the
- * categories page with these Make/Model/Year selects — confirmed from a real
- * codegen recording. selectShopMode() below replaces the old openFinderButton
- * concept entirely.
- */
+
 export default class VehicleFitmentPage extends BasePage {
   readonly makeSelect: Locator;
   readonly modelSelect: Locator;
@@ -41,25 +28,20 @@ export default class VehicleFitmentPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    // Ant Design selects render as divs with this search input class, not
-    // native <select> — .first()/.nth() distinguish Make vs Model vs Year
-    // since they share the same structure. Fragile by position; if the
-    // widget's DOM order ever changes, these break silently (wrong dropdown
-    // opens). Prefer scoping by a label/placeholder if one exists — check
-    // DevTools for a more specific anchor (e.g. aria-label) before relying
-    // on this long-term.
     this.makeSelect = page.locator('.ant-select-selection-search').first();
     this.modelSelect = page
       .locator('div')
       .filter({ hasText: /^Select Model$/ })
       .nth(2);
-    this.yearSelect = page
-      .locator(
-        'div:nth-child(3) > .ant-select > .ant-select-selector > .ant-select-selection-wrap > .ant-select-selection-search'
-      );
+    this.yearSelect = page.locator(
+      'div:nth-child(3) > .ant-select > .ant-select-selector > .ant-select-selection-wrap > .ant-select-selection-search'
+    );
 
+    // FIX: exact: true — without it, name matching is substring-based and
+    // collides with unrelated buttons elsewhere on the page (e.g. cart
+    // drawer items) whose accessible name merely *contains* this text.
     this.categoryButton = (categoryName: string) =>
-      page.getByRole('button', { name: categoryName });
+      page.getByRole('button', { name: categoryName, exact: true });
 
     this.hollanderCode = page.getByText(/^Hollander: 560-/);
 
@@ -67,17 +49,10 @@ export default class VehicleFitmentPage extends BasePage {
     // not just that no error was thrown.
     this.resultPrices = page.getByText(/^\$/);
 
-    // Real DOM (confirmed from an actual run) shows Model and Year as
-    // separate removable chips under "Selected Filters" — Make ("Audi")
-    // is NOT its own chip, it's implicit from the initial selection.
-    //
-    // A "Remove X" button IS the definition of an applied filter chip, so
-    // checking for it directly is unambiguous — no parent-traversal scoping
-    // needed at all (the earlier `.locator('..')` approach only walked one
-    // DOM level up from the heading and missed the chip container, which
-    // sits deeper/separately in the DOM).
+    // FIX: exact: true — `Remove ${value}` was also matching the cart
+    // drawer's "Remove <product name> from cart" buttons via substring.
     this.removeFilterButton = (value: string) =>
-      page.getByRole('button', { name: `Remove ${value}` });
+      page.getByRole('button', { name: `Remove ${value}`, exact: true });
 
     // The "Shop As" modal (full-screen overlay, z-[9999]) re-appears after
     // the Make selection and blocks every subsequent click underneath it.
@@ -91,13 +66,15 @@ export default class VehicleFitmentPage extends BasePage {
       has: page.getByRole('heading', { name: 'Wholesale', exact: true }),
     });
 
-    // Same filter-button pattern as categoryButton — Material ("Alloy",
-    // "Steel") and Diameter ("20\"") are just more of the same toggle-button
-    // filter groups seen in the sidebar.
+    // FIX: exact: true — 'Alloy' / 'Steel' / diameter labels were matching
+    // the cart drawer's "Remove ... Alloy Wheel / Rim from cart",
+    // "Decrease/Increase quantity of ... Alloy Wheel / Rim" buttons too,
+    // since those accessible names contain the material name as a substring.
+    // This was the direct cause of the strict-mode violation.
     this.materialButton = (materialName: string) =>
-      page.getByRole('button', { name: materialName });
+      page.getByRole('button', { name: materialName, exact: true });
     this.diameterButton = (diameterLabel: string) =>
-      page.getByRole('button', { name: diameterLabel });
+      page.getByRole('button', { name: diameterLabel, exact: true });
 
     // The breadcrumb-style summary text (e.g. "Cadillac, Escalade, OEM
     // Replacement Wheel") shown above the results grid once enough filters
@@ -118,17 +95,6 @@ export default class VehicleFitmentPage extends BasePage {
     // filter chip in one click.
     this.resetFiltersButton = page.getByRole('button', { name: 'Reset' });
 
-    // Out-of-stock PDP shows a "Notify Me" button directly instead of "Add
-    // To Cart" — there are two on the page. The FIRST one sits right below
-    // the sticky header (z-[1000]) and gets its click intercepted by that
-    // header on scroll-into-view (confirmed from a real failed run — the
-    // button itself renders fine, Playwright's hit-test just lands under
-    // the fixed header). The second one, further down near the main product
-    // info section, isn't fighting the header for space — use that one via
-    // .last(). Clicking it opens a dialog with the account's email
-    // pre-filled; Submit inside that dialog is what actually registers the
-    // request. Scoping the email/Submit locators to the dialog avoids
-    // collisions with any other "Submit" button on the page.
     this.pdpNotifyMeButton = page.getByRole('button', { name: 'Notify Me' }).last();
     this.pdpNotifyDialog = page.getByRole('dialog', { name: 'Enter your Email' });
     this.pdpNotifyEmailInput = this.pdpNotifyDialog.getByRole('textbox', {
@@ -145,21 +111,11 @@ export default class VehicleFitmentPage extends BasePage {
    * with the Make/Model/Year selects available.
    */
   async selectShopMode(mode: 'Resale' | 'Wholesale') {
-    // The modal only shows on a genuinely first-time selection for this
-    // browser session — if the mode is already set (e.g. persisted from an
-    // earlier test run's cookie/localStorage), it never appears at all, so
-    // a hard "must be visible" wait is wrong. Check first, and skip
-    // everything below if there's nothing to dismiss.
     const isModalVisible = await this.shopAsModalHeading
       .isVisible({ timeout: 5000 })
       .catch(() => false);
 
     if (!isModalVisible) {
-      // No modal means the browser is landing on the plain homepage, which
-      // has its own separate "Browse By Vehicle" widget — not the
-      // categories page sidebar our other locators target. Navigate there
-      // directly so downstream selectMake()/selectModel()/etc. always land
-      // on the right DOM regardless of whether the modal showed up.
       await this.page.goto('https://staging.roadreadywheels.com/t/categories');
       await this.waitForFiltersReady();
       return;
@@ -171,20 +127,11 @@ export default class VehicleFitmentPage extends BasePage {
 
     await this.shopAsModalHeading.waitFor({ state: 'hidden', timeout: 10000 });
 
-    // The app appends `just_sign_in=true` to the URL after this selection,
-    // and that flag keeps re-triggering the same modal on later renders
-    // (e.g. once filters are applied) even though a mode was already
-    // chosen — a plain wait isn't enough. Reloading clears it.
     await this.page.reload();
     await this.page.waitForLoadState('networkidle');
 
-    // Defensive — in case the reload still shows it once more.
     await this.dismissShopAsModalIfPresent();
 
-    // After the reload, the whole filter panel re-initializes: every
-    // dropdown/button is disabled and an "Updating filters…" overlay sits
-    // on top intercepting clicks. networkidle doesn't cover this app-level
-    // loading state, so clicking immediately after it races the overlay.
     await this.waitForFiltersReady();
   }
 
@@ -226,12 +173,6 @@ export default class VehicleFitmentPage extends BasePage {
     }
   }
 
-  /**
-   * Clicks a locator, and if it's blocked by the page-loader or a
-   * Shop-As modal that popped up in the gap between our checks and the
-   * actual click (a real race, confirmed from a failed run — checking
-   * first isn't enough), clears whichever is blocking and retries once.
-   */
   private async clickClearingOverlays(locator: Locator) {
     try {
       await locator.click({ timeout: 8000 });
@@ -248,9 +189,6 @@ export default class VehicleFitmentPage extends BasePage {
     await this.clickClearingOverlays(this.makeSelect);
     await this.page.getByText(make, { exact: true }).click();
 
-    // Modal shows up right after Make is picked — dismiss it here instead
-    // of blindly waiting, since it doesn't reliably appear within a fixed
-    // window.
     await this.dismissShopAsModalIfPresent();
   }
 
@@ -286,12 +224,6 @@ export default class VehicleFitmentPage extends BasePage {
     await this.clickClearingOverlays(this.diameterButton(diameterLabel));
   }
 
-  /**
-   * Verifies each given value has its own "Remove <value>" chip under
-   * "Selected Filters" — works for any number of filters (Model, Year,
-   * Category, Material, Diameter, ...), since a chip's "Remove" button is
-   * the unambiguous signal that a filter is actually applied.
-   */
   async expectFiltersApplied(...values: string[]) {
     for (const value of values) {
       await expect(this.removeFilterButton(value)).toBeVisible({
@@ -315,12 +247,6 @@ export default class VehicleFitmentPage extends BasePage {
     });
   }
 
-  /**
-   * Navigates straight to a filtered results URL — mirrors the codegen
-   * recording, which reloaded the filtered listing via the address bar
-   * (e.g. after opening a product from it) instead of re-picking every
-   * dropdown from scratch.
-   */
   async goToFilteredCategory(params: Record<string, string>) {
     const query = new URLSearchParams(params).toString();
     await this.page.goto(
@@ -328,12 +254,6 @@ export default class VehicleFitmentPage extends BasePage {
     );
   }
 
-  /**
-   * Out-of-stock result cards show "Notify Me" instead of "Add To Cart".
-   * Fills and submits the email capture, then confirms the modal actually
-   * closed rather than assuming a specific success toast (whose exact copy
-   * we haven't confirmed yet).
-   */
   async submitNotifyMe(email: string) {
     await this.click(this.notifyMeButton);
     await this.notifyMeEmailInput.click();
@@ -343,13 +263,6 @@ export default class VehicleFitmentPage extends BasePage {
     await expect(this.notifyMeEmailInput).toBeHidden({ timeout: 10000 });
   }
 
-  /**
-   * Clicks the PDP "Notify Me" button, with a fallback for the sticky
-   * header (z-[1000]) still overlapping it on some viewports even after
-   * switching to the lower button. If the plain click is intercepted,
-   * nudge the scroll position up a bit (clears the button from directly
-   * under the fixed header) and retry once before forcing.
-   */
   private async clickPdpNotifyMeButton() {
     try {
       await this.click(this.pdpNotifyMeButton);
@@ -362,12 +275,6 @@ export default class VehicleFitmentPage extends BasePage {
     }
   }
 
-  /**
-   * PDP "Notify Me" for an out-of-stock item — the button itself opens a
-   * dialog with the account email pre-filled; Submit inside that dialog is
-   * what registers the request. The dialog closing is the success signal —
-   * more reliable than guessing at a specific confirmation string.
-   */
   async submitNotifyMeFromPdp(email?: string) {
     await this.clickPdpNotifyMeButton();
     await expect(this.pdpNotifyDialog).toBeVisible({ timeout: 10000 });
@@ -380,12 +287,6 @@ export default class VehicleFitmentPage extends BasePage {
     await expect(this.pdpNotifyDialog).toBeHidden({ timeout: 10000 });
   }
 
-  /**
-   * Returns to the filtered listing from a PDP using the browser's Back
-   * button (mirrors clicking the actual back arrow), rather than a raw
-   * URL — waits for the "Selected Filters" panel to be back on screen so
-   * the next step doesn't race the navigation.
-   */
   async goBackToListing() {
     await this.page.goBack();
     await expect(
@@ -401,10 +302,15 @@ export default class VehicleFitmentPage extends BasePage {
   async resetFilters() {
     await this.click(this.resetFiltersButton);
 
-    // Wait for every "Remove X" chip to actually disappear before
-    // continuing, instead of a blind timeout that might fire mid-re-render.
+    // Scoped to the Selected Filters panel so the cart drawer's
+    // "Remove ... from cart" button (which also matches /^Remove /i) can
+    // never be counted here and block this assertion from settling.
+    const selectedFiltersPanel = this.page
+      .getByRole('heading', { name: 'Selected Filters' })
+      .locator('..');
+
     await expect(
-      this.page.getByRole('button', { name: /^Remove /i })
+      selectedFiltersPanel.getByRole('button', { name: /^Remove /i })
     ).toHaveCount(0, { timeout: 10000 });
 
     await this.page.waitForTimeout(2000);

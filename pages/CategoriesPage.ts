@@ -16,9 +16,10 @@ export default class CategoriesPage extends BasePage {
     this.searchInput = page.getByPlaceholder(/Search globally for make/i);
 
    
-    this.searchButton = page
-      .getByRole('banner')
-      .getByRole('button', { name: 'Search', exact: true });
+ this.searchButton = page
+  .getByRole('banner')
+  .first() // the top nav banner — the hero's "Browse By Vehicle" banner has its own separate Search button
+  .getByRole('button', { name: 'Search', exact: true });
 
     this.inStockLabels = page.getByText('In Stock');
     this.hollanderLabels = page.getByText(/Hollander:\s*\S+/);
