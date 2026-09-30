@@ -11,7 +11,7 @@ import OrderConfirmationPage from '../pages/OrderConfirmationPage';
 import VehicleFitmentPage from '../pages/VehicleFitmentPage';
 import AmazonPayCheckoutPage from '../pages/AmazonPayCheckoutPage';
 import PayPalCheckoutPage from '../pages/PayPalCheckoutPage';
-import AffirmCheckoutPage from '../pages/AffirmCheckoutPage';
+import AffirmCheckoutPage from '../pages/Affirmcheckoutpage';
 
 type Fixtures = {
   homePage: HomePage;
