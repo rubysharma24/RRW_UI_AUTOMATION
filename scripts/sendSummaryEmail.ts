@@ -33,18 +33,12 @@ interface RawSpec {
   title: string;
   tests: Array<{
     annotations?: RawAnnotation[];
-    // Set by Playwright to the `name` of the project that ran this test
-    // (e.g. "chromium", "firefox", "edge") — comes from playwright.config.ts's
-    // `projects` array, one JSON test entry per project per spec.
+   
     projectName?: string;
     results: Array<{ status: string; duration: number; annotations?: RawAnnotation[] }>;
   }>;
 }
 
-// Spec files that represent an actual payment flow with an order number
-// worth reporting in the Payment Confirmations table — Affirm and Google
-// Pay are deliberately left out per request. Add a file here and it
-// automatically appears in that table; nothing else needs to change.
 const PAYMENT_TYPE_BY_FILE: Record<string, string> = {
   'Paypalcheckout.spec.ts': 'PayPal',
   'amazonPayCheckout.spec.ts': 'Amazon Pay',
@@ -52,13 +46,7 @@ const PAYMENT_TYPE_BY_FILE: Record<string, string> = {
   'cart.spec.ts': 'Charge Order',
 };
 
-/**
- * Playwright JSON reporter ka structure kitni bhi depth tak nested ho
- * sakta hai (describe blocks ki wajah se). Ye function recursively har
- * level ke andar jaake saare specs collect karta hai — file ka naam bhi
- * carry karta hai taaki per-class grouping aur payment-type mapping dono
- * ho sake.
- */
+
 function collectSpecsRecursively(
   suite: RawSuite,
   results: TestResult[],
@@ -68,10 +56,7 @@ function collectSpecsRecursively(
     for (const test of spec.tests ?? []) {
       const result = test.results?.[0];
 
-      // Annotations pushed via test.info().annotations.push(...) show up
-      // on the test case itself in the JSON reporter output; some
-      // Playwright versions also echo them per-result, so check both
-      // rather than assuming one shape.
+      
       const annotations: RawAnnotation[] = test.annotations ?? result?.annotations ?? [];
       const orderNumberAnnotation = annotations.find((a) => a.type === 'Order Number');
 
@@ -100,8 +85,7 @@ function parseTestResults(): TestResult[] {
   const results: TestResult[] = [];
 
   for (const suite of data.suites ?? []) {
-    // Top-level suites are one per spec file — suite.title here is the
-    // file name (e.g. "Paypalcheckout.spec.ts").
+   
     collectSpecsRecursively(suite, results, suite.title);
   }
 
@@ -115,7 +99,7 @@ function escapeHtml(value: string): string {
     .replace(/>/g, '&gt;');
 }
 
-/** "creditCardCheckout.spec.ts" -> "creditCardCheckout" for display. */
+
 function classDisplayName(file: string): string {
   return file.replace(/\.spec\.ts$/, '');
 }
@@ -138,7 +122,7 @@ export async function sendSummaryEmail() {
   console.log('Uploading Playwright report to Drive...');
   const driveLink = await uploadFileToDrive(zipPath, 'PlaywrightReport.zip');
 
-  // --- Payment Confirmations (top of the email) ----------------------
+ 
   const paymentResults = results.filter(
     (r) => r.paymentType && r.status === 'passed' && r.orderNumber
   );
@@ -167,11 +151,7 @@ export async function sendSummaryEmail() {
       </table>`
       : `<p style="font-size: 14px; color: #6b7280; margin-bottom: 24px;">No successful payment orders (PayPal / Amazon Pay / Credit Card / Charge Order) in this run.</p>`;
 
-  // --- Tag Execution Summary — unchanged, same idea as the RestAssured/
-  // Cucumber report's "Tag Execution Summary" table. Playwright doesn't
-  // have tags built in, so this reads @Tag words out of the test title:
-  //   test('should complete checkout flow @CheckoutFlow', async (...) => {...})
-  // A title with no @tag falls into "Untagged".
+ 
   interface TagStats {
     passed: number;
     failed: number;
@@ -234,8 +214,7 @@ export async function sendSummaryEmail() {
         ${tagRows}
       </table>`;
 
-  // --- All Test Classes — one row per spec file, counts only, no
-  // per-test rows and no ".spec.ts" suffix (per the approved mockup) ---
+  /
   interface ClassStats {
     total: number;
     passed: number;
@@ -275,11 +254,7 @@ export async function sendSummaryEmail() {
         ${classRows}
       </table>`;
 
-  // --- Browser-wise Summary — one row per Playwright project (browser),
-  // counts only, same shape as the Test Class table. Reads `browser` off
-  // each result, which comes from the JSON reporter's `projectName` field
-  // (set automatically once playwright.config.ts lists multiple `projects`
-  // — no test-file changes needed for this to populate).
+  
   interface BrowserStats {
     total: number;
     passed: number;
@@ -295,8 +270,7 @@ export async function sendSummaryEmail() {
     browserStats.set(r.browser, stats);
   }
 
-  // Only worth showing once more than one browser actually ran — a
-  // single-project run would just repeat the class table's totals.
+  
   const showBrowserTable = browserStats.size > 1;
 
   const browserRows = Array.from(browserStats.entries())
@@ -429,10 +403,7 @@ export async function sendSummaryEmail() {
   </div>
   `;
 
-  // Preview mode — writes the exact HTML the email would send to a local
-  // file instead of actually sending it, so the template can be checked
-  // before it goes to REPORT_RECIPIENT. Doesn't touch SMTP/nodemailer at
-  // all, so no Gmail credentials are even needed in this mode.
+  
   if (process.env.PREVIEW_ONLY === 'true') {
     const previewPath = path.join(__dirname, '..', 'report-preview.html');
     fs.writeFileSync(previewPath, html, 'utf-8');
