@@ -214,7 +214,7 @@ export async function sendSummaryEmail() {
         ${tagRows}
       </table>`;
 
-  /
+  
   interface ClassStats {
     total: number;
     passed: number;
@@ -370,7 +370,7 @@ export async function sendSummaryEmail() {
       </p>
       ${paymentTableOrNote}
 
-      ${tagSummaryTable}
+    
 
       <p style="font-size: 15px; color: #111827; font-weight: 700; margin: 0 0 10px;">
         All Test Classes
