@@ -30,16 +30,10 @@ export default class CartPage extends BasePage {
     this.cartHeading = page.getByRole('heading', { name: /Your Cart/ }).last();
     this.cartDrawer = this.cartHeading.locator('..').locator('..');
 
-    // Header Resale/Wholesale toggle. exact: true because these words
-    // also appear in other buttons (e.g. "Resale Orders of...", "Switch
-    // to resale").
     this.resaleToggleButton = page.getByRole('button', { name: 'Resale', exact: true });
     this.wholesaleToggleButton = page.getByRole('button', { name: 'Wholesale', exact: true });
 
-    // "Shop As" modal (Wholesale "Orders of: (15+)" / Resale "Orders of:
-    // (1-14)"). Its buttons' accessible names are "Resale Orders of:
-    // (1-14)" etc., so they don't collide with the header toggles above
-    // (exact: true).
+    
     this.shopAsHeading = page.getByRole('heading', { name: 'Shop As' });
     this.shopAsResaleOption = page.getByRole('button', { name: /Resale Orders of/i });
 
@@ -88,27 +82,27 @@ export default class CartPage extends BasePage {
       .locator('..');
   }
 
-  /**
-   * Forces the header toggle to end on Resale regardless of its starting
-   * state, using the fixed Resale -> Wholesale -> Resale sequence. Avoids
-   * depending on aria-pressed/class detection (unconfirmed on this
-   * toggle) and guarantees the "Oops! You need at least 15 units..."
-   * wholesale-minimum modal can't appear later in checkout. Call right
-   * after login (the toggle only exists once logged in) and after the
-   * Shop-As modal is closed.
-   */
+  
   async forceResaleMode() {
-    // Mirrors the recorded flow: (1) pick "Resale Orders of: (1-14)" in
-    // the Shop As modal that shows up after login - that's the real mode
-    // setter; (2) reload a clean /t/categories so no modal/overlay is
-    // left over (without this, the modal stayed open and its
-    // z-[9999] overlay blocked the header toggle clicks - a real run
-    // failed exactly there); (3) header Wholesale, then header Resale, so
-    // the toggle always ends on Resale.
+    
     await this.chooseResaleInShopAsModalIfOpen(8000);
 
+   
+    await this.page.waitForLoadState('domcontentloaded');
+
     const categoriesUrl = new URL('/t/categories', this.page.url()).toString();
-    await this.page.goto(categoriesUrl, { waitUntil: 'domcontentloaded' });
+
+    await expect(async () => {
+      try {
+        await this.page.goto(categoriesUrl, { waitUntil: 'domcontentloaded' });
+      } catch (e) {
+        // Another navigation interrupted goto (page is already moving to
+        // the target). Anything else is a real error.
+        if (!/NS_BINDING_ABORTED/.test(String(e))) throw e;
+        await this.page.waitForLoadState('domcontentloaded');
+      }
+      await expect(this.page).toHaveURL(/\/t\/categories/);
+    }).toPass({ timeout: 20000 });
 
     for (const toggle of [this.wholesaleToggleButton, this.resaleToggleButton]) {
       // Safety net: if the modal re-appears, resolve it before clicking.
@@ -120,11 +114,7 @@ export default class CartPage extends BasePage {
     await this.chooseResaleInShopAsModalIfOpen(1500);
   }
 
-  /**
-   * NOTE: locator.isVisible() ignores its `timeout` option and returns
-   * immediately - it never waits. Use waitFor() when you actually need
-   * to wait for something that may appear a moment later.
-   */
+  
   private async appearsWithin(locator: Locator, timeout: number): Promise<boolean> {
     return locator
       .waitFor({ state: 'visible', timeout })
@@ -172,19 +162,9 @@ export default class CartPage extends BasePage {
     await this.completeCheckoutButton.click();
   }
 
-  /**
-   * Originally only expected the PO prompt ("Don't Have PO"), but a real
-   * run showed a DIFFERENT modal can appear instead: the wholesale-
-   * minimum-quantity warning ("You need at least 15 units in your cart
-   * to checkout with 'wholesale' pricing ... Switch to resale"). That
-   * only happens in Wholesale mode with under 15 units - forceResaleMode()
-   * in beforeEach should prevent it, but handle it here too as a safety
-   * net.
-   */
+  
   async dismissRebillPOModal() {
-    // Race the two possible modals with real waits (isVisible() doesn't
-    // wait) - each promise swallows its own timeout so the loser can't
-    // surface as an unhandled rejection.
+   
     const po = this.dontHavePOButton
       .waitFor({ state: 'visible', timeout: 8000 })
       .then(() => 'po' as const)

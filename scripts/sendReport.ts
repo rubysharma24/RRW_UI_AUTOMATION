@@ -6,10 +6,7 @@ dotenv.config({
   path: path.join(__dirname, '..', '.env'),
 });
 
-/**
- * Diye gaye Drive link ko email me bhejta hai.
- * uploadReport.ts se call hota hai, upload complete hone ke baad.
- */
+
 export async function sendReportLink(driveLink: string) {
   console.log('GMAIL_USER:', process.env.GMAIL_USER);
   console.log(

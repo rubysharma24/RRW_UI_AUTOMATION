@@ -9,11 +9,7 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
       await homePage.goToLogin();
       await loginPage.login(validUser.email, validUser.password);
 
-      // FIRST action after login: picks Resale in the "Shop As" modal,
-      // reloads /t/categories, then toggles Wholesale -> Resale so the
-      // mode always ends on Resale (prevents the "need 15 units for
-      // wholesale" modal mid-checkout). Replaces closeShopAsModal() and
-      // the removed ensureResaleMode().
+      
       await cartPage.forceResaleMode();
 
       await cartPage.clearCartIfNotEmpty();

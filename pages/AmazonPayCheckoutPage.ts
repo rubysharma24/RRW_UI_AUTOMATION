@@ -1,7 +1,6 @@
 import { test, Page, Locator, expect } from '@playwright/test';
 import BasePage from './BasePage';
 
-
 export default class AmazonPayCheckoutPage extends BasePage {
   readonly loginLink: Locator;
   readonly emailInput: Locator;
@@ -23,7 +22,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
   readonly orderTotalText: Locator;
   readonly paymentMethodAmazonPayText: Locator;
   readonly invoiceTotalText: Locator;
-
+readonly paymentMethodHeading: Locator;
   constructor(page: Page) {
     super(page);
 
@@ -32,26 +31,23 @@ export default class AmazonPayCheckoutPage extends BasePage {
     this.passwordInput = page.getByRole('textbox', { name: 'Enter password' });
     this.loginButton = page.getByRole('button', { name: 'Login' });
 
-   
     this.resaleOrdersButton = page.getByRole('button', {
       name: /Resale Orders of/i,
     });
 
-   
     this.shopNowButton = page.getByRole('button', { name: 'Shop Now' });
 
     this.addToCartButton = page.locator('#add-to-cart-button');
     this.openCartButton = page.getByRole('button', { name: 'Open cart' });
-    
+
     this.cartSubtotalText = page.getByText(/^Subtotal \(\d+ items?\)\$/).first();
 
     this.cartDrawer = page.locator('[class*="z-[1000]"]');
-    
+
     this.payWithAmazonPayButtonInCart = this.cartDrawer
       .getByRole('button', { name: 'Pay with Amazon Pay' })
       .last();
 
-    
     this.payWithAmazonPayButtonOnPDP = page
       .getByRole('button', { name: 'Pay with Amazon Pay' })
       .first();
@@ -59,6 +55,9 @@ export default class AmazonPayCheckoutPage extends BasePage {
     this.applySalesTaxCheckbox = page.getByRole('checkbox', {
       name: 'Apply sales tax to this order',
     });
+    this.paymentMethodHeading = page.getByRole('heading', {
+  name: 'Select a payment method:',
+});
     this.continueToShippingButton = page.getByRole('button', {
       name: 'Continue to shipping option',
     });
@@ -83,7 +82,6 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await this.passwordInput.fill(password);
     await this.click(this.loginButton);
 
-    
     await expect(this.loginLink).toBeHidden({ timeout: 10000 });
   }
 
@@ -92,7 +90,6 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await expect(this.resaleOrdersButton).toBeHidden({ timeout: 10000 });
   }
 
- 
   async clickShopNow() {
     await expect(async () => {
       await this.click(this.shopNowButton);
@@ -111,7 +108,6 @@ export default class AmazonPayCheckoutPage extends BasePage {
     ).toBeVisible({ timeout: 10000 });
   }
 
- 
   private async waitForListingReady() {
     const pageLoader = this.page.locator('.page-loader');
     if (await pageLoader.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -137,7 +133,6 @@ export default class AmazonPayCheckoutPage extends BasePage {
     const productName = (await firstProductLink.textContent())?.trim() ?? '';
     await firstProductLink.click();
 
-    
     await this.page.waitForURL(/\/products\//, {
       timeout: 10000,
       waitUntil: 'domcontentloaded',
@@ -150,7 +145,6 @@ export default class AmazonPayCheckoutPage extends BasePage {
     return productName;
   }
 
-  
   async addProductToCart() {
     await this.click(this.addToCartButton);
 
@@ -171,9 +165,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
     password: string,
     closeCartDrawerFirst = false
   ) {
-   
     if (closeCartDrawerFirst) {
-     
       const closeCartButton = this.page.getByRole('button', { name: 'Close cart' }).last();
       if (await closeCartButton.isVisible({ timeout: 2000 }).catch(() => false)) {
         await closeCartButton.scrollIntoViewIfNeeded();
@@ -188,7 +180,6 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await expect(async () => {
       const popupPromise = this.page.waitForEvent('popup', { timeout: 8000 });
 
-     
       await button.scrollIntoViewIfNeeded();
       await this.page.mouse.wheel(0, -150);
       await button.click({ timeout: 5000 }).catch(async () => {
@@ -214,17 +205,14 @@ export default class AmazonPayCheckoutPage extends BasePage {
     });
   }
 
- 
   async signInWithAmazonPay(email: string, password: string) {
     await this.signInThroughAmazonPopup(
       this.payWithAmazonPayButtonInCart,
       email,
       password
-      
     );
   }
 
-  
   async payWithAmazonPayFromPDP(email: string, password: string) {
     await this.signInThroughAmazonPopup(
       this.payWithAmazonPayButtonOnPDP,
@@ -234,7 +222,6 @@ export default class AmazonPayCheckoutPage extends BasePage {
     );
   }
 
-  
   async applySalesTax() {
     const isPresent = await this.applySalesTaxCheckbox
       .isVisible()
@@ -257,20 +244,48 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await expect(this.shippingAddressHeading).toBeVisible({ timeout: 10000 });
   }
 
-  async continueToReview() {
-    await expect(this.orderTotalText).toBeVisible({ timeout: 10000 });
-    await this.click(this.continueToReviewButton);
+ async continueToReview() {
+  await expect(this.orderTotalText).toBeVisible({ timeout: 10000 });
+
+  // Click + verify ek hi retry unit mein: agar Firefox mein click kho jaye
+  // to button abhi bhi visible hoga aur dobara click hoga.
+  await expect(async () => {
+    if (await this.continueToReviewButton.isVisible()) {
+      await this.continueToReviewButton.click({ timeout: 5000 });
+    }
+    await expect(this.paymentMethodHeading).toBeVisible({ timeout: 5000 });
+  }).toPass({ timeout: 30000 });
+}
+
+  /**
+   * Firefox: the Amazon payment widget sometimes stays on its "Payment
+   * method" card list with nothing selected, so Place Order does nothing.
+   * If that list is showing, pick the test card and wait for the list to
+   * close. On Chrome the list never shows, so this is a no-op.
+   */
+  private async selectAmazonCardIfListShown() {
+    for (const frame of this.page.frames()) {
+      const card = frame.getByRole('link', { name: /Visa\s*\.\.\.1111/ });
+      if (await card.isVisible().catch(() => false)) {
+        await card.click({ timeout: 5000 });
+        await expect(card).toBeHidden({ timeout: 10000 });
+        return;
+      }
+    }
   }
 
   async placeOrder() {
-    await this.click(this.placeOrderButton);
+    await this.selectAmazonCardIfListShown();
+
+    await expect(this.placeOrderButton).toBeEnabled({ timeout: 10000 });
+    await this.placeOrderButton.click({ timeout: 5000 });
+
     await this.page.waitForURL(/order-confirmation-invoice\?orderNumber=/, {
-      timeout: 20000,
-      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+      waitUntil: 'commit',
     });
   }
 
-  
   async completeCheckout() {
     await this.applySalesTax();
     await this.continueToShipping();
@@ -283,7 +298,6 @@ export default class AmazonPayCheckoutPage extends BasePage {
     const orderNumber = url.searchParams.get('orderNumber');
     expect(orderNumber).toBeTruthy();
 
-    
     test.info().annotations.push({
       type: 'Order Number',
       description: orderNumber ?? 'unknown',
