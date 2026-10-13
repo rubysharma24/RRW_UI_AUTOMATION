@@ -34,11 +34,11 @@ export default defineConfig({
 
   projects: [
     // ---------- Desktop ----------
-    // {
-    //   name: 'chromium',
-    //   use: { ...devices['Desktop Chrome'] },
-    //   grepInvert: /@mobile/,
-    // },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      grepInvert: /@mobile/,
+    },
 
     {
       name: 'firefox',
