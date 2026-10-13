@@ -40,7 +40,8 @@ export default class MobileHomePage extends BasePage {
     this.loginLink = page.getByRole('link', { name: 'Login' });
   }
 
-  async open() {
+  async open() 
+  {
     await this.page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(this.shopNowButton).toBeVisible({ timeout: 15000 });
   }
