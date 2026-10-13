@@ -43,8 +43,7 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-      grepInvert: /@mobile/,          // mobile tests desktop par nahi chalenge
-    },
+      grepInvert: /@mobile/,          
 
     // {
     //   name: 'webkit',
