@@ -33,40 +33,39 @@ export default defineConfig({
   },
 
   projects: [
-    // ---------- Desktop ----------
+    // ---------- Desktop (only Chrome enabled) ----------
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       grepInvert: /@mobile/,
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-      grepInvert: /@mobile/,          
-
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    //   grepInvert: /@mobile/,
+    // },
     // {
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
     //   grepInvert: /@mobile/,
     // },
-
     // {
     //   name: 'edge',
     //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
     //   grepInvert: /@mobile/,
     // },
 
-    // ---------- Mobile (sirf @mobile tag wale tests) ----------
-    {
-      name: 'mobile-chrome',
-      use: { ...devices['Pixel 7'] },
-      grep: /@mobile/,
-    },
-    {
-      name: 'mobile-safari',
-      use: { ...devices['iPhone 14'] },
-      grep: /@mobile/,
-    },
+    // ---------- Mobile (disabled) ----------
+    // {
+    //   name: 'mobile-chrome',
+    //   use: { ...devices['Pixel 7'] },
+    //   grep: /@mobile/,
+    // },
+    // {
+    //   name: 'mobile-safari',
+    //   use: { ...devices['iPhone 14'] },
+    //   grep: /@mobile/,
+    // },
   ],
 });
