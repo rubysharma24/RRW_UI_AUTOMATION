@@ -1,8 +1,6 @@
 # RoadReady Wheels – Playwright + TypeScript Automation Framework
 
-## Folder Structure
 
-```
 roadready-playwright/
 ├── pages/                  # Page Objects (locators + actions, NO assertions of business logic)
 │   ├── BasePage.ts         # Common reusable methods (click, fill, expectVisible...)
