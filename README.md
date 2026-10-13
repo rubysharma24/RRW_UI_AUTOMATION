@@ -38,5 +38,3 @@ npm run test:ui           # Playwright's interactive UI mode (best for debugging
 npm run test:login        # only login.spec.ts
 npm run report            # open last HTML report
 
-ki feature/flow kya hai, main tumhe exactly bata dunga "is file me ye
-add karo" — pura code copy-paste
