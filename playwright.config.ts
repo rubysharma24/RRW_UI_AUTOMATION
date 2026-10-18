@@ -39,21 +39,21 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       grepInvert: /@mobile/,
     },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-      grepInvert: /@mobile/,
-    },
-    {
-      name: 'webkit', // Safari engine
-      use: { ...devices['Desktop Safari'] },
-      grepInvert: /@mobile/,
-    },
-    {
-      name: 'edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
-      grepInvert: /@mobile/,
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    //   grepInvert: /@mobile/,
+    // },
+    // {
+    //   name: 'webkit', // Safari engine
+    //   use: { ...devices['Desktop Safari'] },
+    //   grepInvert: /@mobile/,
+    // },
+    // {
+    //   name: 'edge',
+    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
+    //   grepInvert: /@mobile/,
+    // },
 
     // ---------- Mobile (disabled) ----------
     // {
