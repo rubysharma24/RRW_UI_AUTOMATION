@@ -10,10 +10,10 @@ export default defineConfig({
     timeout: 5000,
   },
 
-  workers: 1,
+  workers: process.env.CI ? 3 : 1,
 
   forbidOnly: !!process.env.CI,
-  // retries 1 rakho taaki trace 'on-first-retry' local par bhi bane
+
   retries: process.env.CI ? 2 : 1,
 
   reporter: [
