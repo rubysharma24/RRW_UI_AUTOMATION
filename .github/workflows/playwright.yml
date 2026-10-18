@@ -2,9 +2,8 @@ name: Playwright Automation
 
 on:
   push:
-    branches: [PlaywrightTypeScript]   # apni branch ka naam yahan daalo
+    branches: [roadready_ui_automation]
   workflow_dispatch:
-
 jobs:
   run-playwright-tests:
     runs-on: ubuntu-latest
@@ -28,6 +27,10 @@ jobs:
       - name: Run Playwright Tests
         run: npx playwright test
 
+      - name: Zip Report
+        if: always()
+        run: zip -r playwright-report.zip playwright-report/
+
       - name: Upload Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -35,3 +38,26 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+      - name: Send Email Report
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Playwright Report - ${{ job.status }} (${{ github.ref_name }})"
+          to: ${{ secrets.MAIL_TO }}
+          from: RoadReadyWheels QA <${{ secrets.MAIL_USERNAME }}>
+          body: |
+            Playwright test run complete.
+
+            Status: ${{ job.status }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            HTML report attached (unzip and open index.html).
+          attachments: playwright-report.zip
