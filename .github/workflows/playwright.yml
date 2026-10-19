@@ -29,7 +29,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium firefox webkit msedge
+        run: npx playwright install --with-deps chromium
 
       - name: Run Playwright Tests
         run: npx playwright test
@@ -43,6 +43,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Send Email Report
+      - name: Send Summary Email
         if: always()
-        run: npx tsx scripts/sendReport.ts
+        run: npx tsx scripts/sendSummaryEmail.ts
