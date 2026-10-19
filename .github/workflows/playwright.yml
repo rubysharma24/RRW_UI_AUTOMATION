@@ -32,7 +32,15 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright Tests
-        run: npx playwright test
+        run: npx playwright test tests/Affirmcheckout.spec.ts tests/Paypalcheckout.spec.ts  
+
+      - name: Create Google credentials file
+        if: always()
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          mkdir -p credentials
+          printf '%s' "$GOOGLE_CREDENTIALS" > credentials/google-credentials.json
 
       - name: Upload Report
         if: always()
