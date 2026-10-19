@@ -29,10 +29,18 @@ jobs:
         run: npm ci
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium firefox webkit msedge
+        run: npx playwright install --with-deps chromium
 
       - name: Run Playwright Tests
         run: npx playwright test
+
+      - name: Create Google credentials file
+        if: always()
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          mkdir -p credentials
+          printf '%s' "$GOOGLE_CREDENTIALS" > credentials/google-credentials.json
 
       - name: Upload Report
         if: always()
@@ -43,6 +51,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Send Email Report
+      - name: Send Summary Email
         if: always()
-        run: npx tsx scripts/sendReport.ts
+        run: npx tsx scripts/sendSummaryEmail.ts
