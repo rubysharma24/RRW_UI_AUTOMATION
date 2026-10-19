@@ -1,5 +1,6 @@
 ﻿node_modules/
-
+.env
+Credentials/
 allure-report/
 allure-report.zip
 allure-results/

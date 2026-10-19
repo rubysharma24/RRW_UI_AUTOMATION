@@ -27,7 +27,7 @@ export default defineConfig({
     baseURL: process.env.BASE_URL || 'https://staging.roadreadywheels.com',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: process.env.CI ? 'off' : 'retain-on-failure',
     actionTimeout: 10 * 1000,
     navigationTimeout: 45 * 1000,
   },

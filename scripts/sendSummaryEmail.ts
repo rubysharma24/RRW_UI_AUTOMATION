@@ -428,9 +428,11 @@ export async function sendSummaryEmail() {
 
   const subject = `${statusEmoji} RRW Playwright Automation | Staging — ${resultText}`;
 
-  const info = await transporter.sendMail({
+    const info = await transporter.sendMail({
     from: `"RoadReady QA" <${process.env.GMAIL_USER}>`,
     to: process.env.REPORT_RECIPIENT,
+    cc: process.env.REPORT_CC || undefined,
+   // bcc: process.env.REPORT_BCC || undefined,
     subject,
     html,
   });
