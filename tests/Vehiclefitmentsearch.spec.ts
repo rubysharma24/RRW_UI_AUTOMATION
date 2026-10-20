@@ -1,36 +1,57 @@
 import { test, expect } from '../fixtures/pageFixtures';
-import { validUser } from '../test-data/login.data';
 
-test.describe('Vehicle Fitment Search - End to End', () => {
-  test.beforeEach(async ({ homePage, loginPage }) => {
-    await homePage.open();
-    await homePage.goToLogin();
-    await loginPage.login(validUser.email, validUser.password);
-  });
-
-  test('should search two vehicles, reset between them, and notify me for an out-of-stock result', async ({
+test.describe('Vehicle Fitment Search - Guest End to End', () => {
+  test('should filter Cadillac CT-Series, reset, clear Acura filters, and open Buick Enclave PDP', async ({
     vehicleFitmentPage,
     productPage,
   }) => {
-    
-    await test.step('Select Resale shop mode', async () => {
-      await vehicleFitmentPage.selectShopMode('Resale');
+    await test.step('Open home page and click Shop Now', async () => {
+      await vehicleFitmentPage.openHomeAndShopNow();
     });
 
-  
-    await test.step('Search Audi, A Series, 2013', async () => {
-      await vehicleFitmentPage.selectMake('Audi');
-      await vehicleFitmentPage.selectModel('A Series');
-      await vehicleFitmentPage.selectYear('2013');
-      await vehicleFitmentPage.expectFiltersApplied('A Series', '2013');
+    await test.step('Search Cadillac, CT-Series, 2023', async () => {
+      await vehicleFitmentPage.selectMake('Cadillac');
+      await vehicleFitmentPage.selectModel('CT-Series');
+      await vehicleFitmentPage.selectYear('2023');
+      await vehicleFitmentPage.expectFiltersApplied('Cadillac', 'CT-Series', '2023');
     });
 
-    await test.step('Open the Audi A8 wheel and verify PDP', async () => {
-      await vehicleFitmentPage.clickProductByName(
-        '-2015 19x9 Audi A8 Alloy Wheel / Rim'
-      );
+    await test.step('Apply Diameter, Bolt Pattern and Lug Count filters', async () => {
+      await vehicleFitmentPage.selectDiameter('19"');
+      await vehicleFitmentPage.selectBoltPattern('5x120mm or 5x4.7"');
+      await vehicleFitmentPage.selectLugCount('5');
+      await vehicleFitmentPage.expectFiltersApplied('19"', '5x120mm or 5x4.7"', '5');
+    });
 
-      await expect(productPage.productTitle).toContainText(/Audi A8/i, {
+    await test.step('Reset all filters', async () => {
+      await vehicleFitmentPage.resetFilters();
+      await vehicleFitmentPage.expectFiltersCleared('Cadillac', 'CT-Series', '2023');
+    });
+
+    await test.step('Search Acura ILX and apply Alloy material', async () => {
+      await vehicleFitmentPage.selectMake('Acura');
+      await vehicleFitmentPage.selectModel('ILX');
+      await vehicleFitmentPage.selectMaterial('Alloy');
+      await vehicleFitmentPage.expectFiltersApplied('Acura', 'ILX', 'Alloy');
+    });
+
+    await test.step('Remove Alloy, ILX and Acura filter chips one by one', async () => {
+      await vehicleFitmentPage.removeFilter('Alloy');
+      await vehicleFitmentPage.removeFilter('ILX');
+      await vehicleFitmentPage.removeFilter('Acura');
+    });
+
+    await test.step('Search Buick, Enclave, 2023', async () => {
+      await vehicleFitmentPage.selectMake('Buick');
+      await vehicleFitmentPage.selectModel('Enclave');
+      await vehicleFitmentPage.selectYear('2023');
+      await vehicleFitmentPage.expectFiltersApplied('Buick', 'Enclave', '2023');
+    });
+
+    await test.step('Open Buick Enclave wheel and verify PDP', async () => {
+      await vehicleFitmentPage.clickProductByName('2018-2024 20x8 Buick Enclave');
+
+      await expect(productPage.productTitle).toContainText(/Buick Enclave/i, {
         timeout: 10000,
       });
 
@@ -38,52 +59,5 @@ test.describe('Vehicle Fitment Search - End to End', () => {
       const price = Number(priceText.replace(/[$,]/g, '').trim());
       expect(price).toBeGreaterThan(0);
     });
-
-    
-    await test.step('Return to the Audi listing and reset filters', async () => {
-      await vehicleFitmentPage.goToFilteredCategory({
-        make: 'Audi',
-        model: 'A Series',
-        year: '2013',
-      });
-
-      await vehicleFitmentPage.resetFilters();
-      await vehicleFitmentPage.expectFiltersCleared('A Series', '2013');
-    });
-
-
-    await test.step('Search Cadillac Escalade with Category/Material/Diameter filters', async () => {
-      await vehicleFitmentPage.selectMake('Cadillac');
-      await vehicleFitmentPage.selectModel('Escalade');
-      await vehicleFitmentPage.expectFiltersApplied('Escalade');
-
-      await vehicleFitmentPage.selectCategory('OEM Replacement Wheel');
-      await vehicleFitmentPage.selectMaterial('Alloy');
-      await vehicleFitmentPage.selectDiameter('20"');
-
-      await vehicleFitmentPage.expectFiltersApplied(
-        'OEM Replacement Wheel',
-        'Alloy',
-        '20"'
-      );
-    });
-
-    
-    await test.step('Open the Cadillac Escalade wheel and verify PDP', async () => {
-      await vehicleFitmentPage.clickProductByName('2015-2023 Cadillac Escalade');
-
-      await expect(productPage.productTitle).toContainText(
-        /Cadillac Escalade/i,
-        { timeout: 10000 }
-      );
-
-      const priceText = await productPage.getPriceText();
-      const price = Number(priceText.replace(/[$,]/g, '').trim());
-      expect(price).toBeGreaterThan(0);
-    });
-
-await test.step('Notify Me for the out-of-stock Escalade wheel', async () => {
-  await vehicleFitmentPage.submitNotifyMeFromPdp('ruby.sharma@w3villa.com');
-});
   });
 });

@@ -1,8 +1,8 @@
 import { Page, Locator, expect } from '@playwright/test';
 import BasePage from './BasePage';
 
-
 export default class VehicleFitmentPage extends BasePage {
+  readonly shopNowButton: Locator;
   readonly makeSelect: Locator;
   readonly modelSelect: Locator;
   readonly yearSelect: Locator;
@@ -12,21 +12,24 @@ export default class VehicleFitmentPage extends BasePage {
   readonly removeFilterButton: (value: string) => Locator;
   readonly shopAsModalHeading: Locator;
   readonly shopAsResaleOption: Locator;
-  readonly shopAsWholesaleOption: Locator;
   readonly materialButton: (materialName: string) => Locator;
   readonly diameterButton: (diameterLabel: string) => Locator;
+  readonly boltPatternButton: (label: string) => Locator;
+  readonly lugCountButton: (count: string) => Locator;
   readonly filterSummaryText: (partialText: string) => Locator;
-  readonly notifyMeButton: Locator;
-  readonly notifyMeEmailInput: Locator;
-  readonly notifyMeSubmitButton: Locator;
   readonly resetFiltersButton: Locator;
+  readonly notifyMeButton: Locator;
   readonly pdpNotifyMeButton: Locator;
-  readonly pdpNotifyDialog: Locator;
-  readonly pdpNotifyEmailInput: Locator;
-  readonly pdpNotifySubmitButton: Locator;
+  readonly notifyEmailInput: Locator;
+  readonly notifySoonerCheckbox: Locator;
+  readonly notifySubmitButton: Locator;
+  readonly notifySuccessMessage: Locator;
 
   constructor(page: Page) {
     super(page);
+
+    // Home page CTA (guest flow, no login)
+    this.shopNowButton = page.getByRole('button', { name: 'Shop Now' });
 
     this.makeSelect = page.locator('.ant-select-selection-search').first();
     this.modelSelect = page
@@ -37,110 +40,62 @@ export default class VehicleFitmentPage extends BasePage {
       'div:nth-child(3) > .ant-select > .ant-select-selector > .ant-select-selection-wrap > .ant-select-selection-search'
     );
 
-    // FIX: exact: true — without it, name matching is substring-based and
-    // collides with unrelated buttons elsewhere on the page (e.g. cart
-    // drawer items) whose accessible name merely *contains* this text.
     this.categoryButton = (categoryName: string) =>
       page.getByRole('button', { name: categoryName, exact: true });
 
     this.hollanderCode = page.getByText(/^Hollander: 560-/);
-
-    // Result cards' prices — used to assert results actually rendered,
-    // not just that no error was thrown.
     this.resultPrices = page.getByText(/^\$/);
 
-    // FIX: exact: true — `Remove ${value}` was also matching the cart
-    // drawer's "Remove <product name> from cart" buttons via substring.
     this.removeFilterButton = (value: string) =>
       page.getByRole('button', { name: `Remove ${value}`, exact: true });
 
-    // The "Shop As" modal (full-screen overlay, z-[9999]) re-appears after
-    // the Make selection and blocks every subsequent click underneath it.
-    // Scoped via the nested heading so this doesn't collide with the plain
-    // "Resale" toggle button in the header (that one has no heading inside).
+    // Safety net: dismissed only if the "Shop As" modal shows up.
     this.shopAsModalHeading = page.getByRole('heading', { name: 'Shop As' });
     this.shopAsResaleOption = page.getByRole('button').filter({
       has: page.getByRole('heading', { name: 'Resale', exact: true }),
     });
-    this.shopAsWholesaleOption = page.getByRole('button').filter({
-      has: page.getByRole('heading', { name: 'Wholesale', exact: true }),
-    });
 
-    // FIX: exact: true — 'Alloy' / 'Steel' / diameter labels were matching
-    // the cart drawer's "Remove ... Alloy Wheel / Rim from cart",
-    // "Decrease/Increase quantity of ... Alloy Wheel / Rim" buttons too,
-    // since those accessible names contain the material name as a substring.
-    // This was the direct cause of the strict-mode violation.
     this.materialButton = (materialName: string) =>
       page.getByRole('button', { name: materialName, exact: true });
     this.diameterButton = (diameterLabel: string) =>
       page.getByRole('button', { name: diameterLabel, exact: true });
+    this.boltPatternButton = (label: string) =>
+      page.getByRole('button', { name: label, exact: true });
+    this.lugCountButton = (count: string) =>
+      page.getByRole('button', { name: count, exact: true });
 
-    // The breadcrumb-style summary text (e.g. "Cadillac, Escalade, OEM
-    // Replacement Wheel") shown above the results grid once enough filters
-    // are picked — partial match since the full string grows with each
-    // filter added.
     this.filterSummaryText = (partialText: string) =>
       page.getByText(partialText, { exact: false });
 
-    // Shown on a result card instead of "Add To Cart" when that specific
-    // filtered combination has no stock.
-    this.notifyMeButton = page.getByRole('button', { name: 'Notify Me' });
-    this.notifyMeEmailInput = page.getByRole('textbox', {
-      name: 'example@domain.com',
-    });
-    this.notifyMeSubmitButton = page.getByRole('button', { name: 'Submit' });
-
-    // Sits next to the "Selected Filters" heading — clears every applied
-    // filter chip in one click.
     this.resetFiltersButton = page.getByRole('button', { name: 'Reset' });
 
-    this.pdpNotifyMeButton = page.getByRole('button', { name: 'Notify Me' }).last();
-    this.pdpNotifyDialog = page.getByRole('dialog', { name: 'Enter your Email' });
-    this.pdpNotifyEmailInput = this.pdpNotifyDialog.getByRole('textbox', {
-      name: 'example@domain.com',
+    this.notifyMeButton = page
+      .getByRole('button', { name: 'Get Restock Alert' })
+      .nth(1);
+    this.pdpNotifyMeButton = page
+      .getByRole('button', { name: 'Get Restock Alert' })
+      .last();
+
+    // Restock dialog ("Get Notified When It's Back")
+    this.notifyEmailInput = page.getByRole('textbox', { name: 'Email address' });
+    this.notifySoonerCheckbox = page.locator('#sooner-restock-requested');
+    this.notifySubmitButton = page.getByRole('button', {
+      name: 'Notify Me When Available',
     });
-    this.pdpNotifySubmitButton = this.pdpNotifyDialog.getByRole('button', {
-      name: 'Submit',
-    });
+    this.notifySuccessMessage = page
+      .getByText(/Thanks!\s*We will notify you/i)
+      .first();
   }
 
-  /**
-   * Call once right after login — the "Shop As" modal is mandatory at that
-   * point, and choosing an option is what lands you on the categories page
-   * with the Make/Model/Year selects available.
-   */
-  async selectShopMode(mode: 'Resale' | 'Wholesale') {
-    const isModalVisible = await this.shopAsModalHeading
-      .isVisible({ timeout: 5000 })
-      .catch(() => false);
-
-    if (!isModalVisible) {
-      await this.page.goto('https://staging.roadreadywheels.com/t/categories');
-      await this.waitForFiltersReady();
-      return;
-    }
-
-    const option =
-      mode === 'Resale' ? this.shopAsResaleOption : this.shopAsWholesaleOption;
-    await option.click();
-
-    await this.shopAsModalHeading.waitFor({ state: 'hidden', timeout: 10000 });
-
-    await this.page.reload();
-    await this.page.waitForLoadState('networkidle');
-
-    await this.dismissShopAsModalIfPresent();
-
+  /** Guest flow: open home page and click "Shop Now" to reach the filters. */
+  async openHomeAndShopNow() {
+    await this.page.goto('/');
+    await expect(this.shopNowButton).toBeVisible({ timeout: 15000 });
+    await this.shopNowButton.click();
     await this.waitForFiltersReady();
   }
 
-  /**
-   * Waits out the "Updating filters…" overlay AND the separate full-page
-   * ".page-loader" spinner — both appear after a reload or filter-panel
-   * re-init and intercept clicks on their own, independently of the
-   * Shop-As modal.
-   */
+  /** Waits out "Updating filters…" overlay and the ".page-loader" spinner. */
   async waitForFiltersReady() {
     const pageLoader = this.page.locator('.page-loader');
     if (await pageLoader.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -150,18 +105,12 @@ export default class VehicleFitmentPage extends BasePage {
     const updatingFiltersText = this.page.getByText('Updating filters', {
       exact: false,
     });
-
     if (await updatingFiltersText.isVisible({ timeout: 3000 }).catch(() => false)) {
       await updatingFiltersText.waitFor({ state: 'hidden', timeout: 15000 });
     }
   }
 
-  /**
-   * Call before any dropdown/button interaction that follows a Make
-   * selection — the modal can pop up more than once, not just immediately
-   * after the first select. A blind wait isn't reliable because the modal's
-   * appearance timing varies; actively checking and dismissing it is.
-   */
+  /** Dismisses the "Shop As" modal only if it appears (no-op otherwise). */
   async dismissShopAsModalIfPresent() {
     const isModalVisible = await this.shopAsModalHeading
       .isVisible({ timeout: 3000 })
@@ -188,7 +137,6 @@ export default class VehicleFitmentPage extends BasePage {
     await this.dismissShopAsModalIfPresent();
     await this.clickClearingOverlays(this.makeSelect);
     await this.page.getByText(make, { exact: true }).click();
-
     await this.dismissShopAsModalIfPresent();
   }
 
@@ -224,6 +172,18 @@ export default class VehicleFitmentPage extends BasePage {
     await this.clickClearingOverlays(this.diameterButton(diameterLabel));
   }
 
+  async selectBoltPattern(label: string) {
+    await this.waitForFiltersReady();
+    await this.dismissShopAsModalIfPresent();
+    await this.clickClearingOverlays(this.boltPatternButton(label));
+  }
+
+  async selectLugCount(count: string) {
+    await this.waitForFiltersReady();
+    await this.dismissShopAsModalIfPresent();
+    await this.clickClearingOverlays(this.lugCountButton(count));
+  }
+
   async expectFiltersApplied(...values: string[]) {
     for (const value of values) {
       await expect(this.removeFilterButton(value)).toBeVisible({
@@ -241,6 +201,14 @@ export default class VehicleFitmentPage extends BasePage {
     }
   }
 
+  /** Removes a single applied filter chip and waits for it to disappear. */
+  async removeFilter(value: string) {
+    await this.waitForFiltersReady();
+    await this.removeFilterButton(value).click();
+    await expect(this.removeFilterButton(value)).toBeHidden({ timeout: 10000 });
+    await this.waitForFiltersReady();
+  }
+
   async expectFilterSummaryVisible(partialText: string) {
     await expect(this.filterSummaryText(partialText)).toBeVisible({
       timeout: 10000,
@@ -249,42 +217,48 @@ export default class VehicleFitmentPage extends BasePage {
 
   async goToFilteredCategory(params: Record<string, string>) {
     const query = new URLSearchParams(params).toString();
-    await this.page.goto(
-      `https://staging.roadreadywheels.com/t/categories?${query}`
-    );
+    await this.page.goto(`/t/categories?${query}`);
   }
 
-  async submitNotifyMe(email: string) {
-    await this.click(this.notifyMeButton);
-    await this.notifyMeEmailInput.click();
-    await this.notifyMeEmailInput.fill(email);
-    await this.click(this.notifyMeSubmitButton);
+  /** Fills the restock dialog, optionally ticks "I need it sooner", submits. */
+  private async fillAndSubmitNotifyDialog(email: string, needItSooner: boolean) {
+    await expect(this.notifyEmailInput).toBeVisible({ timeout: 10000 });
+    await this.notifyEmailInput.fill(email);
 
-    await expect(this.notifyMeEmailInput).toBeHidden({ timeout: 10000 });
-  }
-
-  private async clickPdpNotifyMeButton() {
-    try {
-      await this.click(this.pdpNotifyMeButton);
-    } catch (err) {
-      await this.pdpNotifyMeButton.scrollIntoViewIfNeeded();
-      await this.page.mouse.wheel(0, -150);
-      await this.pdpNotifyMeButton.click({ timeout: 8000 }).catch(async () => {
-        await this.pdpNotifyMeButton.click({ force: true });
-      });
-    }
-  }
-
-  async submitNotifyMeFromPdp(email?: string) {
-    await this.clickPdpNotifyMeButton();
-    await expect(this.pdpNotifyDialog).toBeVisible({ timeout: 10000 });
-
-    if (email) {
-      await this.pdpNotifyEmailInput.fill(email);
+    if (needItSooner) {
+      await this.notifySoonerCheckbox.check();
     }
 
-    await this.click(this.pdpNotifySubmitButton);
-    await expect(this.pdpNotifyDialog).toBeHidden({ timeout: 10000 });
+    // Toast chhota hota hai, isliye click se PEHLE wait shuru karo
+    const toastShown = this.notifySuccessMessage.waitFor({
+      state: 'visible',
+      timeout: 15000,
+    });
+    await this.notifySubmitButton.click();
+    await toastShown;
+
+    await expect(this.notifyEmailInput).toBeHidden({ timeout: 10000 });
+  }
+
+  /** Listing page: click "Get Restock Alert" on the out-of-stock result. */
+  async submitNotifyMe(email: string, needItSooner = false) {
+    await this.waitForFiltersReady();
+    await this.dismissShopAsModalIfPresent();
+
+    await expect(this.notifyMeButton).toBeVisible({ timeout: 30000 });
+    await this.notifyMeButton.scrollIntoViewIfNeeded();
+    await this.notifyMeButton.click();
+
+    await this.fillAndSubmitNotifyDialog(email, needItSooner);
+  }
+
+  /** Product page: click "Get Restock Alert" in the main section. */
+  async submitNotifyMeFromPdp(email: string, needItSooner = false) {
+    await expect(this.pdpNotifyMeButton).toBeVisible({ timeout: 10000 });
+    await this.pdpNotifyMeButton.scrollIntoViewIfNeeded();
+    await this.pdpNotifyMeButton.click();
+
+    await this.fillAndSubmitNotifyDialog(email, needItSooner);
   }
 
   async goBackToListing() {
@@ -294,17 +268,10 @@ export default class VehicleFitmentPage extends BasePage {
     ).toBeVisible({ timeout: 10000 });
   }
 
-  /**
-   * Clicks Reset and waits for the filter chips to actually clear before
-   * moving on — resetting is followed by a re-render, so proceeding
-   * immediately can land clicks on stale dropdown state.
-   */
+  /** Clicks Reset and waits for the filter chips to actually clear. */
   async resetFilters() {
-    await this.click(this.resetFiltersButton);
+    await this.resetFiltersButton.click();
 
-    // Scoped to the Selected Filters panel so the cart drawer's
-    // "Remove ... from cart" button (which also matches /^Remove /i) can
-    // never be counted here and block this assertion from settling.
     const selectedFiltersPanel = this.page
       .getByRole('heading', { name: 'Selected Filters' })
       .locator('..');
@@ -313,20 +280,21 @@ export default class VehicleFitmentPage extends BasePage {
       selectedFiltersPanel.getByRole('button', { name: /^Remove /i })
     ).toHaveCount(0, { timeout: 10000 });
 
-    await this.page.waitForTimeout(2000);
+    await this.waitForFiltersReady();
   }
 
   async expectResultsVisible() {
-    await expect(this.hollanderCode).toBeVisible({ timeout: 10000 });
+    await expect(this.hollanderCode).toBeVisible({ timeout: 20000 });
 
     const priceCount = await this.resultPrices.count();
     expect(priceCount).toBeGreaterThan(0);
   }
 
+  /** Product ke 2 links hote hain (image + title), isliye .first() */
   async clickProductByName(partialName: string) {
     await this.page
-      .locator('a')
-      .filter({ hasText: partialName })
+      .getByRole('link', { name: partialName })
+      .first()
       .click();
   }
 }

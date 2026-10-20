@@ -10,7 +10,7 @@ export default defineConfig({
     timeout: 5000,
   },
 
-  workers: process.env.CI ? 3 : 1,
+  workers: 3,
 
   forbidOnly: !!process.env.CI,
 
