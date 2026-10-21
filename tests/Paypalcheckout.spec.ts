@@ -1,11 +1,16 @@
 import { test } from '../fixtures/pageFixtures';
-import { guestUser, payPalSandboxUser } from '../test-data/Guestcheckout.data.ts';
+import { guestUser, payPalSandboxUser } from '../test-data/Guestcheckout.data';
 
 test('should complete guest checkout using PayPal', async ({ page, paypalCheckoutPage }) => {
-  await test.step('Go to home and open a product', async () => {
+  await test.step('Go to home and click Shop Now', async () => {
     await page.goto('https://staging.roadreadywheels.com/');
     await paypalCheckoutPage.clickShopNow();
-    await paypalCheckoutPage.openFirstProduct();
+  });
+
+  await test.step('Search BMW and open the BMW 525i wheel', async () => {
+    await paypalCheckoutPage.searchFor('bmw');
+    await paypalCheckoutPage.selectSearchResultGroup('Bmw');
+    await paypalCheckoutPage.openProductByName('2004-2007 17x7.5 BMW 525i');
   });
 
   await test.step('Add product to cart', async () => {

@@ -12,9 +12,10 @@ export interface GuestCheckoutInfo {
   phone: string;
 }
 
-
 export default class PayPalCheckoutPage extends BasePage {
   readonly shopNowButton: Locator;
+  readonly searchInput: Locator;
+  readonly searchButton: Locator;
   readonly addToCartButton: Locator;
   readonly cartDrawer: Locator;
   readonly cartSubtotalText: Locator;
@@ -44,27 +45,27 @@ export default class PayPalCheckoutPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-   
     this.shopNowButton = page.getByRole('button', { name: 'Shop Now' });
+
+    // Header global search
+    this.searchInput = page.getByRole('textbox', { name: 'Search for wheels' });
+    this.searchButton = page.getByRole('button', { name: 'Search', exact: true });
+
     this.addToCartButton = page.locator('#add-to-cart-button');
     this.cartDrawer = page.locator('[class*="z-[1000]"]');
-   
     this.cartSubtotalText = page.getByText(/^Subtotal \(\d+ items?\)\$/).first();
 
-    
     this.completeCheckoutButton = this.cartDrawer
       .locator('button:visible', { hasText: 'Complete Checkout' })
       .last();
 
     this.emailInput = page.getByRole('textbox', { name: 'Email address' });
-    
     this.firstNameInput = page.getByRole('textbox', { name: 'First name' }).first();
     this.lastNameInput = page.getByRole('textbox', { name: 'Last name' }).first();
     this.addressLineInput = page
       .getByRole('textbox', { name: 'Address Line' })
       .first();
     this.cityInput = page.getByRole('textbox', { name: 'City' }).first();
-    
     this.stateSelect = page.locator('.ant-select-selection-search').first();
     this.zipInput = page.getByRole('textbox', { name: 'ZIP Code' }).first();
     this.phoneInput = page.getByRole('textbox', { name: 'Phone number' }).first();
@@ -73,9 +74,7 @@ export default class PayPalCheckoutPage extends BasePage {
     });
     this.registrationContinueButton = page.getByRole('button', { name: 'Continue' });
 
-    
     this.reviewOrderTotalText = page.getByText(/Total\s*\$/);
-   
     this.reviewContinueButton = page.getByRole('button', { name: 'Continue' }).nth(1);
     this.payPalButton = page.getByRole('button', { name: 'PayPal ▶' });
 
@@ -85,7 +84,6 @@ export default class PayPalCheckoutPage extends BasePage {
     this.paymentMethodText = page.getByText('PayPal');
   }
 
-  
   async clickShopNow() {
     await expect(async () => {
       await this.click(this.shopNowButton);
@@ -96,7 +94,6 @@ export default class PayPalCheckoutPage extends BasePage {
     }).toPass({ timeout: 15000 });
   }
 
-  
   private async waitForListingReady() {
     const pageLoader = this.page.locator('.page-loader');
     if (await pageLoader.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -111,6 +108,41 @@ export default class PayPalCheckoutPage extends BasePage {
     }
   }
 
+  /** Header search me keyword daal kar Search dabata hai. */
+  async searchFor(term: string) {
+    await this.waitForListingReady();
+    await this.searchInput.fill(term);
+    await expect(this.searchButton).toBeEnabled({ timeout: 5000 });
+    await this.searchButton.click();
+    await this.waitForListingReady();
+  }
+
+  /** Search result me make/category button (e.g. 'Bmw') par click karta hai. */
+  async selectSearchResultGroup(name: string) {
+    const groupButton = this.page.getByRole('button', { name }).first();
+    await expect(groupButton).toBeVisible({ timeout: 15000 });
+    await groupButton.click();
+    await this.waitForListingReady();
+  }
+
+  /** Listing se product naam se kholta hai (image + title = 2 links, isliye .first()). */
+  async openProductByName(partialName: string) {
+    await this.waitForListingReady();
+
+    await this.page
+      .getByRole('link', { name: partialName })
+      .first()
+      .click();
+
+    await this.page.waitForURL(/\/products\//, {
+      timeout: 10000,
+      waitUntil: 'domcontentloaded',
+    });
+
+    await expect(this.addToCartButton).toBeVisible({ timeout: 10000 });
+  }
+
+  /** Pehla Alloy Wheel product kholta hai (purane specs ke liye). */
   async openFirstProduct(): Promise<string> {
     await this.waitForListingReady();
 
@@ -134,13 +166,11 @@ export default class PayPalCheckoutPage extends BasePage {
     return productName;
   }
 
-  /** Same defensive pattern as AmazonPayCheckoutPage.addProductToCart(). */
   async addProductToCart() {
     await this.click(this.addToCartButton);
     await expect(this.cartSubtotalText).toBeVisible({ timeout: 10000 });
   }
 
- 
   async proceedToGuestCheckout() {
     await this.click(this.completeCheckoutButton);
     await this.page.waitForURL(/checkout\/registration/, {
@@ -149,7 +179,6 @@ export default class PayPalCheckoutPage extends BasePage {
     });
   }
 
-  
   private async clickStateSelect() {
     try {
       await this.click(this.stateSelect);
@@ -162,7 +191,6 @@ export default class PayPalCheckoutPage extends BasePage {
     }
   }
 
- 
   async completeGuestRegistration(info: GuestCheckoutInfo) {
     const formAlreadyVisible = await this.emailInput
       .isVisible({ timeout: 3000 })
@@ -179,7 +207,6 @@ export default class PayPalCheckoutPage extends BasePage {
     await this.cityInput.fill(info.city);
 
     await this.clickStateSelect();
-   
     await this.page.getByText(info.state, { exact: true }).first().click();
 
     await this.zipInput.fill(info.zip);
@@ -195,17 +222,14 @@ export default class PayPalCheckoutPage extends BasePage {
     });
   }
 
- 
   async reviewOrderAndContinue() {
     await expect(this.reviewOrderTotalText).toBeVisible({ timeout: 10000 });
     await this.click(this.reviewContinueButton);
 
-   
     await expect(this.page.getByText(/Tax\s*\$/)).toBeVisible({ timeout: 10000 });
     await expect(this.reviewOrderTotalText).toBeVisible({ timeout: 10000 });
   }
 
- 
   private async findClickToContinueLink(): Promise<Locator | null> {
     const onPage = this.page.getByRole('link', { name: 'Click to Continue' });
     if (await onPage.isVisible().catch(() => false)) {
@@ -220,20 +244,25 @@ export default class PayPalCheckoutPage extends BasePage {
     return null;
   }
 
-  
-  private async waitForPayPalConfirmButton(popup: Page, timeout: number): Promise<Locator | null> {
+  private async waitForPayPalConfirmButton(
+    popup: Page,
+    timeout: number
+  ): Promise<Locator | null> {
     const initialSubmit = popup.getByTestId('submit-button-initial');
     const completePurchase = popup.getByRole('button', { name: 'Complete Purchase' });
 
- 
-    const a = initialSubmit.waitFor({ state: 'visible', timeout }).then(() => initialSubmit).catch(() => null);
-    const b = completePurchase.waitFor({ state: 'visible', timeout }).then(() => completePurchase).catch(() => null);
+    const a = initialSubmit
+      .waitFor({ state: 'visible', timeout })
+      .then(() => initialSubmit)
+      .catch(() => null);
+    const b = completePurchase
+      .waitFor({ state: 'visible', timeout })
+      .then(() => completePurchase)
+      .catch(() => null);
     return (await Promise.race([a, b])) ?? (await a) ?? (await b);
   }
 
- 
   private async finishPayPalPayment(initialPopup: Page) {
- 
     test.setTimeout(Math.max(test.info().timeout, 150000));
 
     const CONFIRMATION_URL = /order-confirmation-invoice\?orderNumber=/;
@@ -286,7 +315,6 @@ export default class PayPalCheckoutPage extends BasePage {
           const target = await this.waitForPayPalConfirmButton(popup, 5000);
           if (target) {
             log('confirm button visible -> clicking once');
-          
             await target.click({ timeout: 5000 }).catch(() => {});
             confirmClickedAt = Date.now();
           }
@@ -298,13 +326,16 @@ export default class PayPalCheckoutPage extends BasePage {
           loggedClosed = true;
         }
 
-   
         if (Date.now() - closedSince > CLOSED_GRACE_MS && relaunches < MAX_RELAUNCHES) {
           const reLaunchLink = await this.findClickToContinueLink();
           if (reLaunchLink) {
             relaunches++;
-            log(`popup closed with no redirect -> relaunch attempt ${relaunches}/${MAX_RELAUNCHES}`);
-            const popupPromise = this.page.waitForEvent('popup', { timeout: 8000 }).catch(() => null);
+            log(
+              `popup closed with no redirect -> relaunch attempt ${relaunches}/${MAX_RELAUNCHES}`
+            );
+            const popupPromise = this.page
+              .waitForEvent('popup', { timeout: 8000 })
+              .catch(() => null);
             await reLaunchLink.click();
             popup = (await popupPromise) ?? popup;
             closedSince = 0;
@@ -333,7 +364,6 @@ export default class PayPalCheckoutPage extends BasePage {
       .contentFrame()
       .getByRole('link', { name: 'PayPal' });
 
-    
     await expect(async () => {
       const collapsedToggle = this.page.getByRole('button', { name: 'PayPal ▶' });
       if (await collapsedToggle.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -358,7 +388,6 @@ export default class PayPalCheckoutPage extends BasePage {
     await this.declinePaymentVerificationIfPresent();
   }
 
- 
   async declinePaymentVerificationIfPresent() {
     const verificationFrame = this.page.locator('iframe[name^="I0_"]');
     const isPresent = await verificationFrame.isVisible({ timeout: 5000 }).catch(() => false);
@@ -373,7 +402,6 @@ export default class PayPalCheckoutPage extends BasePage {
     return url.searchParams.get('orderNumber') ?? '';
   }
 
-  
   async expectOrderConfirmed(email: string) {
     const orderNumber = this.getOrderNumberFromUrl();
     expect(orderNumber).toBeTruthy();
