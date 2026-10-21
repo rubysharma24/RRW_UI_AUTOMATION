@@ -359,10 +359,12 @@ export default class PayPalCheckoutPage extends BasePage {
   }
 
   async payWithPayPal(email: string, password: string) {
+    // iframe me 2 buttons hote hain: "PayPal" aur "Pay Later".
+    // data-funding-source="paypal" unique hai, isliye strict mode violation nahi aayega.
     const payPalLink = this.page
       .locator('iframe[name^="__zoid__paypal_buttons__"]')
       .contentFrame()
-      .getByRole('link', { name: 'PayPal' });
+      .locator('[data-funding-source="paypal"]');
 
     await expect(async () => {
       const collapsedToggle = this.page.getByRole('button', { name: 'PayPal ▶' });
