@@ -5,13 +5,13 @@ export interface GuestCheckoutInfo {
   email: string;
   firstName: string;
   lastName: string;
+  company?: string;
   addressLine: string;
   city: string;
   state: string;
   zip: string;
   phone: string;
 }
-
 
 export default class AffirmCheckoutPage extends BasePage {
   readonly shopNowButton: Locator;
@@ -20,10 +20,12 @@ export default class AffirmCheckoutPage extends BasePage {
   readonly cartSubtotalText: Locator;
   readonly completeCheckoutButton: Locator;
 
-  
+  // Guest registration
+  readonly guestHeading: Locator;
   readonly emailInput: Locator;
   readonly firstNameInput: Locator;
   readonly lastNameInput: Locator;
+  readonly companyInput: Locator;
   readonly addressLineInput: Locator;
   readonly cityInput: Locator;
   readonly stateSelect: Locator;
@@ -32,21 +34,18 @@ export default class AffirmCheckoutPage extends BasePage {
   readonly useShippingAddressCheckbox: Locator;
   readonly registrationContinueButton: Locator;
 
-  
+  // Review
+  readonly orderSummaryHeading: Locator;
   readonly reviewOrderTotalText: Locator;
   readonly reviewContinueButton: Locator;
 
   // Payment
+  readonly affirmToggle: Locator;
   readonly affirmPayButton: Locator;
-
-  // Confirmation
-  readonly orderSummaryHeading: Locator;
-  readonly paymentMethodText: Locator;
 
   constructor(page: Page) {
     super(page);
 
-    // --- Same locators as PayPalCheckoutPage - identical site/components ---
     this.shopNowButton = page.getByRole('button', { name: 'Shop Now' });
     this.addToCartButton = page.locator('#add-to-cart-button');
     this.cartDrawer = page.locator('[class*="z-[1000]"]');
@@ -56,9 +55,13 @@ export default class AffirmCheckoutPage extends BasePage {
       .locator('button:visible', { hasText: 'Complete Checkout' })
       .last();
 
+    this.guestHeading = page.getByRole('heading', { name: 'Continue as Guest' });
     this.emailInput = page.getByRole('textbox', { name: 'Email address' });
     this.firstNameInput = page.getByRole('textbox', { name: 'First name' }).first();
     this.lastNameInput = page.getByRole('textbox', { name: 'Last name' }).first();
+    this.companyInput = page
+      .getByRole('textbox', { name: 'Company (optional)' })
+      .first();
     this.addressLineInput = page
       .getByRole('textbox', { name: 'Address Line' })
       .first();
@@ -71,20 +74,16 @@ export default class AffirmCheckoutPage extends BasePage {
     });
     this.registrationContinueButton = page.getByRole('button', { name: 'Continue' });
 
-    this.reviewOrderTotalText = page.getByText(/Total\s*\$/);
-    
-    this.reviewContinueButton = page.getByRole('button', { name: 'Continue' }).nth(1);
-
-    // --- Affirm-specific ---
-    this.affirmPayButton = page.getByRole('button', { name: 'Pay $' });
-
     this.orderSummaryHeading = page.getByRole('heading', {
-      name: 'Order Summary For Your',
+      name: /Order Summary \(1 items?\)/,
     });
-    this.paymentMethodText = page.getByText('Affirm');
+    this.reviewOrderTotalText = page.getByText(/Total\s*\$/);
+    this.reviewContinueButton = page.getByRole('button', { name: 'Continue' }).first();
+
+    this.affirmToggle = page.getByRole('button', { name: 'Affirm ▶' });
+    this.affirmPayButton = page.getByRole('button', { name: 'Pay $' });
   }
 
-  /** Same as PayPalCheckoutPage.clickShopNow(). */
   async clickShopNow() {
     await expect(async () => {
       await this.click(this.shopNowButton);
@@ -95,7 +94,6 @@ export default class AffirmCheckoutPage extends BasePage {
     }).toPass({ timeout: 15000 });
   }
 
-  /** Same as PayPalCheckoutPage.waitForListingReady(). */
   private async waitForListingReady() {
     const pageLoader = this.page.locator('.page-loader');
     if (await pageLoader.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -110,46 +108,37 @@ export default class AffirmCheckoutPage extends BasePage {
     }
   }
 
-  /** Same as PayPalCheckoutPage.openFirstProduct(). */
-  async openFirstProduct(): Promise<string> {
+  /** Listing se naam ke hisaab se product kholta hai (image + title = 2 links, isliye .first()). */
+  async openProductByName(partialName: string) {
     await this.waitForListingReady();
 
-    const firstProductLink = this.page
-      .locator('a')
-      .filter({ hasText: /Alloy Wheel\s*\/\s*Rim/i })
-      .first();
-
-    const productName = (await firstProductLink.textContent())?.trim() ?? '';
-    await firstProductLink.click();
+    await this.page
+      .getByRole('link', { name: partialName })
+      .first()
+      .click();
 
     await this.page.waitForURL(/\/products\//, {
       timeout: 10000,
       waitUntil: 'domcontentloaded',
     });
 
-    await expect(
-      this.page.getByRole('heading', { name: productName, exact: false })
-    ).toBeVisible({ timeout: 10000 });
-
-    return productName;
+    await expect(this.addToCartButton).toBeVisible({ timeout: 10000 });
   }
 
-  /** Same as PayPalCheckoutPage.addProductToCart(). */
   async addProductToCart() {
     await this.click(this.addToCartButton);
     await expect(this.cartSubtotalText).toBeVisible({ timeout: 10000 });
   }
 
-  /** Same as PayPalCheckoutPage.proceedToGuestCheckout(). */
   async proceedToGuestCheckout() {
     await this.click(this.completeCheckoutButton);
     await this.page.waitForURL(/checkout\/registration/, {
       timeout: 15000,
       waitUntil: 'domcontentloaded',
     });
+    await expect(this.guestHeading).toBeVisible({ timeout: 10000 });
   }
 
-  /** Same as PayPalCheckoutPage.clickStateSelect(). */
   private async clickStateSelect() {
     try {
       await this.click(this.stateSelect);
@@ -162,7 +151,6 @@ export default class AffirmCheckoutPage extends BasePage {
     }
   }
 
-  /** Same as PayPalCheckoutPage.completeGuestRegistration(). */
   async completeGuestRegistration(info: GuestCheckoutInfo) {
     const formAlreadyVisible = await this.emailInput
       .isVisible({ timeout: 3000 })
@@ -175,11 +163,14 @@ export default class AffirmCheckoutPage extends BasePage {
     await this.emailInput.fill(info.email);
     await this.firstNameInput.fill(info.firstName);
     await this.lastNameInput.fill(info.lastName);
+    if (info.company) {
+      await this.companyInput.fill(info.company);
+    }
     await this.addressLineInput.fill(info.addressLine);
     await this.cityInput.fill(info.city);
 
     await this.clickStateSelect();
-    await this.page.getByText(info.state, { exact: true }).first().click();
+    await this.page.getByTitle(info.state, { exact: true }).click();
 
     await this.zipInput.fill(info.zip);
     await this.phoneInput.fill(info.phone);
@@ -194,25 +185,22 @@ export default class AffirmCheckoutPage extends BasePage {
     });
   }
 
-  /** Same as PayPalCheckoutPage.reviewOrderAndContinue(). */
   async reviewOrderAndContinue() {
+    await expect(this.orderSummaryHeading).toBeVisible({ timeout: 10000 });
     await expect(this.reviewOrderTotalText).toBeVisible({ timeout: 10000 });
     await this.click(this.reviewContinueButton);
 
     await expect(this.page.getByText(/Tax\s*\$/)).toBeVisible({ timeout: 10000 });
-    await expect(this.reviewOrderTotalText).toBeVisible({ timeout: 10000 });
+    await expect(this.orderSummaryHeading).toBeVisible({ timeout: 10000 });
   }
 
-  
-  async payWithAffirm() {
+  /** Affirm option expand karta hai aur verify karta hai ki Pay button dikh raha hai (click nahi karta). */
+  async selectAffirmPayment() {
     await expect(async () => {
-      const collapsedToggle = this.page.getByRole('button', { name: 'Affirm ▶' });
-      if (await collapsedToggle.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await collapsedToggle.click();
+      if (await this.affirmToggle.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await this.affirmToggle.click();
       }
       await expect(this.affirmPayButton).toBeVisible({ timeout: 5000 });
     }).toPass({ timeout: 30000 });
-
-    await this.click(this.affirmPayButton);
   }
 }

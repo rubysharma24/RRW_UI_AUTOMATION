@@ -10,7 +10,7 @@ export default defineConfig({
     timeout: 5000,
   },
 
-  workers: 3,
+  workers: 1,
 
   forbidOnly: !!process.env.CI,
 
@@ -39,7 +39,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       grepInvert: /@mobile/,
     },
-    // {
+    //  {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] },
     //   grepInvert: /@mobile/,
