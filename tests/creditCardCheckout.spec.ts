@@ -78,13 +78,22 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
       // --------------------------------------------------
       await test.step('Complete shipping address', async () => {
         await addressPage.completeAddress();
+
+        // Phone is a required field on the address step. If the saved address
+        // has no phone, the browser blocks "Continue" ("Please fill out this
+        // field") and we never reach the review page — so fill it and retry.
+        const phone = addressPage.page.getByPlaceholder('Phone number');
+        if ((await phone.isVisible()) && !(await phone.inputValue())) {
+          await phone.fill('9876543210');
+          await addressPage.page.getByRole('button', { name: 'Continue' }).click();
+        }
       });
 
       // --------------------------------------------------
       // 5. Reach Review page and select shipping
       // --------------------------------------------------
       await test.step('Reach checkout review page', async () => {
-        await checkoutReviewPage.page.waitForURL(/.*checkout\/review.*/i, {
+        await expect(checkoutReviewPage.page).toHaveURL(/.*checkout\/review.*/i, {
           timeout: 15000,
         });
       });
@@ -175,7 +184,7 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
           description: orderNumber,
         });
 
-        await orderConfirmationPage.expectCustomerEmailVisible(validUser.email);
+        await orderConfirmationPage.expectCustomerEmailVisible(validUser.apiemail);
       });
 
       // --------------------------------------------------
