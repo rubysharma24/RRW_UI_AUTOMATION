@@ -83,11 +83,15 @@ export default class RestockAlertPage extends BasePage {
   }
 
   async submitRestockAlert(email: string, needItSooner = true) {
-    await expect(this.restockAlertButton).toBeVisible({ timeout: 30000 });
-    await this.restockAlertButton.scrollIntoViewIfNeeded();
-    await this.restockAlertButton.click();
+    await this.waitForLoaderGone();
 
-    await expect(this.emailInput).toBeVisible({ timeout: 10000 });
+    // Listing re-render hone par button detach ho sakta hai, isliye
+    // click + dialog open hona ek saath retry hota hai (click khud scroll karta hai)
+    await expect(async () => {
+      await this.restockAlertButton.click({ timeout: 5000 });
+      await expect(this.emailInput).toBeVisible({ timeout: 3000 });
+    }).toPass({ timeout: 30000 });
+
     await this.emailInput.fill(email);
 
     if (needItSooner) {
@@ -103,6 +107,6 @@ export default class RestockAlertPage extends BasePage {
     await this.notifySubmitButton.click();
     await toastShown;
 
-    await expect(this.emailInput).toBeHidden({ timeout: 10000 }); 
+    await expect(this.emailInput).toBeHidden({ timeout: 10000 }); // dialog band
   }
 }
