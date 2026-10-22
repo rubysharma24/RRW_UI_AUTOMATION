@@ -1,56 +1,32 @@
-name: Playwright Automation
+name: PayPal Checkout Test
 
 on:
+  workflow_dispatch:        # GitHub me "Run workflow" button se manually chalane ke liye
   push:
     branches: [roadready_ui_automation]
-  workflow_dispatch:
 
 jobs:
-  run-playwright-tests:
+  paypal-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-      VALID_USER_EMAIL: ${{ secrets.VALID_USER_EMAIL }}
-      VALID_USER_PASSWORD: ${{ secrets.VALID_USER_PASSWORD }}
-      GMAIL_USER: ${{ secrets.GMAIL_USER }}
-      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      REPORT_RECIPIENT: ${{ secrets.REPORT_RECIPIENT }}
-
+    timeout-minutes: 15
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - name: Install Dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright Tests
-        run: npx playwright test
+      - name: Run PayPal test
+        run: npx playwright test tests/Paypalcheckout.spec.ts --project=chromium
 
-      - name: Create Google credentials file
+      - uses: actions/upload-artifact@v4
         if: always()
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-        run: |
-          mkdir -p credentials
-          printf '%s' "$GOOGLE_CREDENTIALS" > credentials/google-credentials.json
-
-      - name: Upload Report
-        if: always()
-        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Send Summary Email
-        if: always()
-        run: npx tsx scripts/sendSummaryEmail.ts
+          retention-days: 7
