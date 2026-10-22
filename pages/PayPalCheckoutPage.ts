@@ -270,22 +270,26 @@ export default class PayPalCheckoutPage extends BasePage {
     return null;
   }
 
+  /**
+   * PayPal popup ka final confirm button. Purana layout: submit-button-initial /
+   * "Complete Purchase". Naya layout (CI): sirf "Pay". Teeno me se jo pehle dikhe.
+   */
   private async waitForPayPalConfirmButton(
     popup: Page,
     timeout: number
   ): Promise<Locator | null> {
-    const initialSubmit = popup.getByTestId('submit-button-initial');
-    const completePurchase = popup.getByRole('button', { name: 'Complete Purchase' });
+    const confirmButton = popup
+      .getByTestId('submit-button-initial')
+      .or(popup.getByRole('button', { name: 'Complete Purchase' }))
+      .or(popup.getByRole('button', { name: 'Pay', exact: true }))
+      .first();
 
-    const a = initialSubmit
+    const visible = await confirmButton
       .waitFor({ state: 'visible', timeout })
-      .then(() => initialSubmit)
-      .catch(() => null);
-    const b = completePurchase
-      .waitFor({ state: 'visible', timeout })
-      .then(() => completePurchase)
-      .catch(() => null);
-    return (await Promise.race([a, b])) ?? (await a) ?? (await b);
+      .then(() => true)
+      .catch(() => false);
+
+    return visible ? confirmButton : null;
   }
 
   private async finishPayPalPayment(initialPopup: Page) {
