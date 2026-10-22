@@ -166,9 +166,35 @@ export default class PayPalCheckoutPage extends BasePage {
     return productName;
   }
 
+  /** Extend "damage protection" popup ka decline button (main page ya iframe me), warna null. */
+  private async findProtectionDeclineButton(): Promise<Locator | null> {
+    const pattern = /I don.t want protection/i;
+
+    const onPage = this.page.getByText(pattern).first();
+    if (await onPage.isVisible().catch(() => false)) return onPage;
+
+    for (const frame of this.page.frames()) {
+      const inFrame = frame.getByText(pattern).first();
+      if (await inFrame.isVisible().catch(() => false)) return inFrame;
+    }
+    return null;
+  }
+
   async addProductToCart() {
     await this.click(this.addToCartButton);
-    await expect(this.cartSubtotalText).toBeVisible({ timeout: 10000 });
+
+    // Extend popup sirf kuch runs/regions (CI) me aata hai: aaye to decline karo,
+    // na aaye to seedha cart subtotal ka wait karo.
+    await expect(async () => {
+      if (await this.cartSubtotalText.isVisible().catch(() => false)) return;
+
+      const decline = await this.findProtectionDeclineButton();
+      if (decline) {
+        await decline.click({ timeout: 3000 }).catch(() => {});
+      }
+
+      await expect(this.cartSubtotalText).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20000 });
   }
 
   async proceedToGuestCheckout() {
