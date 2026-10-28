@@ -426,7 +426,7 @@ export async function sendSummaryEmail() {
   const resultText =
     failed > 0 ? `${passed}/${total} Tests Passed` : `All ${total} Tests Passed`;
 
-  const subject = `${statusEmoji} RRW Playwright Automation | Staging — ${resultText}`;
+  const subject = `${statusEmoji} RRW Playwright UI Automation | Staging — ${resultText}`;
 
     const info = await transporter.sendMail({
     from: `"RoadReady QA" <${process.env.GMAIL_USER}>`,

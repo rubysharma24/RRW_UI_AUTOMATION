@@ -457,5 +457,5 @@ export default class PayPalCheckoutPage extends BasePage {
     });
     await expect(this.page.getByText(/^Tax\s*\$/)).toBeVisible({ timeout: 10000 });
     await expect(this.page.getByText(/^Total\$/)).toBeVisible({ timeout: 10000 });
-  }
+  }                           
 }
