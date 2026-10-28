@@ -1,32 +1,56 @@
-name: PayPal Checkout Test
+name: Playwright Automation
 
 on:
-  workflow_dispatch:        # GitHub me "Run workflow" button se manually chalane ke liye
   push:
     branches: [roadready_ui_automation]
+  workflow_dispatch:
 
 jobs:
-  paypal-test:
+  run-playwright-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
+    timeout-minutes: 60
+    env:
+      VALID_USER_EMAIL: ${{ secrets.VALID_USER_EMAIL }}
+      VALID_USER_PASSWORD: ${{ secrets.VALID_USER_PASSWORD }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      REPORT_RECIPIENT: ${{ secrets.REPORT_RECIPIENT }}
 
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
-      - run: npm ci
+      - name: Install Dependencies
+        run: npm ci
 
-      - run: npx playwright install --with-deps chromium
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
 
-      - name: Run PayPal test
-        run: npx playwright test tests/Paypalcheckout.spec.ts --project=chromium
+      - name: Run Playwright Tests
+        run: npx playwright test
 
-      - uses: actions/upload-artifact@v4
+      - name: Create Google credentials file
         if: always()
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          mkdir -p credentials
+          printf '%s' "$GOOGLE_CREDENTIALS" > credentials/google-credentials.json
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
-          retention-days: 7
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Send Summary Email
+        if: always()
+        run: npx tsx scripts/sendSummaryEmail.ts
