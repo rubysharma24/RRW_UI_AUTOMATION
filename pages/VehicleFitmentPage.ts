@@ -229,7 +229,7 @@ export default class VehicleFitmentPage extends BasePage {
       await this.notifySoonerCheckbox.check();
     }
 
-    // Toast chhota hota hai, isliye click se PEHLE wait shuru karo
+
     const toastShown = this.notifySuccessMessage.waitFor({
       state: 'visible',
       timeout: 15000,
@@ -240,7 +240,7 @@ export default class VehicleFitmentPage extends BasePage {
     await expect(this.notifyEmailInput).toBeHidden({ timeout: 10000 });
   }
 
-  /** Listing page: click "Get Restock Alert" on the out-of-stock result. */
+
   async submitNotifyMe(email: string, needItSooner = false) {
     await this.waitForFiltersReady();
     await this.dismissShopAsModalIfPresent();
@@ -252,7 +252,7 @@ export default class VehicleFitmentPage extends BasePage {
     await this.fillAndSubmitNotifyDialog(email, needItSooner);
   }
 
-  /** Product page: click "Get Restock Alert" in the main section. */
+
   async submitNotifyMeFromPdp(email: string, needItSooner = false) {
     await expect(this.pdpNotifyMeButton).toBeVisible({ timeout: 10000 });
     await this.pdpNotifyMeButton.scrollIntoViewIfNeeded();
@@ -268,7 +268,7 @@ export default class VehicleFitmentPage extends BasePage {
     ).toBeVisible({ timeout: 10000 });
   }
 
-  /** Clicks Reset and waits for the filter chips to actually clear. */
+ 
   async resetFilters() {
     await this.resetFiltersButton.click();
 
@@ -290,7 +290,7 @@ export default class VehicleFitmentPage extends BasePage {
     expect(priceCount).toBeGreaterThan(0);
   }
 
-  /** Product ke 2 links hote hain (image + title), isliye .first() */
+
   async clickProductByName(partialName: string) {
     await this.page
       .getByRole('link', { name: partialName })

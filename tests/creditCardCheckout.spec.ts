@@ -73,15 +73,11 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
         await cartPage.dismissRebillPOModal();
       });
 
-      // --------------------------------------------------
-      // 4. Complete address (selects a saved address)
-      // --------------------------------------------------
+
       await test.step('Complete shipping address', async () => {
         await addressPage.completeAddress();
 
-        // Phone is a required field on the address step. If the saved address
-        // has no phone, the browser blocks "Continue" ("Please fill out this
-        // field") and we never reach the review page — so fill it and retry.
+       
         const phone = addressPage.page.getByPlaceholder('Phone number');
         if ((await phone.isVisible()) && !(await phone.inputValue())) {
           await phone.fill('9876543210');
@@ -89,9 +85,7 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
         }
       });
 
-      // --------------------------------------------------
-      // 5. Reach Review page and select shipping
-      // --------------------------------------------------
+     
       await test.step('Reach checkout review page', async () => {
         await expect(checkoutReviewPage.page).toHaveURL(/.*checkout\/review.*/i, {
           timeout: 15000,
@@ -132,9 +126,7 @@ test.describe('Checkout Flow - Credit Card Payment', () => {
           { type: 'Total', description: `$${total}` }
         );
 
-        // Sanity check: subtotal on the review page should match what we
-        // expect from the PDP price × quantity — catches a pricing
-        // mismatch here rather than only at the very end via the API.
+        
         expect(subtotal).toBeCloseTo(expectedSubtotal, 2);
       });
 

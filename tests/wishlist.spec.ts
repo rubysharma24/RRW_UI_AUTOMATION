@@ -10,8 +10,7 @@ test.describe('Wishlist Flow - RoadReady Wheels', () => {
     await loginPage.login(wishlistUser.email, wishlistUser.password);
 
     await wishlistPage.selectResaleMode();
-    // Open wishlist -> delete leftover items (if any) -> verify empty
-    // -> Browse Wheels, landing on the listing page.
+   
     await wishlistPage.clearWishlist();
   });
 

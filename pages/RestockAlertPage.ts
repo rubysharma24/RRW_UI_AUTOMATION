@@ -20,7 +20,7 @@ export default class RestockAlertPage extends BasePage {
 
     // Make / Model / Year = index 0 / 1 / 2
     this.selectBoxes = page.locator('.ant-select-selection-search');
-    // Sirf open dropdown ke andar option dhoondhne ke liye (strict mode safe)
+  
     this.openDropdown = page.locator(
       '.ant-select-dropdown:not(.ant-select-dropdown-hidden)'
     );
@@ -36,7 +36,7 @@ export default class RestockAlertPage extends BasePage {
       name: 'Notify Me When Available',
     });
 
-    // Toast: "Thanks! We will notify you when this item is back in stock."
+   
     this.successMessage = page.getByText(/Thanks!\s*We will notify you/i).first();
   }
 
@@ -85,8 +85,7 @@ export default class RestockAlertPage extends BasePage {
   async submitRestockAlert(email: string, needItSooner = true) {
     await this.waitForLoaderGone();
 
-    // Listing re-render hone par button detach ho sakta hai, isliye
-    // click + dialog open hona ek saath retry hota hai (click khud scroll karta hai)
+
     await expect(async () => {
       await this.restockAlertButton.click({ timeout: 5000 });
       await expect(this.emailInput).toBeVisible({ timeout: 3000 });
@@ -98,7 +97,7 @@ export default class RestockAlertPage extends BasePage {
       await this.soonerCheckbox.check();
     }
 
-    // Toast chhota hota hai, isliye click se PEHLE wait shuru karo
+   
     const toastShown = this.successMessage.waitFor({
       state: 'visible',
       timeout: 15000,
@@ -107,6 +106,6 @@ export default class RestockAlertPage extends BasePage {
     await this.notifySubmitButton.click();
     await toastShown;
 
-    await expect(this.emailInput).toBeHidden({ timeout: 10000 }); // dialog band
+    await expect(this.emailInput).toBeHidden({ timeout: 10000 }); 
   }
 }

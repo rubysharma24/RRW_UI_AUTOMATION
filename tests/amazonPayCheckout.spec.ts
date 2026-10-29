@@ -7,13 +7,7 @@ test('should checkout using Amazon Pay', async ({ page, amazonPayCheckoutPage, c
       waitUntil: 'domcontentloaded',
     });
 
-    // payWithAmazonPayFromPDP() assumes the cart is empty so the PDP's
-    // "Pay with Amazon Pay" button is the only match on the page (the
-    // cart drawer only renders its own copy once it has an item). A
-    // leftover item from an earlier test run breaks that assumption
-    // silently - the click lands on the wrong button and the popup never
-    // opens - so clear it explicitly rather than relying on isolation
-    // between runs.
+    
     await cartPage.clearCartIfNotEmpty();
   });
 

@@ -41,12 +41,7 @@ test.describe('Pricing - Resale vs Wholesale', () => {
         await productPage.addToCart();
       });
 
-      // --------------------------------------------------
-      // 3. Close cart drawer
-      // --------------------------------------------------
-      // NOTE: check whether CartPage already has a method for this
-      // (e.g. closeCartDrawer()) — if it does, use that instead of this
-      // inline locator so the whole framework stays consistent.
+     
       await test.step('Close cart drawer', async () => {
         await cartPage.page
           .getByRole('button', { name: 'Close cart' })
@@ -54,16 +49,12 @@ test.describe('Pricing - Resale vs Wholesale', () => {
           .click();
       });
 
-      // --------------------------------------------------
-      // 4. Switch to wholesale pricing, capture price, add to cart
-      // --------------------------------------------------
       let wholesalePrice = 0;
 
       await test.step('Switch to wholesale pricing and add to cart', async () => {
         await productPage.switchToWholesalePricing();
 
-        // waits for the price text to actually change before reading it —
-        // avoids reading the stale resale price due to the async re-render
+        
         await productPage.waitForPriceToChange(resalePriceText);
 
         const wholesalePriceText = await productPage.getPriceText();
