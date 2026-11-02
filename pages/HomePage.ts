@@ -31,4 +31,5 @@ export default class HomePage extends BasePage {
   async goToLogin() {
     await this.click(this.loginLink);
   }
+
 }

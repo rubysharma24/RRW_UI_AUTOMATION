@@ -9,20 +9,40 @@ export default class BasePage {
 
   async goto(path: string = '/') {
     await this.page.goto(path);
+    await this.dismissStagingGate();
+  }
+
+  async dismissStagingGate() {
+    const passwordInput = this.page.getByPlaceholder('Enter password');
+
+    const gateShown = await passwordInput
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!gateShown) return;
+
+    const password = process.env.STAGING_PASSWORD;
+    if (!password) {
+      throw new Error('STAGING_PASSWORD environment variable is not set');
+    }
+
+    await passwordInput.fill(password);
+    await this.page.getByRole('button', { name: 'Submit' }).click();
+    await expect(passwordInput).toBeHidden({ timeout: 15000 });
   }
 
   async getTitle(): Promise<string> {
     return this.page.title();
   }
 
-async click(locator: Locator) {
-  await expect(async () => {
-    await locator.waitFor({ state: 'visible' });
-    await locator.scrollIntoViewIfNeeded();
-    await expect(locator).toBeEnabled({ timeout: 5000 });
-    await locator.click({ timeout: 5000 });
-  }).toPass({ timeout: 20000 });
-}
+  async click(locator: Locator) {
+    await expect(async () => {
+      await locator.waitFor({ state: 'visible' });
+      await locator.scrollIntoViewIfNeeded();
+      await expect(locator).toBeEnabled({ timeout: 5000 });
+      await locator.click({ timeout: 5000 });
+    }).toPass({ timeout: 20000 });
+  }
 
   async fill(locator: Locator, value: string) {
     await locator.waitFor({ state: 'visible' });
