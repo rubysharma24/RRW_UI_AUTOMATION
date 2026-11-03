@@ -12,6 +12,7 @@ export default class BasePage {
     await this.dismissStagingGate();
   }
 
+  /** Staging password gate aaye to password daal kar nikal jata hai, warna kuch nahi karta. */
   async dismissStagingGate() {
     const passwordInput = this.page.getByPlaceholder('Enter password');
 
@@ -26,9 +27,14 @@ export default class BasePage {
       throw new Error('STAGING_PASSWORD environment variable is not set');
     }
 
-    await passwordInput.fill(password);
-    await this.page.getByRole('button', { name: 'Submit' }).click();
-    await expect(passwordInput).toBeHidden({ timeout: 15000 });
+    // Page hydrate hote waqt React input reset kar deta hai, isliye poora
+    // fill -> value check -> submit -> gate gayab hone tak ek saath retry hota hai.
+    await expect(async () => {
+      await passwordInput.fill(password);
+      await expect(passwordInput).toHaveValue(password, { timeout: 2000 });
+      await this.page.getByRole('button', { name: 'Submit' }).click();
+      await expect(passwordInput).toBeHidden({ timeout: 5000 });
+    }).toPass({ timeout: 30000 });
   }
 
   async getTitle(): Promise<string> {

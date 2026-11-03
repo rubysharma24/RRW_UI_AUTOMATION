@@ -6,14 +6,16 @@ test('should reach Affirm payment option for guest checkout', async ({
   affirmCheckoutPage,
   cartPage,
 }) => {
- 
   test.setTimeout(90000);
 
   await test.step('Go to home with a clean cart', async () => {
     await page.goto('https://staging.roadreadywheels.com/', {
       waitUntil: 'domcontentloaded',
     });
-  
+
+    // Staging password gate aaye to nikal do
+    await affirmCheckoutPage.dismissStagingGate();
+
     await cartPage.clearCartIfNotEmpty();
   });
 
@@ -41,6 +43,4 @@ test('should reach Affirm payment option for guest checkout', async ({
   await test.step('Select Affirm payment option', async () => {
     await affirmCheckoutPage.selectAffirmPayment();
   });
-
-
 });

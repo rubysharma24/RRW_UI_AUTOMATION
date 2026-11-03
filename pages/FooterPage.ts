@@ -8,7 +8,7 @@ export class FooterPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-  
+
     this.header = page.getByRole('banner').first();
     this.footer = page.getByRole('contentinfo');
     this.pageLoader = page.locator('.page-loader');
@@ -19,13 +19,14 @@ export class FooterPage extends BasePage {
   }
 
   async open(path = '/') {
-    await this.page.goto(path);
+    
+    await this.goto(path);
     await expect(this.pageLoader).toBeHidden({ timeout: 30000 });
-    await this.footer.scrollIntoViewIfNeeded();
-    await expect(this.footer).toBeVisible();
+
+    await expect(this.footer).toBeVisible({ timeout: 20000 });
   }
 
-  /** Header + footer (4 columns) should be present on every page */
+
   async expectHeaderAndFooter() {
     await expect(this.header).toBeVisible({ timeout: 20000 });
     await expect(this.footer).toBeVisible({ timeout: 20000 });
@@ -36,15 +37,17 @@ export class FooterPage extends BasePage {
 
   async clickFooterLink(name: string | RegExp, urlPattern: RegExp) {
     const link = this.footerLink(name);
-    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeVisible({ timeout: 20000 });
+
+    
     await Promise.all([
       this.page.waitForURL(urlPattern, { timeout: 30000, waitUntil: 'domcontentloaded' }),
-      link.click(),
+      link.click({ timeout: 20000 }),
     ]);
     await expect(this.pageLoader).toBeHidden({ timeout: 30000 });
   }
 
-  /** All href values present in footer */
+
   async allHrefs(): Promise<string[]> {
     const hrefs = await this.footer.locator('a[href]').evaluateAll((els) =>
       els.map((e) => (e as HTMLAnchorElement).getAttribute('href') || '')

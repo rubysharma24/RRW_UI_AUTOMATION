@@ -74,7 +74,7 @@ readonly paymentMethodHeading: Locator;
     this.invoiceTotalText = page.getByText(/^\$\d/);
   }
 
-  /** Direct login — same locators as the actual recorded flow. */
+
   async login(email: string, password: string) {
     await this.click(this.loginLink);
 
@@ -257,12 +257,7 @@ readonly paymentMethodHeading: Locator;
   }).toPass({ timeout: 30000 });
 }
 
-  /**
-   * Firefox: the Amazon payment widget sometimes stays on its "Payment
-   * method" card list with nothing selected, so Place Order does nothing.
-   * If that list is showing, pick the test card and wait for the list to
-   * close. On Chrome the list never shows, so this is a no-op.
-   */
+
   private async selectAmazonCardIfListShown() {
     for (const frame of this.page.frames()) {
       const card = frame.getByRole('link', { name: /Visa\s*\.\.\.1111/ });

@@ -2,12 +2,16 @@ import { test } from '../fixtures/pageFixtures';
 import { amazonSandboxUser } from '../test-data/amazonPay.data';
 
 test('should checkout using Amazon Pay', async ({ page, amazonPayCheckoutPage, cartPage }) => {
+  // Amazon popup login + redirects + 3 checkout steps = default 60s kam padta hai
+  test.setTimeout(150000);
+
   await test.step('Go to home with a clean cart', async () => {
     await page.goto('https://staging.roadreadywheels.com/', {
       waitUntil: 'domcontentloaded',
     });
 
-    
+    await amazonPayCheckoutPage.dismissStagingGate();
+
     await cartPage.clearCartIfNotEmpty();
   });
 

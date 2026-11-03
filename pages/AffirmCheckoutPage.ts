@@ -83,7 +83,10 @@ export default class AffirmCheckoutPage extends BasePage {
     this.affirmToggle = page.getByRole('button', { name: 'Affirm ▶' });
     this.affirmPayButton = page.getByRole('button', { name: 'Pay $' });
   }
-
+async openHome() {
+    await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+    await this.dismissStagingGate();
+  }
   async clickShopNow() {
     await expect(async () => {
       await this.click(this.shopNowButton);
