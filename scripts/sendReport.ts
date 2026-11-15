@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import * as path from 'path';
 
-// Local: .env se load hota hai. CI me .env nahi hoti, wahan GitHub secrets env se aate hain.
+
 dotenv.config({
   path: path.join(__dirname, '..', '.env'),
 });
@@ -20,7 +20,7 @@ export async function sendReportLink(driveLink?: string) {
     );
   }
 
-  // CI me GitHub run ka link, local me jo driveLink diya ho wo
+  
   const isCI = !!process.env.GITHUB_RUN_ID;
   const reportLink = isCI
     ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`

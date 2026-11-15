@@ -7,7 +7,14 @@ import { zipPlaywrightReport } from './zipReport';
 import { uploadFileToDrive, cleanFolderWithRetry } from './GoogleDriveUploader';
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
-
+/** comma / semicolon / space / newline se alag kiye gaye emails -> clean list */
+function parseList(value?: string): string[] {
+  return (value ?? '')
+    .replace(/["']/g, '')
+    .split(/[,;\s]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 interface TestResult {
   file: string;
   title: string;

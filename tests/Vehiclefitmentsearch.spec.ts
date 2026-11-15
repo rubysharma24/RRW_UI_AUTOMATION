@@ -10,9 +10,7 @@ test.describe('Vehicle Fitment Search - Guest End to End', () => {
       await page.goto('/');
     });
 
-    await test.step('Pass staging password gate (if shown)', async () => {
-      await vehicleFitmentPage.passStagingGateIfPresent();
-    });
+  
 
     await test.step('Click Shop Now', async () => {
       await expect(vehicleFitmentPage.shopNowButton).toBeVisible({ timeout: 15000 });

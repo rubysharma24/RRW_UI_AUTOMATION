@@ -10,7 +10,10 @@ export default defineConfig({
     timeout: 5000,
   },
 
-  workers: 1,
+ 
+  globalSetup: require.resolve('./scripts/global-setup'),
+
+  workers: 2,
 
   forbidOnly: !!process.env.CI,
 
@@ -25,6 +28,7 @@ export default defineConfig({
 
   use: {
     baseURL: process.env.BASE_URL || 'https://staging.roadreadywheels.com',
+    storageState: 'auth/staging-gate.json', 
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: process.env.CI ? 'off' : 'retain-on-failure',
@@ -33,38 +37,10 @@ export default defineConfig({
   },
 
   projects: [
-    // ---------- Desktop ----------
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       grepInvert: /@mobile/,
     },
-    //  {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    //   grepInvert: /@mobile/,
-    // },
-    // {
-    //   name: 'webkit', // Safari engine
-    //   use: { ...devices['Desktop Safari'] },
-    //   grepInvert: /@mobile/,
-    // },
-    // {
-    //   name: 'edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    //   grepInvert: /@mobile/,
-    // },
-
-    // ---------- Mobile (disabled) ----------
-    // {
-    //   name: 'mobile-chrome',
-    //   use: { ...devices['Pixel 7'] },
-    //   grep: /@mobile/,
-    // },
-    // {
-    //   name: 'mobile-safari',
-    //   use: { ...devices['iPhone 14'] },
-    //   grep: /@mobile/,
-    // },
   ],
 });

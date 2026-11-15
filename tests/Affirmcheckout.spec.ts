@@ -13,8 +13,7 @@ test('should reach Affirm payment option for guest checkout', async ({
       waitUntil: 'domcontentloaded',
     });
 
-    // Staging password gate aaye to nikal do
-    await affirmCheckoutPage.dismissStagingGate();
+    
 
     await cartPage.clearCartIfNotEmpty();
   });
