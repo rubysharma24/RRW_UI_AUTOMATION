@@ -13,9 +13,10 @@ export default class ProductPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.productTitle = page.getByRole('heading', { level: 1 });
-    
+
+    // Sticky bar wala hidden price skip karo: sirf visible price lo
     this.price = page
-      .locator('span.text-3xl.font-bold')
+      .locator('span.text-3xl.font-bold:visible')
       .filter({ hasText: /^\$\d{1,3}(,\d{3})*\.\d{2}$/ })
       .first();
     this.quantitySelector = page.getByRole('combobox').first();
@@ -55,7 +56,6 @@ export default class ProductPage extends BasePage {
   }
 
   async switchToWholesalePricing() {
-    
     console.log('Wholesale button count:', await this.wholesaleToggleButton.count());
     console.log(
       'Wholesale button class BEFORE click:',

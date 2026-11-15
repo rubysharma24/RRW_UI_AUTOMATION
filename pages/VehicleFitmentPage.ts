@@ -24,6 +24,9 @@ export default class VehicleFitmentPage extends BasePage {
   readonly notifySoonerCheckbox: Locator;
   readonly notifySubmitButton: Locator;
   readonly notifySuccessMessage: Locator;
+  readonly stagingGate: Locator;
+  readonly stagingPasswordInput: Locator;
+  readonly stagingSubmitButton: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -53,6 +56,16 @@ export default class VehicleFitmentPage extends BasePage {
     this.shopAsModalHeading = page.getByRole('heading', { name: 'Shop As' });
     this.shopAsResaleOption = page.getByRole('button').filter({
       has: page.getByRole('heading', { name: 'Resale', exact: true }),
+    });
+
+    // Staging password gate (overlay jo home page ke upar aata hai)
+    this.stagingGate = page.locator('#rrw-staging-gate');
+    this.stagingPasswordInput = this.stagingGate.getByRole('textbox', {
+      name: 'Password',
+    });
+    this.stagingSubmitButton = this.stagingGate.getByRole('button', {
+      name: 'Submit',
+      exact: true,
     });
 
     this.materialButton = (materialName: string) =>
@@ -87,9 +100,40 @@ export default class VehicleFitmentPage extends BasePage {
       .first();
   }
 
-  /** Guest flow: open home page and click "Shop Now" to reach the filters. */
+  /** Staging password gate aaye to password daal ke nikalo, warna no-op. */
+  async passStagingGateIfPresent() {
+    // Gate page hydrate hone ke baad render hota hai, isliye lamba wait
+    const gateShown = await this.stagingPasswordInput
+      .waitFor({ state: 'visible', timeout: 20000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!gateShown) return;
+
+    const password = process.env.STAGING_PASSWORD;
+    if (!password) {
+      throw new Error(
+        'Staging gate aaya hai, par STAGING_PASSWORD env variable set nahi hai.'
+      );
+    }
+
+    await this.stagingPasswordInput.click();
+    await this.stagingPasswordInput.fill(password);
+
+    // React controlled input kabhi fill ignore kar deta hai, to key-by-key type karo
+    if ((await this.stagingPasswordInput.inputValue()) !== password) {
+      await this.stagingPasswordInput.clear();
+      await this.stagingPasswordInput.pressSequentially(password, { delay: 50 });
+    }
+    await expect(this.stagingPasswordInput).toHaveValue(password);
+
+    await this.stagingSubmitButton.click();
+    await expect(this.stagingGate).toBeHidden({ timeout: 15000 });
+  }
+
+  /** Guest flow: open home page, pass staging gate, click "Shop Now". */
   async openHomeAndShopNow() {
     await this.page.goto('/');
+    await this.passStagingGateIfPresent();
     await expect(this.shopNowButton).toBeVisible({ timeout: 15000 });
     await this.shopNowButton.click();
     await this.waitForFiltersReady();
@@ -229,7 +273,6 @@ export default class VehicleFitmentPage extends BasePage {
       await this.notifySoonerCheckbox.check();
     }
 
-
     const toastShown = this.notifySuccessMessage.waitFor({
       state: 'visible',
       timeout: 15000,
@@ -239,7 +282,6 @@ export default class VehicleFitmentPage extends BasePage {
 
     await expect(this.notifyEmailInput).toBeHidden({ timeout: 10000 });
   }
-
 
   async submitNotifyMe(email: string, needItSooner = false) {
     await this.waitForFiltersReady();
@@ -251,7 +293,6 @@ export default class VehicleFitmentPage extends BasePage {
 
     await this.fillAndSubmitNotifyDialog(email, needItSooner);
   }
-
 
   async submitNotifyMeFromPdp(email: string, needItSooner = false) {
     await expect(this.pdpNotifyMeButton).toBeVisible({ timeout: 10000 });
@@ -268,7 +309,6 @@ export default class VehicleFitmentPage extends BasePage {
     ).toBeVisible({ timeout: 10000 });
   }
 
- 
   async resetFilters() {
     await this.resetFiltersButton.click();
 
@@ -289,7 +329,6 @@ export default class VehicleFitmentPage extends BasePage {
     const priceCount = await this.resultPrices.count();
     expect(priceCount).toBeGreaterThan(0);
   }
-
 
   async clickProductByName(partialName: string) {
     await this.page

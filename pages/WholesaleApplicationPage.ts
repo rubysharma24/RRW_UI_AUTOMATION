@@ -24,6 +24,11 @@ export class WholesaleApplicationPage extends BasePage {
   readonly wholesaleLink: Locator;
   readonly getStartedButton: Locator;
 
+  // Staging password gate
+  readonly stagingGate: Locator;
+  readonly stagingPasswordInput: Locator;
+  readonly stagingSubmitButton: Locator;
+
   // Step 1
   readonly firstName: Locator;
   readonly lastName: Locator;
@@ -48,6 +53,16 @@ export class WholesaleApplicationPage extends BasePage {
     this.wholesaleLink = page.getByRole('link', { name: 'Wholesale' }).first();
     this.getStartedButton = page.getByRole('button', { name: 'Get Started' }).first();
 
+    // Staging password gate (overlay jo home page ke upar aata hai)
+    this.stagingGate = page.locator('#rrw-staging-gate');
+    this.stagingPasswordInput = this.stagingGate.getByRole('textbox', {
+      name: 'Password',
+    });
+    this.stagingSubmitButton = this.stagingGate.getByRole('button', {
+      name: 'Submit',
+      exact: true,
+    });
+
     this.firstName = page.getByRole('textbox', { name: 'Enter your first name' });
     this.lastName = page.getByRole('textbox', { name: 'Enter your last name' });
     this.company = page.getByRole('textbox', { name: 'Enter your company name' });
@@ -65,8 +80,39 @@ export class WholesaleApplicationPage extends BasePage {
     this.captchaFrame = page.locator('iframe[title*="reCAPTCHA"], iframe[src*="recaptcha"]').first();
   }
 
+  /** Staging password gate aaye to password daal ke nikalo, warna no-op. */
+  async passStagingGateIfPresent() {
+    // Gate page hydrate hone ke baad render hota hai, isliye lamba wait
+    const gateShown = await this.stagingPasswordInput
+      .waitFor({ state: 'visible', timeout: 20000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!gateShown) return;
+
+    const password = process.env.STAGING_PASSWORD;
+    if (!password) {
+      throw new Error(
+        'Staging gate aaya hai, par STAGING_PASSWORD env variable set nahi hai.'
+      );
+    }
+
+    await this.stagingPasswordInput.click();
+    await this.stagingPasswordInput.fill(password);
+
+    // React controlled input kabhi fill ignore kar deta hai, to key-by-key type karo
+    if ((await this.stagingPasswordInput.inputValue()) !== password) {
+      await this.stagingPasswordInput.clear();
+      await this.stagingPasswordInput.pressSequentially(password, { delay: 50 });
+    }
+    await expect(this.stagingPasswordInput).toHaveValue(password);
+
+    await this.stagingSubmitButton.click();
+    await expect(this.stagingGate).toBeHidden({ timeout: 15000 });
+  }
+
   async open() {
     await this.page.goto('/');
+    await this.passStagingGateIfPresent();
     await this.wholesaleLink.click();
     await expect(this.page).toHaveURL(/\/wholesale/, { timeout: 30000 });
     await expect(this.pageLoader).toBeHidden({ timeout: 30000 });

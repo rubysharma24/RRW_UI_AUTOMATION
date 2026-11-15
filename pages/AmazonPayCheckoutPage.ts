@@ -22,7 +22,8 @@ export default class AmazonPayCheckoutPage extends BasePage {
   readonly orderTotalText: Locator;
   readonly paymentMethodAmazonPayText: Locator;
   readonly invoiceTotalText: Locator;
-readonly paymentMethodHeading: Locator;
+  readonly paymentMethodHeading: Locator;
+
   constructor(page: Page) {
     super(page);
 
@@ -56,8 +57,8 @@ readonly paymentMethodHeading: Locator;
       name: 'Apply sales tax to this order',
     });
     this.paymentMethodHeading = page.getByRole('heading', {
-  name: 'Select a payment method:',
-});
+      name: 'Select a payment method:',
+    });
     this.continueToShippingButton = page.getByRole('button', {
       name: 'Continue to shipping option',
     });
@@ -73,7 +74,6 @@ readonly paymentMethodHeading: Locator;
     this.paymentMethodAmazonPayText = page.getByText('Amazon pay');
     this.invoiceTotalText = page.getByText(/^\$\d/);
   }
-
 
   async login(email: string, password: string) {
     await this.click(this.loginLink);
@@ -158,6 +158,20 @@ readonly paymentMethodHeading: Locator;
     await expect(this.cartSubtotalText).toBeVisible({ timeout: 10000 });
   }
 
+  /** Amazon ka "Continue shopping" bot-check page aaye to uska button click karo. */
+  private async passAmazonInterstitial(popup: Page) {
+    const continueShopping = popup
+      .getByRole('button', { name: /Continue shopping/i })
+      .or(popup.getByRole('link', { name: /Continue shopping/i }))
+      .or(popup.locator('input[type="submit"][value*="Continue shopping" i]'))
+      .first();
+
+    if (await continueShopping.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await continueShopping.click();
+      await popup.waitForLoadState('domcontentloaded');
+    }
+  }
+
   /** Shared popup sign-in flow, used by both the cart and PDP checkout paths. */
   private async signInThroughAmazonPopup(
     button: Locator,
@@ -189,15 +203,54 @@ readonly paymentMethodHeading: Locator;
       amazonPopup = await popupPromise;
     }).toPass({ timeout: 20000 });
 
-    await amazonPopup!.getByRole('textbox', { name: 'Email' }).fill(email);
-    await amazonPopup!.getByRole('button', { name: 'Continue' }).click();
+    const popup = amazonPopup!;
+    await popup.waitForLoadState('domcontentloaded');
+    await this.passAmazonInterstitial(popup); // email se pehle
 
-    await amazonPopup!.getByRole('textbox', { name: 'Password' }).fill(password);
-    await amazonPopup!
-      .getByRole('button', { name: 'Sign in using our secure' })
-      .click();
+    // Step 1: email
+    await popup.getByRole('textbox', { name: 'Email' }).fill(email);
+    const continueButton = popup.getByRole('button', {
+      name: 'Continue',
+      exact: true,
+    });
+    if (await continueButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await continueButton.click();
+      await popup.waitForLoadState('domcontentloaded');
+      await this.passAmazonInterstitial(popup); // password se pehle
+    }
 
-    await amazonPopup!.waitForEvent('close', { timeout: 20000 });
+    // Step 2: password field, ya captcha/OTP, jo pehle aaye
+    const passwordInput = popup.locator('#ap_password, input[type="password"]').first();
+    const blocker = popup
+      .locator(
+        '#auth-captcha-image, input[name="cvf_captcha_input"], #auth-mfa-otpcode, input[name="otpCode"], #cvf-page-content'
+      )
+      .first();
+
+    await Promise.race([
+      passwordInput.waitFor({ state: 'visible', timeout: 20000 }),
+      blocker.waitFor({ state: 'visible', timeout: 20000 }),
+    ]).catch(() => {});
+
+    if (!(await passwordInput.isVisible().catch(() => false))) {
+      // Debug ke liye screenshot report me attach karo
+      await test.info().attach('amazon-popup-blocked', {
+        body: await popup.screenshot().catch(() => Buffer.from('')),
+        contentType: 'image/png',
+      });
+      const reason = (await blocker.isVisible().catch(() => false))
+        ? 'Amazon ne captcha/OTP verification maanga hai'
+        : 'Password field nahi mila (popup ka page alag hai)';
+      throw new Error(
+        `${reason}. Report me "amazon-popup-blocked" screenshot dekho. ` +
+          'Sandbox test buyer (bina 2FA) use karo.'
+      );
+    }
+
+    await passwordInput.fill(password);
+    await popup.getByRole('button', { name: /Sign in/i }).click();
+
+    await popup.waitForEvent('close', { timeout: 20000 });
 
     await this.page.waitForURL(/amazon_order\/address/, {
       timeout: 20000,
@@ -244,19 +297,18 @@ readonly paymentMethodHeading: Locator;
     await expect(this.shippingAddressHeading).toBeVisible({ timeout: 10000 });
   }
 
- async continueToReview() {
-  await expect(this.orderTotalText).toBeVisible({ timeout: 10000 });
+  async continueToReview() {
+    await expect(this.orderTotalText).toBeVisible({ timeout: 10000 });
 
-  // Click + verify ek hi retry unit mein: agar Firefox mein click kho jaye
-  // to button abhi bhi visible hoga aur dobara click hoga.
-  await expect(async () => {
-    if (await this.continueToReviewButton.isVisible()) {
-      await this.continueToReviewButton.click({ timeout: 5000 });
-    }
-    await expect(this.paymentMethodHeading).toBeVisible({ timeout: 5000 });
-  }).toPass({ timeout: 30000 });
-}
-
+    // Click + verify ek hi retry unit mein: agar Firefox mein click kho jaye
+    // to button abhi bhi visible hoga aur dobara click hoga.
+    await expect(async () => {
+      if (await this.continueToReviewButton.isVisible()) {
+        await this.continueToReviewButton.click({ timeout: 5000 });
+      }
+      await expect(this.paymentMethodHeading).toBeVisible({ timeout: 5000 });
+    }).toPass({ timeout: 30000 });
+  }
 
   private async selectAmazonCardIfListShown() {
     for (const frame of this.page.frames()) {

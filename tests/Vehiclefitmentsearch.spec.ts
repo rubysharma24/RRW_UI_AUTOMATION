@@ -2,11 +2,22 @@ import { test, expect } from '../fixtures/pageFixtures';
 
 test.describe('Vehicle Fitment Search - Guest End to End', () => {
   test('should filter Cadillac CT-Series, reset, clear Acura filters, and open Buick Enclave PDP', async ({
+    page,
     vehicleFitmentPage,
     productPage,
   }) => {
-    await test.step('Open home page and click Shop Now', async () => {
-      await vehicleFitmentPage.openHomeAndShopNow();
+    await test.step('Open home page', async () => {
+      await page.goto('/');
+    });
+
+    await test.step('Pass staging password gate (if shown)', async () => {
+      await vehicleFitmentPage.passStagingGateIfPresent();
+    });
+
+    await test.step('Click Shop Now', async () => {
+      await expect(vehicleFitmentPage.shopNowButton).toBeVisible({ timeout: 15000 });
+      await vehicleFitmentPage.shopNowButton.click();
+      await vehicleFitmentPage.waitForFiltersReady();
     });
 
     await test.step('Search Cadillac, CT-Series, 2023', async () => {

@@ -21,6 +21,11 @@ export default class PayPalCheckoutPage extends BasePage {
   readonly cartSubtotalText: Locator;
   readonly completeCheckoutButton: Locator;
 
+  // Staging password gate (overlay jo home page ke upar aata hai)
+  readonly stagingGate: Locator;
+  readonly stagingPasswordInput: Locator;
+  readonly stagingSubmitButton: Locator;
+
   // Guest registration (/checkout/registration)
   readonly emailInput: Locator;
   readonly firstNameInput: Locator;
@@ -46,6 +51,16 @@ export default class PayPalCheckoutPage extends BasePage {
     super(page);
 
     this.shopNowButton = page.getByRole('button', { name: 'Shop Now' });
+
+    // Staging password gate
+    this.stagingGate = page.locator('#rrw-staging-gate');
+    this.stagingPasswordInput = this.stagingGate.getByRole('textbox', {
+      name: 'Password',
+    });
+    this.stagingSubmitButton = this.stagingGate.getByRole('button', {
+      name: 'Submit',
+      exact: true,
+    });
 
     // Header global search
     this.searchInput = page.getByRole('textbox', { name: 'Search for wheels' });
@@ -84,7 +99,38 @@ export default class PayPalCheckoutPage extends BasePage {
     this.paymentMethodText = page.getByText('PayPal');
   }
 
+  /** Staging password gate aaye to password daal ke nikalo, warna no-op. */
+  async passStagingGateIfPresent() {
+    // Gate page hydrate hone ke baad render hota hai, isliye thoda wait
+    const gateShown = await this.stagingPasswordInput
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!gateShown) return;
+
+    const password = process.env.STAGING_PASSWORD;
+    if (!password) {
+      throw new Error(
+        'Staging gate aaya hai, par STAGING_PASSWORD env variable set nahi hai.'
+      );
+    }
+
+    await this.stagingPasswordInput.click();
+    await this.stagingPasswordInput.fill(password);
+
+    // React controlled input kabhi fill ignore kar deta hai, to key-by-key type karo
+    if ((await this.stagingPasswordInput.inputValue()) !== password) {
+      await this.stagingPasswordInput.clear();
+      await this.stagingPasswordInput.pressSequentially(password, { delay: 50 });
+    }
+    await expect(this.stagingPasswordInput).toHaveValue(password);
+
+    await this.stagingSubmitButton.click();
+    await expect(this.stagingGate).toBeHidden({ timeout: 15000 });
+  }
+
   async clickShopNow() {
+    await this.passStagingGateIfPresent();
     await expect(async () => {
       await this.click(this.shopNowButton);
       await this.page.waitForURL(/\/t\/categories/, {
@@ -457,5 +503,5 @@ export default class PayPalCheckoutPage extends BasePage {
     });
     await expect(this.page.getByText(/^Tax\s*\$/)).toBeVisible({ timeout: 10000 });
     await expect(this.page.getByText(/^Total\$/)).toBeVisible({ timeout: 10000 });
-  }                           
+  }
 }
