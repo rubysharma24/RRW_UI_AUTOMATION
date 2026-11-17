@@ -61,7 +61,7 @@ function collectSpecsRecursively(
 ) {
   for (const spec of suite.specs ?? []) {
     for (const test of spec.tests ?? []) {
-      const result = test.results?.[0];
+      const result = test.results?.[test.results.length - 1];
 
 
       const annotations: RawAnnotation[] = test.annotations ?? result?.annotations ?? [];
