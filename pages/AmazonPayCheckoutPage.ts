@@ -286,8 +286,62 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await expect(this.applySalesTaxCheckbox).toBeChecked();
   }
 
+  /**
+   * Address select hone ke baad hi "Continue to shipping option" render hota hai.
+   * CI me Amazon widget ka select event kabhi miss ho jata hai (address tick hota hai,
+   * par button nahi aata). Isliye: pehle address dobara click, phir reload (2 baar).
+   */
+  private async ensureContinueToShippingVisible() {
+    const addressLabel = process.env.AMAZON_ADDRESS_LABEL ?? 'rishabh g.';
+    const MAX_ATTEMPTS = 3;
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const visible = await this.continueToShippingButton
+        .waitFor({ state: 'visible', timeout: attempt === 1 ? 8000 : 10000 })
+        .then(() => true)
+        .catch(() => false);
+      if (visible) return;
+
+      console.log(
+        `[AmazonPay] Continue to shipping button missing (attempt ${attempt}/${MAX_ATTEMPTS})`
+      );
+
+      if (attempt === 1) {
+        // Widget ka select event dobara fire karao
+        await this.clickAddressInWidget(addressLabel);
+      } else {
+        // Widget ko fresh init karo
+        await this.page.reload({ waitUntil: 'domcontentloaded' });
+        await expect(this.orderTotalText).toBeVisible({ timeout: 15000 });
+        await this.applySalesTax();
+      }
+    }
+
+    await test.info().attach('amazon-address-step-blocked', {
+      body: await this.page.screenshot({ fullPage: true }),
+      contentType: 'image/png',
+    });
+    throw new Error(
+      'Amazon Pay address book me address select hai, par "Continue to shipping option" ' +
+        'button 3 attempts (click + 2 reload) ke baad bhi render nahi hua. ' +
+        'Ye site/widget ka issue hai, locator ka nahi.'
+    );
+  }
+
+  private async clickAddressInWidget(label: string) {
+    // Widget main page ya iframe, dono me ho sakta hai
+    for (const scope of [this.page, ...this.page.frames()]) {
+      const entry = scope.getByText(label, { exact: false }).first();
+      if (await entry.isVisible().catch(() => false)) {
+        await entry.click({ timeout: 3000 }).catch(() => {});
+        return;
+      }
+    }
+  }
+
   async continueToShipping() {
     await expect(this.orderTotalText).toBeVisible({ timeout: 10000 });
+    await this.ensureContinueToShippingVisible();
     await this.click(this.continueToShippingButton);
 
     await this.page.waitForURL(/amazon_order\/delivery/, {
