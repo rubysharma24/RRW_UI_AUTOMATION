@@ -158,7 +158,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await expect(this.cartSubtotalText).toBeVisible({ timeout: 10000 });
   }
 
-  /** Amazon ka "Continue shopping" bot-check page aaye to uska button click karo. */
+ 
   private async passAmazonInterstitial(popup: Page) {
     const continueShopping = popup
       .getByRole('button', { name: /Continue shopping/i })
@@ -172,7 +172,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
     }
   }
 
-  /** Shared popup sign-in flow, used by both the cart and PDP checkout paths. */
+ 
   private async signInThroughAmazonPopup(
     button: Locator,
     email: string,
@@ -219,7 +219,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
       await this.passAmazonInterstitial(popup); // password se pehle
     }
 
-    // Step 2: password field, ya captcha/OTP, jo pehle aaye
+   
     const passwordInput = popup.locator('#ap_password, input[type="password"]').first();
     const blocker = popup
       .locator(
@@ -271,7 +271,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
       this.payWithAmazonPayButtonOnPDP,
       email,
       password,
-      true // close the drawer first if it's unexpectedly open
+      true 
     );
   }
 
@@ -286,11 +286,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
     await expect(this.applySalesTaxCheckbox).toBeChecked();
   }
 
-  /**
-   * Address select hone ke baad hi "Continue to shipping option" render hota hai.
-   * CI me Amazon widget ka select event kabhi miss ho jata hai (address tick hota hai,
-   * par button nahi aata). Isliye: pehle address dobara click, phir reload (2 baar).
-   */
+  
   private async ensureContinueToShippingVisible() {
     const addressLabel = process.env.AMAZON_ADDRESS_LABEL ?? 'rishabh g.';
     const MAX_ATTEMPTS = 3;
@@ -354,8 +350,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
   async continueToReview() {
     await expect(this.orderTotalText).toBeVisible({ timeout: 10000 });
 
-    // Click + verify ek hi retry unit mein: agar Firefox mein click kho jaye
-    // to button abhi bhi visible hoga aur dobara click hoga.
+   
     await expect(async () => {
       if (await this.continueToReviewButton.isVisible()) {
         await this.continueToReviewButton.click({ timeout: 5000 });
@@ -423,7 +418,7 @@ export default class AmazonPayCheckoutPage extends BasePage {
     });
   }
 
-  /** Alias for expectOrderConfirmed() - matches the naming used in the spec. */
+
   async expectOrderPlaced() {
     await this.expectOrderConfirmed();
   }
