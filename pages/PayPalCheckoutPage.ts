@@ -21,7 +21,6 @@ export default class PayPalCheckoutPage extends BasePage {
   readonly cartSubtotalText: Locator;
   readonly completeCheckoutButton: Locator;
 
-  // Guest registration (/checkout/registration)
   readonly emailInput: Locator;
   readonly firstNameInput: Locator;
   readonly lastNameInput: Locator;
@@ -33,12 +32,10 @@ export default class PayPalCheckoutPage extends BasePage {
   readonly useShippingAddressCheckbox: Locator;
   readonly registrationContinueButton: Locator;
 
-  // Review (/checkout/review)
   readonly reviewOrderTotalText: Locator;
   readonly reviewContinueButton: Locator;
   readonly payPalButton: Locator;
 
-  // Confirmation
   readonly orderSummaryHeading: Locator;
   readonly paymentMethodText: Locator;
 
@@ -47,7 +44,6 @@ export default class PayPalCheckoutPage extends BasePage {
 
     this.shopNowButton = page.getByRole('button', { name: 'Shop Now' });
 
-    // Header global search
     this.searchInput = page.getByRole('textbox', { name: 'Search for wheels' });
     this.searchButton = page.getByRole('button', { name: 'Search', exact: true });
 
@@ -108,7 +104,6 @@ export default class PayPalCheckoutPage extends BasePage {
     }
   }
 
-  /** Header search me keyword daal kar Search dabata hai. */
   async searchFor(term: string) {
     await this.waitForListingReady();
     await this.searchInput.fill(term);
@@ -117,7 +112,6 @@ export default class PayPalCheckoutPage extends BasePage {
     await this.waitForListingReady();
   }
 
-  /** Search result me make/category button (e.g. 'Bmw') par click karta hai. */
   async selectSearchResultGroup(name: string) {
     const groupButton = this.page.getByRole('button', { name }).first();
     await expect(groupButton).toBeVisible({ timeout: 15000 });
@@ -125,7 +119,6 @@ export default class PayPalCheckoutPage extends BasePage {
     await this.waitForListingReady();
   }
 
-  /** Listing se product naam se kholta hai (image + title = 2 links, isliye .first()). */
   async openProductByName(partialName: string) {
     await this.waitForListingReady();
 
@@ -142,7 +135,6 @@ export default class PayPalCheckoutPage extends BasePage {
     await expect(this.addToCartButton).toBeVisible({ timeout: 10000 });
   }
 
-  /** Pehla Alloy Wheel product kholta hai (purane specs ke liye). */
   async openFirstProduct(): Promise<string> {
     await this.waitForListingReady();
 
@@ -166,7 +158,6 @@ export default class PayPalCheckoutPage extends BasePage {
     return productName;
   }
 
-  /** Extend "damage protection" popup ka decline button (main page ya iframe me), warna null. */
   private async findProtectionDeclineButton(): Promise<Locator | null> {
     const pattern = /I don.t want protection/i;
 
@@ -183,8 +174,6 @@ export default class PayPalCheckoutPage extends BasePage {
   async addProductToCart() {
     await this.click(this.addToCartButton);
 
-    // Extend popup sirf kuch runs/regions (CI) me aata hai: aaye to decline karo,
-    // na aaye to seedha cart subtotal ka wait karo.
     await expect(async () => {
       if (await this.cartSubtotalText.isVisible().catch(() => false)) return;
 
@@ -270,10 +259,6 @@ export default class PayPalCheckoutPage extends BasePage {
     return null;
   }
 
-  /**
-   * PayPal popup ka final confirm button. Purana layout: submit-button-initial /
-   * "Complete Purchase". Naya layout (CI): sirf "Pay". Teeno me se jo pehle dikhe.
-   */
   private async waitForPayPalConfirmButton(
     popup: Page,
     timeout: number
@@ -292,10 +277,6 @@ export default class PayPalCheckoutPage extends BasePage {
     return visible ? confirmButton : null;
   }
 
-  /**
-   * PayPal popup me login. Slow load, PayPal error page aur one-page/two-step layout,
-   * sab handle karta hai. Fail hone par popup ka screenshot + URL + text report me aata hai.
-   */
   private async loginToPayPal(popup: Page, email: string, password: string) {
     const log = (msg: string) =>
       console.log(`[PayPal login ${new Date().toISOString().slice(11, 19)}] ${msg}`);
@@ -317,7 +298,6 @@ export default class PayPalCheckoutPage extends BasePage {
     try {
       await popup.waitForLoadState('domcontentloaded').catch(() => {});
 
-      // 1) Email ya password field aane tak wait (PayPal error page aaye to Try again)
       let errorCount = 0;
       await expect(async () => {
         if (popup.isClosed()) throw new Error('PayPal popup closed before login');
@@ -331,10 +311,8 @@ export default class PayPalCheckoutPage extends BasePage {
         await expect(emailInput.or(passwordInput).first()).toBeVisible({ timeout: 5000 });
       }).toPass({ timeout: 60000, intervals: [2000] });
 
-      // 2) Email step (agar dikh raha hai)
       if (await emailInput.isVisible().catch(() => false)) {
         await emailInput.fill(email);
-        // One-page layout me password pehle se dikhta hai, tab Next ki zaroorat nahi
         if (!(await passwordInput.isVisible().catch(() => false))) {
           await popup
             .getByRole('button', { name: 'Next' })
@@ -344,14 +322,34 @@ export default class PayPalCheckoutPage extends BasePage {
         }
       }
 
-      // 3) Password step
       await expect(passwordInput).toBeVisible({ timeout: 30000 });
       await passwordInput.fill(password);
-      await popup
-        .getByRole('button', { name: /log in/i })
-        .or(popup.locator('#btnLogin'))
-        .first()
-        .click();
+
+      const submitButton = popup
+        .locator('#btnLogin')
+        .or(popup.getByRole('button', { name: /^(log\s*in|login|sign\s*in|continue|next)$/i }))
+        .or(popup.locator('button[type="submit"]'))
+        .first();
+
+      const hasSubmit = await submitButton
+        .waitFor({ state: 'visible', timeout: 5000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (popup.isClosed()) {
+        log('popup closed right after password fill (login likely auto-submitted)');
+        return;
+      }
+
+      if (hasSubmit) {
+        await submitButton.click({ timeout: 5000 }).catch((e) => {
+          if (!popup.isClosed()) throw e;
+        });
+      } else {
+        const buttons = await popup.getByRole('button').allInnerTexts().catch(() => []);
+        log(`no login button found; visible buttons: ${JSON.stringify(buttons)} -> pressing Enter`);
+        await passwordInput.press('Enter').catch(() => {});
+      }
     } catch (error) {
       if (!popup.isClosed()) {
         log(`login failed at ${popup.url()}`);
@@ -376,7 +374,7 @@ export default class PayPalCheckoutPage extends BasePage {
 
     const CONFIRMATION_URL = /order-confirmation-invoice\?orderNumber=/;
     const MAX_PAYPAL_ERRORS = 3;
-    const CLOSED_GRACE_MS = 5000; // popup band hone ke 5s baad relaunch
+    const CLOSED_GRACE_MS = 5000;
     const MAX_RELAUNCHES = 3;
     const log = (msg: string) =>
       console.log(`[PayPal ${new Date().toISOString().slice(11, 19)}] ${msg}`);
@@ -414,7 +412,7 @@ export default class PayPalCheckoutPage extends BasePage {
             log(`PayPal error page shown (#${paypalErrorCount}) at ${where(popup)}`);
             if (paypalErrorCount >= MAX_PAYPAL_ERRORS) {
               gaveUp = true;
-              return; // leave toPass; the error is thrown below
+              return;
             }
             const tryAgain = popup
               .getByRole('button', { name: /try again/i })
@@ -423,7 +421,6 @@ export default class PayPalCheckoutPage extends BasePage {
             lastTryAgainAt = Date.now();
           }
         } else if (await loginField.isVisible().catch(() => false)) {
-          // Relaunch ke baad PayPal dobara login maang sakta hai
           if (Date.now() - lastLoginAt > 20000) {
             log(`login form shown at ${where(popup)} -> logging in again`);
             lastLoginAt = Date.now();
@@ -480,8 +477,6 @@ export default class PayPalCheckoutPage extends BasePage {
   }
 
   async payWithPayPal(email: string, password: string) {
-    // iframe me 2 buttons hote hain: "PayPal" aur "Pay Later".
-    // data-funding-source="paypal" unique hai, isliye strict mode violation nahi aayega.
     const payPalIframe = this.page.locator('iframe[name^="__zoid__paypal_buttons__"]');
     const payPalLink = payPalIframe
       .contentFrame()
@@ -490,8 +485,6 @@ export default class PayPalCheckoutPage extends BasePage {
     let lastToggleAt = 0;
 
     await expect(async () => {
-      // Accordion toggle hota hai: iframe abhi page par nahi hai tabhi kholo,
-      // aur 10 sec me ek hi baar click karo (warna khulke wapas band ho jata hai).
       if ((await payPalIframe.count()) === 0 && Date.now() - lastToggleAt > 10000) {
         const collapsedToggle = this.page.getByRole('button', { name: /^PayPal/ });
         if (await collapsedToggle.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -507,7 +500,6 @@ export default class PayPalCheckoutPage extends BasePage {
 
     const payPalPopup = await popupPromise;
 
-    // Login: slow load, error page aur dono layouts handle karta hai
     await this.loginToPayPal(payPalPopup, email, password);
 
     await this.finishPayPalPayment(payPalPopup, email, password);
@@ -523,7 +515,6 @@ export default class PayPalCheckoutPage extends BasePage {
     await verificationFrame.contentFrame()?.getByRole('button', { name: 'NO' }).click();
   }
 
-  /** Reads the order number straight from the confirmation URL. */
   getOrderNumberFromUrl(): string {
     const url = new URL(this.page.url());
     return url.searchParams.get('orderNumber') ?? '';
