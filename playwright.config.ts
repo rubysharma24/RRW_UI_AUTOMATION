@@ -13,7 +13,7 @@ export default defineConfig({
  
   globalSetup: require.resolve('./scripts/global-setup'),
 
-  workers: 2,
+  workers: 1,
 
   forbidOnly: !!process.env.CI,
 
