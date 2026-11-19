@@ -292,13 +292,92 @@ export default class PayPalCheckoutPage extends BasePage {
     return visible ? confirmButton : null;
   }
 
-  private async finishPayPalPayment(initialPopup: Page) {
-    test.setTimeout(Math.max(test.info().timeout, 150000));
+  /**
+   * PayPal popup me login. Slow load, PayPal error page aur one-page/two-step layout,
+   * sab handle karta hai. Fail hone par popup ka screenshot + URL + text report me aata hai.
+   */
+  private async loginToPayPal(popup: Page, email: string, password: string) {
+    const log = (msg: string) =>
+      console.log(`[PayPal login ${new Date().toISOString().slice(11, 19)}] ${msg}`);
+
+    const emailInput = popup
+      .locator('#email')
+      .or(popup.getByRole('textbox', { name: /email or mobile number/i }))
+      .first();
+    const passwordInput = popup
+      .locator('#password')
+      .or(popup.getByRole('textbox', { name: /password/i }))
+      .first();
+    const errorPage = popup.getByText(/Things don.t appear to be working/i);
+    const tryAgain = popup
+      .getByRole('button', { name: /try again/i })
+      .or(popup.getByRole('link', { name: /try again/i }))
+      .first();
+
+    try {
+      await popup.waitForLoadState('domcontentloaded').catch(() => {});
+
+      // 1) Email ya password field aane tak wait (PayPal error page aaye to Try again)
+      let errorCount = 0;
+      await expect(async () => {
+        if (popup.isClosed()) throw new Error('PayPal popup closed before login');
+
+        if (await errorPage.isVisible().catch(() => false)) {
+          errorCount++;
+          log(`PayPal error page (#${errorCount}) -> clicking Try again`);
+          await tryAgain.click({ timeout: 3000 }).catch(() => {});
+          throw new Error('PayPal error page shown');
+        }
+        await expect(emailInput.or(passwordInput).first()).toBeVisible({ timeout: 5000 });
+      }).toPass({ timeout: 60000, intervals: [2000] });
+
+      // 2) Email step (agar dikh raha hai)
+      if (await emailInput.isVisible().catch(() => false)) {
+        await emailInput.fill(email);
+        // One-page layout me password pehle se dikhta hai, tab Next ki zaroorat nahi
+        if (!(await passwordInput.isVisible().catch(() => false))) {
+          await popup
+            .getByRole('button', { name: 'Next' })
+            .or(popup.locator('#btnNext'))
+            .first()
+            .click();
+        }
+      }
+
+      // 3) Password step
+      await expect(passwordInput).toBeVisible({ timeout: 30000 });
+      await passwordInput.fill(password);
+      await popup
+        .getByRole('button', { name: /log in/i })
+        .or(popup.locator('#btnLogin'))
+        .first()
+        .click();
+    } catch (error) {
+      if (!popup.isClosed()) {
+        log(`login failed at ${popup.url()}`);
+        const shot = await popup.screenshot().catch(() => null);
+        if (shot) {
+          await test.info().attach('paypal-popup-login-failure', {
+            body: shot,
+            contentType: 'image/png',
+          });
+        }
+        const text = await popup.locator('body').innerText().catch(() => '');
+        log(`popup text: ${text.replace(/\s+/g, ' ').slice(0, 300)}`);
+      } else {
+        log('popup was already closed');
+      }
+      throw error;
+    }
+  }
+
+  private async finishPayPalPayment(initialPopup: Page, email: string, password: string) {
+    test.setTimeout(Math.max(test.info().timeout, 180000));
 
     const CONFIRMATION_URL = /order-confirmation-invoice\?orderNumber=/;
     const MAX_PAYPAL_ERRORS = 3;
-    const CLOSED_GRACE_MS = 15000;
-    const MAX_RELAUNCHES = 2;
+    const CLOSED_GRACE_MS = 5000; // popup band hone ke 5s baad relaunch
+    const MAX_RELAUNCHES = 3;
     const log = (msg: string) =>
       console.log(`[PayPal ${new Date().toISOString().slice(11, 19)}] ${msg}`);
     const where = (p: Page) => {
@@ -315,6 +394,7 @@ export default class PayPalCheckoutPage extends BasePage {
     let loggedClosed = false;
     let relaunches = 0;
     let lastTryAgainAt = 0;
+    let lastLoginAt = 0;
     let paypalErrorCount = 0;
     let gaveUp = false;
 
@@ -326,6 +406,8 @@ export default class PayPalCheckoutPage extends BasePage {
         loggedClosed = false;
 
         const errorPage = popup.getByText(/Things don.t appear to be working/i);
+        const loginField = popup.locator('#email').or(popup.locator('#password')).first();
+
         if (await errorPage.isVisible().catch(() => false)) {
           if (Date.now() - lastTryAgainAt > 8000) {
             paypalErrorCount++;
@@ -339,6 +421,15 @@ export default class PayPalCheckoutPage extends BasePage {
               .or(popup.getByRole('link', { name: /try again/i }));
             await tryAgain.first().click({ timeout: 5000 }).catch(() => {});
             lastTryAgainAt = Date.now();
+          }
+        } else if (await loginField.isVisible().catch(() => false)) {
+          // Relaunch ke baad PayPal dobara login maang sakta hai
+          if (Date.now() - lastLoginAt > 20000) {
+            log(`login form shown at ${where(popup)} -> logging in again`);
+            lastLoginAt = Date.now();
+            await this.loginToPayPal(popup, email, password).catch((e) =>
+              log(`re-login failed: ${String(e).slice(0, 120)}`)
+            );
           }
         } else if (Date.now() - confirmClickedAt > 20000) {
           log(`popup open at ${where(popup)}`);
@@ -416,13 +507,10 @@ export default class PayPalCheckoutPage extends BasePage {
 
     const payPalPopup = await popupPromise;
 
-    await payPalPopup.getByRole('textbox', { name: 'Email or mobile number' }).fill(email);
-    await payPalPopup.getByRole('button', { name: 'Next' }).click();
+    // Login: slow load, error page aur dono layouts handle karta hai
+    await this.loginToPayPal(payPalPopup, email, password);
 
-    await payPalPopup.getByRole('textbox', { name: 'Password' }).fill(password);
-    await payPalPopup.getByRole('button', { name: 'Log In' }).click();
-
-    await this.finishPayPalPayment(payPalPopup);
+    await this.finishPayPalPayment(payPalPopup, email, password);
 
     await this.declinePaymentVerificationIfPresent();
   }
